@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ActiveDirectory\ActiveDirectory.csproj" />
-    <ProjectReference Include="..\CryptoService\CryptoService.csproj" />
     <ProjectReference Include="..\DataService\DataService.csproj" />
     <ProjectReference Include="..\ExcelFactory\ExcelFactory.csproj" />
     <ProjectReference Include="..\FileService\FileService.csproj" />
