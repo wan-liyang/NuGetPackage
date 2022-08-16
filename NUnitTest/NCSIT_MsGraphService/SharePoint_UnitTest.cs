@@ -1,5 +1,5 @@
-﻿using MicrosoftGraphService;
-using MicrosoftGraphService.Config;
+﻿using TryIT.MicrosoftGraphService;
+using TryIT.MicrosoftGraphService.Config;
 using NUnit.Framework;
 using System;
 using System.IO;

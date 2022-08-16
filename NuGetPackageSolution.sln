@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelFactory", "ExcelFactor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicrosoftGraphService", "MicrosoftGraphService\MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlAdoService", "SqlAdoService\SqlAdoService.csproj", "{74510E8B-6A42-4802-A888-915311596FF2}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuartzJobBase", "QuartzJobB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFTPService", "SFTPService\SFTPService.csproj", "{439078D8-F8FD-439A-9BFA-1A6691BD1624}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpHandler", "HttpHandler\HttpHandler.csproj", "{D9A8C806-EFE6-4F03-A976-01097F726F20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.HttpHandler", "TryIT.HttpHandler\TryIT.HttpHandler.csproj", "{D9A8C806-EFE6-4F03-A976-01097F726F20}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Impersonation.Win", "Impersonation.Win\Impersonation.Win.csproj", "{4DD580EA-75B2-4B43-A4E1-A96A512574D8}"
 EndProject

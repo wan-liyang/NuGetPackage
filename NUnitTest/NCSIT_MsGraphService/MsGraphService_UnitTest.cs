@@ -1,6 +1,6 @@
-﻿using MicrosoftGraphService;
-using MicrosoftGraphService.Config;
-using MicrosoftGraphService.Helper;
+﻿using TryIT.MicrosoftGraphService;
+using TryIT.MicrosoftGraphService.Config;
+using TryIT.MicrosoftGraphService.Helper;
 using NUnit.Framework;
 
 namespace NUnitTest.Liyang_MsGraphService
