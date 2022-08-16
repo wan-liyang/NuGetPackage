@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     /// <summary>
     /// extension method for <see cref="Exception"/>

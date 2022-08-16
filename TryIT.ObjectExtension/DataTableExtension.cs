@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     /// <summary>
     /// extension method for <see cref="System.Data.DataTable"/>

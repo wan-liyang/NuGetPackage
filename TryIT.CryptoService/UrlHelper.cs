@@ -1,4 +1,4 @@
-﻿namespace CryptoService
+﻿namespace TryIT.CryptoService
 {
     internal class UrlHelper
     {

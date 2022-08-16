@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     public static class DictionaryExtension
     {

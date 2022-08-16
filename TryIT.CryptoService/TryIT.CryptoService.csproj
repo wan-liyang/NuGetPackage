@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Liyang.CryptoService</PackageId>
+    <PackageId>TryIT.CryptoService</PackageId>
     <Authors>Liyang</Authors>
     <Company>Liyang</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>CryptoService.xml</DocumentationFile>
+    <DocumentationFile>TryIT.CryptoService.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>

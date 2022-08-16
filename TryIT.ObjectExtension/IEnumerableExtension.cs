@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     /// <summary>
     /// Extension method for <see cref="IEnumerable{T}"/> item

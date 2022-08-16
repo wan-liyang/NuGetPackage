@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     /// <summary>
     /// extension method for <see cref="Array"/>

@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CryptoService
+namespace TryIT.CryptoService
 {
     /// <summary>
     /// perform Encryption or Decryption with AES, Advanced Encryption Standard (Rijndael)

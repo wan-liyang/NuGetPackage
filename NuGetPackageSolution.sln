@@ -25,9 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActiveDirectory", "ActiveDi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "DataService\DataService.csproj", "{29DF7638-AD2D-4320-AECB-521A86CB156F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoService", "CryptoService\CryptoService.csproj", "{9E1AB63A-71EB-4AA8-9A2A-75BC8A16D70D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.CryptoService", "TryIT.CryptoService\TryIT.CryptoService.csproj", "{9E1AB63A-71EB-4AA8-9A2A-75BC8A16D70D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectExtension", "ObjectExtension\ObjectExtension.csproj", "{82B18564-17D7-4FCC-A73B-A4EC0324495E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ObjectExtension", "TryIT.ObjectExtension\TryIT.ObjectExtension.csproj", "{82B18564-17D7-4FCC-A73B-A4EC0324495E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowService", "WindowService\WindowService.csproj", "{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}"
 EndProject

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     public class StringAppend
     {

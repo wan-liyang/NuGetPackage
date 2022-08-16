@@ -6,7 +6,7 @@
     <Company>Liyang</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>the extension method for various type, String, Array, DataTable, Dictionary, etc</Description>
-    <PackageId>Liyang.ObjectExtension</PackageId>
+    <PackageId>TryIT.ObjectExtension</PackageId>
     <PackageTags>ObjectExtension ExtensionMethod Extension</PackageTags>
     <Product>ObjectExtension</Product>
   </PropertyGroup>

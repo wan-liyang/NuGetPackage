@@ -2,7 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 
-namespace CryptoService
+namespace TryIT.CryptoService
 {
     /// <summary>
     /// Data Encryption Standard

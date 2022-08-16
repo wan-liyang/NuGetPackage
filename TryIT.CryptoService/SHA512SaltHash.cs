@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CryptoService
+namespace TryIT.CryptoService
 {
     /// <summary>
     /// SHA512 generate/verify hash

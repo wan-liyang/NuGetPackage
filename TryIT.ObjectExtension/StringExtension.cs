@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Linq;
 
-namespace ObjectExtension
+namespace TryIT.ObjectExtension
 {
     public static class StringExtension
     {

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CryptoService
+namespace TryIT.CryptoService
 {
     /// <summary>
     /// MD5 hash
