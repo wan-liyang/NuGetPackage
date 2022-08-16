@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ActiveDirectory.Constants
+namespace TryIT.ActiveDirectory.Constants
 {
     public enum AdInfoEnum
     {

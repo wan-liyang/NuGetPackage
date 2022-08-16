@@ -1,9 +1,9 @@
-﻿using ActiveDirectory.Constants;
-using ActiveDirectory.Models;
+﻿using TryIT.ActiveDirectory.Constants;
+using TryIT.ActiveDirectory.Models;
 using System.Collections.Generic;
 using System.DirectoryServices;
 
-namespace ActiveDirectory.Helper
+namespace TryIT.ActiveDirectory.Helper
 {
     internal class AdGroupHelper
     {

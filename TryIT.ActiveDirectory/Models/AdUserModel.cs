@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ActiveDirectory.Models
+namespace TryIT.ActiveDirectory.Models
 {
     internal class AdUserModel
 	{

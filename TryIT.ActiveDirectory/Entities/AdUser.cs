@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ActiveDirectory.Entities
+namespace TryIT.ActiveDirectory.Entities
 {
 	public class AdUser : AdUserBaseInfo
 	{

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ActiveDirectory.Constants
+namespace TryIT.ActiveDirectory.Constants
 {
     internal class AttributeMap
     {

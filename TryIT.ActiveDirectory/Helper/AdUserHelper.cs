@@ -1,11 +1,11 @@
-﻿using ActiveDirectory.Constants;
-using ActiveDirectory.Models;
+﻿using TryIT.ActiveDirectory.Constants;
+using TryIT.ActiveDirectory.Models;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Text;
 
-namespace ActiveDirectory.Helper
+namespace TryIT.ActiveDirectory.Helper
 {
     internal class AdUserHelper
 	{

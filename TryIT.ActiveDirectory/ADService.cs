@@ -1,9 +1,9 @@
-﻿using ActiveDirectory.Entities;
-using ActiveDirectory.Helper;
-using ActiveDirectory.Models;
+﻿using TryIT.ActiveDirectory.Entities;
+using TryIT.ActiveDirectory.Helper;
+using TryIT.ActiveDirectory.Models;
 using System.Collections.Generic;
 
-namespace ActiveDirectory
+namespace TryIT.ActiveDirectory
 {
     /// <summary>
     /// service to operate with Active Directory

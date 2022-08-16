@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpHandler", "HttpHandler\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Impersonation.Win", "Impersonation.Win\Impersonation.Win.csproj", "{4DD580EA-75B2-4B43-A4E1-A96A512574D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActiveDirectory", "ActiveDirectory\ActiveDirectory.csproj", "{E3FDE038-19C9-4239-BEE6-365FCA7008A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ActiveDirectory", "TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj", "{E3FDE038-19C9-4239-BEE6-365FCA7008A5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "DataService\DataService.csproj", "{29DF7638-AD2D-4320-AECB-521A86CB156F}"
 EndProject
