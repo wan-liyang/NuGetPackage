@@ -1,0 +1,38 @@
+﻿@page
+@model NUnitTest_Web.Pages.Test.HttpHandlerTestModel
+@{
+}
+
+@using HttpHandler
+
+HttpHelper.Url.FullDisplayUrl : @CurrentRequest.Url.FullDisplayUrl
+<br />
+HttpHelper.Url.FulEncodedUrl : @CurrentRequest.Url.FulEncodedUrl
+<br />
+<br />
+
+HttpHelper.Url.FullUrlWithoutQuery : @CurrentRequest.Url.FullUrlWithoutQuery
+<br />
+<br />
+
+HttpHelper.Url.Scheme : @CurrentRequest.Url.Scheme
+<br />
+HttpHelper.Url.Port : @CurrentRequest.Url.Port
+<br />
+HttpHelper.Url.Host : @CurrentRequest.Url.Host
+<br />
+HttpHelper.Url.AppPath : @CurrentRequest.Url.AppPath
+<br />
+HttpHelper.Url.HostAndAppPath : @CurrentRequest.Url.HostAndAppPath
+<br />
+HttpHelper.Url.Page : @CurrentRequest.Url.Page
+<br />
+HttpHelper.Url.Query : @CurrentRequest.Url.Query
+<br />
+<br />
+HttpHelper.ClientIPAddress : @CurrentRequest.ClientIPAddress
+<br />
+HttpHelper.UserAgent : @CurrentRequest.UserAgent
+<br />
+HttpHelper.SessionId : @CurrentRequest.SessionId
+<br />

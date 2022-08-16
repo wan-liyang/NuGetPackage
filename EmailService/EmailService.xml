@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EmailService</name>
+    </assembly>
+    <members>
+        <member name="T:EmailService.EmailService_Smtp">
+            <summary>
+            send email via SMTP
+            </summary>
+        </member>
+        <member name="M:EmailService.EmailService_Smtp.SendEmail(EmailService.Models.EmailContent)">
+            <summary>
+            send email
+            </summary>
+            <param name="emailContent"></param>
+        </member>
+        <member name="M:EmailService.EmailService_Smtp.AddEmailToMailAddressCollection(System.String,System.Net.Mail.MailAddressCollection)">
+            <summary>
+            add email address into MailMessage receiver (To / Cc / Bcc)
+            </summary>
+            <param name="strEmails"></param>
+            <param name="mailAddressColl"></param>
+        </member>
+        <member name="P:EmailService.Models.EmailAttachment.FileName">
+            <summary>
+            optional, the name of attachment, if not defined will get name from <see cref="P:EmailService.Models.EmailAttachment.FileNameAndPath"/>
+            </summary>
+        </member>
+        <member name="P:EmailService.Models.EmailAttachment.FileNameAndPath">
+            <summary>
+            mandatory, the physical path of attachment, will attach this file as email attachment
+            </summary>
+        </member>
+    </members>
+</doc>

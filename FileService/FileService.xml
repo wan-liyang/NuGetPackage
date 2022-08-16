@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FileService</name>
+    </assembly>
+    <members>
+        <member name="M:FileService.FileUtility.ToBase64String(System.String)">
+            <summary>
+            convert a file to base64string
+            </summary>
+            <param name="fileNameAndPath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FileService.FileUtility.FromBase64String(System.String)">
+            <summary>
+            convert base64string to a file byte
+            </summary>
+            <param name="base64string"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FileService.FileUtility.ToByte(System.String,System.Boolean)">
+            <summary>
+            convert file to byte
+            </summary>
+            <param name="filePath"></param>
+            <param name="isDelete"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FileService.FileUtility.DeleteFile(System.String,System.String,System.Boolean)">
+            <summary>
+            Delete file from path <paramref name="rootPath"/> when path exists, e.g. DeleteFile("path", "*.*", false)
+            <para>do nothing if path not exists</para>
+            </summary>
+            <param name="rootPath">the path need delete file</param>
+            <param name="pattern">search pattern to get the files, cannot be empty, The search string to match against the names of files in path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters, but it doesn't support regular expressions.</param>
+            <param name="isRemoveFolderIfEmpty">indicator whether delete folder if it become empty folder</param>
+        </member>
+        <member name="M:FileService.FileUtility.DeleteFolder(System.String,System.Boolean)">
+            <summary>
+            Deletes the specified directory
+            </summary>
+            <param name="dirPath">The name of the directory to remove.</param>
+            <param name="isRecursive">true to remove directories, subdirectories, and files in path; otherwise, false.</param>
+        </member>
+        <member name="M:FileService.FileUtility.IsDirectoryEmpty(System.String)">
+            <summary>
+            check whether specific directory is empty, true: it's empty, otherwise false
+            </summary>
+            <param name="dirPath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FileService.FileUtility.Write(System.String,System.String,System.Boolean)">
+            <summary>
+            write text to specific file, create a new file if not exists, no action will be perform if <paramref name="text"/> is empty
+            </summary>
+            <param name="fileNameAndPath">file path with file name</param>
+            <param name="text">text to write</param>
+            <param name="isOverwrite">true: overwrite existing content, false: append text to end</param>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="fileNameAndPath"/> is empty</exception>
+            <exception cref="T:System.IO.DirectoryNotFoundException">if <paramref name="fileNameAndPath"/> directory not found</exception>
+        </member>
+        <member name="M:FileService.FileUtility.WriteLine(System.String,System.String,System.Boolean)">
+            <summary>
+            write text to specific file follow up new line, create a new file if not exists
+            </summary>
+            <param name="fileNameAndPath"></param>
+            <param name="text"></param>
+            <param name="isOverwrite"></param>
+        </member>
+        <member name="M:FileService.FileUtility.CreateIfNotExists(System.String,FileService.FileUtility.PathType)">
+            <summary>
+            create folder / file in specific path, if the folder / file not exists
+            <para>if already exists, do nothing</para>
+            </summary>
+            <param name="folderPathOrFilePath"></param>
+        </member>
+        <member name="M:FileService.FileUtility.CleanName(System.String,System.Int32)">
+            <summary>
+            clean file name to replace special character to '_', and cut to specific length, <paramref name="maxLength"/> default 0 will not cut file name
+            </summary>
+            <param name="fileName"></param>
+            <param name="maxLength"></param>
+            <returns></returns>
+        </member>
+        <member name="F:FileService.MIMEType.BIN">
+            <summary>
+            Any kind of binary data
+            </summary>
+        </member>
+        <member name="F:FileService.MIMEType.XLS">
+            <summary>
+            Microsoft Excel
+            </summary>
+        </member>
+        <member name="F:FileService.MIMEType.XLSX">
+            <summary>
+            Microsoft Excel (OpenXML)
+            </summary>
+        </member>
+        <member name="F:FileService.MIMEType.CSV">
+            <summary>
+            Comma-separated values (CSV)
+            </summary>
+        </member>
+        <member name="M:FileService.MIMEType.GetContentType(System.String)">
+            <summary>
+            get content type by fileName.
+            <para>default application/octet-stream</para>
+            </summary>
+            <param name="fileName"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

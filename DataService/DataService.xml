@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DataService</name>
+    </assembly>
+    <members>
+        <member name="M:DataService.DataConversion.StringToValue.ToDateTimeWithDefault(System.String,System.DateTime,System.String[])">
+            <summary>
+            Convert string to datetime, return default value if convert failed
+            </summary>
+            <param name="value">string value going to convert</param>
+            <param name="defaultValue">default datetime value if convert failed</param>
+            <param name="valueFormats">string values's format, if multiple format defined, will return with first valid format which convert success</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataService.DataConversion.StringToValue.ToDateTime(System.String,System.String[])">
+            <summary>
+            Convert string to datetime, return 0001-01-01 if convert failed
+            </summary>
+            <param name="value">string value going to convert</param>
+            <param name="valueFormats">string values's format, if multiple format defined, will return with first valid format which convert success</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataService.DataConversion.StringToValue.ToDateTime(System.String,System.String)">
+            <summary>
+            Convert string to datetime
+            </summary>
+            <param name="value">string value going to convert</param>
+            <param name="valueFormat">string values's format</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataService.DataConversion.StringToValue.ToInt(System.String)">
+            <summary>
+            convert string value to int, return 0 if convert failed
+            <para>if value is "0", it will be 0 as well</para>
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DataService.DataConversion.StringToValue.ToEnum``1(System.String,``0)">
+            <summary>
+            convert string value to Enum item, return defaultEnum if convert failed
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="value"></param>
+            <param name="defaultEnum"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

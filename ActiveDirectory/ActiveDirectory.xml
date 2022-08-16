@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ActiveDirectory</name>
+    </assembly>
+    <members>
+        <member name="T:ActiveDirectory.ADService">
+            <summary>
+            service to operate with Active Directory
+            </summary>
+        </member>
+        <member name="T:ActiveDirectory.ADService.User">
+            <summary>
+            User related service
+            </summary>
+        </member>
+        <member name="M:ActiveDirectory.ADService.User.FindUserByEmployeeId(System.String)">
+            <summary>
+            find user by Employee Id
+            </summary>
+            <param name="employeeId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ActiveDirectory.ADService.User.FindUserByEmailAddress(System.String)">
+            <summary>
+            find user by Email Address
+            </summary>
+            <param name="emailAddress"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ActiveDirectory.ADService.User.FindUserByUserLogin(System.String)">
+            <summary>
+            find user by Email Address
+            </summary>
+            <param name="emailAddress"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ActiveDirectory.ADService.User.FindUser(System.String)">
+            <summary>
+            find user by EmployeeId / UserLogin / EmailAddress
+            </summary>
+            <param name="keyword"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ActiveDirectory.ADService.User.FindUserManager(System.String)">
+            <summary>
+            find user's manager
+            </summary>
+            <param name="userDistinguishedName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ActiveDirectory.ADService.User.FindUserGroup(System.String)">
+            <summary>
+            get groups user belong to
+            </summary>
+            <param name="userDistinguishedName"></param>
+            <returns></returns>
+        </member>
+        <member name="P:ActiveDirectory.Constants.AttributeMap.User.ManagerMap">
+            <summary>
+            user's manager get general information only, exclude memberof info, exclude manager's manager info
+            </summary>
+        </member>
+        <member name="P:ActiveDirectory.Entities.AdUser.AccountActive">
+            <summary>
+            indicator whether account is active or disabled, value could be: Yes / No
+            </summary>
+        </member>
+        <member name="M:ActiveDirectory.Helper.AdUserHelper.FindUserByKeyword(System.String)">
+            <summary>
+            find user by EmployeeId, UserLogin, EmailAddress
+            </summary>
+            <param name="keyword"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

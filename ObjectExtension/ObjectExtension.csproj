@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Liyang</Authors>
+    <Company>Liyang</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>the extension method for various type, String, Array, DataTable, Dictionary, etc</Description>
+    <PackageId>Liyang.ObjectExtension</PackageId>
+    <PackageTags>ObjectExtension ExtensionMethod Extension</PackageTags>
+    <Product>ObjectExtension</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>ObjectExtension.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+</Project>

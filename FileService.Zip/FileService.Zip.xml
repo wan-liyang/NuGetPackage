@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FileService.Zip</name>
+    </assembly>
+    <members>
+        <member name="T:FileService.Zip.ZipUnzip">
+            <summary>
+            Create zip file or Unzip a file
+            </summary>
+        </member>
+        <member name="M:FileService.Zip.ZipUnzip.CreateIfNotExists(System.String,FileService.Zip.ZipUnzip.PathType)">
+            <summary>
+            create folder / file in specific path, if the folder / file not exists
+            <para>if already exists, do nothing</para>
+            </summary>
+            <param name="folderPathOrFilePath"></param>
+        </member>
+        <member name="M:FileService.Zip.ZipUnzip.DeleteFolder(System.String,System.Boolean)">
+            <summary>
+            Deletes the specified directory
+            </summary>
+            <param name="dirPath">The name of the directory to remove.</param>
+            <param name="isRecursive">true to remove directories, subdirectories, and files in path; otherwise, false.</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:FileService.Zip.ZipUnzip.IsDirectoryEmpty(System.String)" -->
+        <member name="M:FileService.Zip.ZipUnzip.UnZip(System.String,System.String)">
+            <summary>
+            unzip <paramref name="sourceZipFile"/> into <paramref name="targetDir"/>
+            </summary>
+            <param name="sourceZipFile"></param>
+            <param name="targetDir"></param>
+        </member>
+        <member name="M:FileService.Zip.ZipUnzip.Zip(System.String[],System.String,System.String)">
+            <summary>
+            create zip file based on list of file
+            </summary>
+            <param name="filePathAndName"></param>
+            <param name="outputZipFilePathAndName"></param>
+            <param name="password"></param>
+        </member>
+        <member name="M:FileService.Zip.ZipUnzip.Zip(System.String,System.String,System.String)">
+            <summary>
+            create zip file based on source folder
+            </summary>
+            <param name="sourceFolderPath"></param>
+            <param name="outputZipFilePathAndName"></param>
+            <param name="password"></param>
+        </member>
+        <member name="M:FileService.Zip.ZipUnzip.CreateZip(System.String,System.String,System.String)">
+            <summary>
+            Compresses the files in the nominated folder, and creates a zip file 
+            </summary>
+            <param name="sourceFolderPath"></param>
+            <param name="outputZipFilePathAndName"></param>
+            <param name="password"></param>
+        </member>
+        <member name="M:FileService.Zip.ZipUnzip.CompressFolder(System.String,ICSharpCode.SharpZipLib.Zip.ZipOutputStream,System.Int32)">
+            <summary>
+            Recursively compresses a folder structure
+            </summary>
+            <param name="path"></param>
+            <param name="zipStream"></param>
+            <param name="folderOffset"></param>
+        </member>
+    </members>
+</doc>

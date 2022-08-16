@@ -1,0 +1,20 @@
+﻿@page
+@model NUnitTest_Web.Pages.Test.ServiceTest
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+}
+
+<p>Enter a service name:</p>
+
+<form method="post" asp-controller="ServiceTest" asp-action="Stop">
+    Name:
+    <input asp-for="ServiceName" />
+    <input type="submit" value="Stop Service" />
+</form>
+
+<form method="post" asp-controller="ServiceTest" asp-action="Start">
+    Name:
+    <input asp-for="ServiceName" />
+    <input type="submit" value="Start Service" />
+</form>

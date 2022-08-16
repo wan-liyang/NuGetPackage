@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QuartzJobBase</name>
+    </assembly>
+    <members>
+        <member name="T:QuartzJobBase.IQuartzJob">
+            <summary>
+            interface for QuartzJob, refer to <see cref="T:QuartzJobBase.QuartzJobBaseSampleJob"/> for implementation example
+            </summary>
+        </member>
+        <member name="P:QuartzJobBase.IQuartzJob.JobDescription">
+            <summary>
+            job description, describe what purpose of this job
+            </summary>
+        </member>
+        <member name="T:QuartzJobBase.QuartzJobBaseSampleJob">
+            <summary>
+            sample job
+            </summary>
+        </member>
+        <member name="P:QuartzJobBase.QuartzJobBaseSampleJob.QuartzJobBase#IQuartzJob#JobDescription">
+            <summary>
+            describe this job
+            </summary>
+        </member>
+        <member name="M:QuartzJobBase.QuartzJobBaseSampleJob.Execute(Quartz.IJobExecutionContext)">
+            <summary>
+            run job
+            </summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

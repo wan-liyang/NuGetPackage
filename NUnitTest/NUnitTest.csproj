@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ActiveDirectory\ActiveDirectory.csproj" />
+    <ProjectReference Include="..\CryptoService\CryptoService.csproj" />
+    <ProjectReference Include="..\DataService\DataService.csproj" />
+    <ProjectReference Include="..\ExcelFactory\ExcelFactory.csproj" />
+    <ProjectReference Include="..\FileService\FileService.csproj" />
+    <ProjectReference Include="..\MicrosoftGraphService\MicrosoftGraphService.csproj" />
+    <ProjectReference Include="..\ObjectExtension\ObjectExtension.csproj" />
+    <ProjectReference Include="..\RestApiService\RestApiService.csproj" />
+    <ProjectReference Include="..\SFTPService\SFTPService.csproj" />
+    <ProjectReference Include="..\SqlAdoService\SqlAdoService.csproj" />
+    <ProjectReference Include="..\WindowService\WindowService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="testhost.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Liyang</Authors>
+    <Company>NCS</Company>
+    <Description>Provide method to operate Active Directory.
+e.g. find user, find group</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>ActiveDirectory.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.DirectoryServices" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>
