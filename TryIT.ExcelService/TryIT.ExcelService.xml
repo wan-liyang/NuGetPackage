@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TryIT.ExcelService</name>
+    </assembly>
+    <members>
+        <member name="M:TryIT.ExcelService.ExcelComponent.GetDataTable(OfficeOpenXml.ExcelWorksheet)">
+            <summary>
+            get DataTable from WorkSheet, first row will be Table Header, all column is String type
+            </summary>
+            <param name="worksheet"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

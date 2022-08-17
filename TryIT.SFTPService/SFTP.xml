@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TryIT.SFTPService</name>
+    </assembly>
+    <members>
+        <member name="T:TryIT.SFTPService.SFTP">
+            <summary>
+            operate with SFTP server
+            <para>1. init connection with <see cref="M:TryIT.SFTPService.SFTP.InitConenctionInfoPassword(System.String,System.Int32,System.String,System.String)"/> </para>
+            <para>or <see cref="M:TryIT.SFTPService.SFTP.InitConenctionInfoPrivateKey(System.String,System.Int32,System.String,System.Byte[])"/></para>
+            <para>2. use that connection to do specific operation</para>
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:TryIT.SFTPService.SFTP.InitConenctionInfoPassword(System.String,System.Int32,System.String,System.String)" -->
+        <member name="M:TryIT.SFTPService.SFTP.InitConenctionInfoPrivateKey(System.String,System.Int32,System.String,System.String)">
+            <summary>
+            init connection with private key file
+            </summary>
+            <param name="ip"></param>
+            <param name="port"></param>
+            <param name="username"></param>
+            <param name="privateKeyFileNameAndPath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.SFTPService.SFTP.InitConenctionInfoPrivateKey(System.String,System.Int32,System.String,System.Byte[])">
+            <summary>
+            init connection with private key file byte
+            </summary>
+            <param name="ip"></param>
+            <param name="port"></param>
+            <param name="username"></param>
+            <param name="privateKeyFileNameAndPath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.SFTPService.SFTP.ListDirectory(Renci.SshNet.ConnectionInfo)">
+            <summary>
+            list all directory from SFTP root path "/"
+            </summary>
+            <param name="ip"></param>
+            <param name="port"></param>
+            <param name="username"></param>
+            <param name="password"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.SFTPService.SFTP.ListDirectoryAndFile(Renci.SshNet.ConnectionInfo)">
+            <summary>
+            list all directory and file from SFTP root path "/"
+            </summary>
+            <param name="ip"></param>
+            <param name="port"></param>
+            <param name="username"></param>
+            <param name="password"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.SFTPService.SFTP.CreateDirectory(Renci.SshNet.ConnectionInfo,System.String)">
+            <summary>
+            create directory into SFTP folder, if directory already exists, then no action will be perform
+            </summary>
+            <param name="ip"></param>
+            <param name="port"></param>
+            <param name="username"></param>
+            <param name="password"></param>
+            <param name="folderPath"></param>
+        </member>
+        <member name="M:TryIT.SFTPService.SFTP.Upload(Renci.SshNet.ConnectionInfo,System.String,System.String)">
+            <summary>
+            upload source file into SFTP folder, the <paramref name="targetFileNameAndPath"/> folder must exists
+            </summary>
+            <param name="ip"></param>
+            <param name="port"></param>
+            <param name="username"></param>
+            <param name="password"></param>
+            <param name="sourceFileNameAndPath"></param>
+            <param name="targetFileNameAndPath"></param>
+        </member>
+    </members>
+</doc>

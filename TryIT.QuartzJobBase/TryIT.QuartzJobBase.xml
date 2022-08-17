@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>QuartzJobBase</name>
+        <name>TryIT.QuartzJobBase</name>
     </assembly>
     <members>
-        <member name="T:QuartzJobBase.IQuartzJob">
+        <member name="T:TryIT.QuartzJobBase.IQuartzJob">
             <summary>
-            interface for QuartzJob, refer to <see cref="T:QuartzJobBase.QuartzJobBaseSampleJob"/> for implementation example
+            interface for QuartzJob, refer to <see cref="T:TryIT.QuartzJobBase.QuartzJobBaseSampleJob"/> for implementation example
             </summary>
         </member>
-        <member name="P:QuartzJobBase.IQuartzJob.JobDescription">
+        <member name="P:TryIT.QuartzJobBase.IQuartzJob.JobDescription">
             <summary>
             job description, describe what purpose of this job
             </summary>
         </member>
-        <member name="T:QuartzJobBase.QuartzJobBaseSampleJob">
+        <member name="T:TryIT.QuartzJobBase.QuartzJobBaseSampleJob">
             <summary>
             sample job
             </summary>
         </member>
-        <member name="P:QuartzJobBase.QuartzJobBaseSampleJob.QuartzJobBase#IQuartzJob#JobDescription">
+        <member name="P:TryIT.QuartzJobBase.QuartzJobBaseSampleJob.TryIT#QuartzJobBase#IQuartzJob#JobDescription">
             <summary>
             describe this job
             </summary>
         </member>
-        <member name="M:QuartzJobBase.QuartzJobBaseSampleJob.Execute(Quartz.IJobExecutionContext)">
+        <member name="M:TryIT.QuartzJobBase.QuartzJobBaseSampleJob.Execute(Quartz.IJobExecutionContext)">
             <summary>
             run job
             </summary>

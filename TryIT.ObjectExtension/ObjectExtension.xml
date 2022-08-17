@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TryIT.ObjectExtension</name>
+    </assembly>
+    <members>
+        <member name="T:TryIT.ObjectExtension.ArrayExtension">
+            <summary>
+            extension method for <see cref="T:System.Array"/>
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ArrayExtension.IndexOf``1(``0[],``0)">
+            <summary>
+            The zero-based index of the first occurrence of value in the entire array, if found; otherwise, -1.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="array"></param>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.DataTableExtension">
+            <summary>
+            extension method for <see cref="T:System.Data.DataTable"/>
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.IsNullOrEmpty(System.Data.DataTable)">
+            <summary>
+            Indicates whether the specified DataTable is null or has not row.
+            </summary>
+            <param name="dt"></param>
+            <returns>true: table is null or has not row, false: table is not null and has row</returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToList(System.Data.DataTable,System.String,System.Boolean)">
+            <summary>
+            convert specified column to string list, return empty list if dtSource or columnName invalid.
+            </summary>
+            <param name="dtSource"></param>
+            <param name="columnName"></param>
+            <param name="ignoreBlank">whether ignore blank or null</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToList``1(System.Data.DataTable,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            convert <paramref name="dtSource"/> to list of <typeparamref name="T"/>, based on <paramref name="keyValues"/> mapping,
+            <para>Keys: is Source Column</para>
+            <para>Values: is Target Entity Property</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="dtSource"></param>
+            <param name="keyValues"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle">
+            <summary>
+            style value for convert DataTable to HtmlString
+            </summary>
+        </member>
+        <member name="P:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Table">
+            <summary>
+            Table format
+            </summary>
+        </member>
+        <member name="P:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Th">
+            <summary>
+            Th format
+            </summary>
+        </member>
+        <member name="P:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Td">
+            <summary>
+            Td format
+            </summary>
+        </member>
+        <member name="T:TryIT.ObjectExtension.DataTableExtension.Delegate_TdFormat">
+            <summary>
+            delegate function for customize cell format
+            </summary>
+            <param name="dataTable"></param>
+            <param name="row"></param>
+            <param name="col"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToHtmlString(System.Data.DataTable,TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle,TryIT.ObjectExtension.DataTableExtension.Delegate_TdFormat,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            convert DataTable to HtmlString
+            <para>\r\n &amp; \n will be replace to <br/> </para>
+            <para>return html table string: &lt;table style=&quot;&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th style=&quot;&quot;&gt;Col1&lt;/th&gt;&lt;th&gt;Col2&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td style=&quot;&quot;&gt;Row1-Col1&lt;/td&gt;&lt;td&gt;Row1-Col2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Row2-Col1&lt;/td&gt;&lt;td&gt;Row2-Col2&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</para>
+            </summary>
+            <param name="dt"></param>
+            <param name="style">table style for Table / Tr / Td, default will set "border-collapse: collapse; border: 1px solid;"</param>
+            <param name="tdFormatFunc">delegate function to allow customize format Td content when Td is not DBNull, e.g. add hyperlink to Td
+            <para>string Func(DataTable dataTable, int row, int col)</para>
+            </param>
+            <param name="columns">columns to include in html, default null to include all columns</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DictionaryExtension.IsContainsKey(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
+            <summary>
+            check whether string dictionary contains provided key, default ignore case, return false if key is null
+            </summary>
+            <param name="dic"></param>
+            <param name="key"></param>
+            <param name="comparisonType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DictionaryExtension.IsContainsValue(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
+            <summary>
+            check whether string dictionary contains provided value, default ignore case, return false if value is null
+            </summary>
+            <param name="dic"></param>
+            <param name="value"></param>
+            <param name="comparisonType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DictionaryExtension.TryGetValue(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            try get value from Dictionary, return null if not exists
+            </summary>
+            <param name="keyValuePairs"></param>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.ExceptionExtension">
+            <summary>
+            extension method for <see cref="T:System.Exception"/>
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ExceptionExtension.ToCustomizeString(System.Exception)">
+            <summary>
+            convert Exception object to Customize String
+            <para>return <paramref name="ex"/> + <paramref name="ex"/>.InnerException + <paramref name="ex"/>.InnerExeption.InnerException</para>
+            </summary>
+            <param name="ex"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.IEnumerableExtension">
+            <summary>
+            Extension method for <see cref="T:System.Collections.Generic.IEnumerable`1"/> item
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.IsNullOrEmpty(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            indicator whether <paramref name="list"/> is null or empty
+            </summary>
+            <param name="list"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.IsContains(System.Collections.Generic.IEnumerable{System.String},System.String,System.StringComparison)">
+            <summary>
+            check whether string list contains provided value, default ignore case, return false if value is null
+            </summary>
+            <param name="list"></param>
+            <param name="value"></param>
+            <param name="comparisonType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.DistinctBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            distict IEnumerable object by specific property
+            <para>list.DistinctBy(p => p.Id)</para>
+            <para>list.DistinctBy(p => new { p.Id, p.Name })</para>
+            </summary>
+            <typeparam name="TSource"></typeparam>
+            <typeparam name="TKey"></typeparam>
+            <param name="source"></param>
+            <param name="keySelector"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.ToDataTable``1(System.Collections.Generic.List{``0})">
+            <summary>
+            Convert list to DataTable
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.ObjExtension">
+            <summary>
+            extension method for Object type
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.DeepCopy``1(``0)">
+            <summary>
+            deep copy by serializing it and then returning a deserialized copy
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="self"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ToBoolean(System.Object)">
+            <summary>
+            convert object value to boolean, return false if value is null
+            <para>true: value of "Y", "Yes", "On" will be true</para>
+            <para>false: value of "N", "No", "Off" will be false</para>
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ConvertValue``1(System.Object)">
+            <summary>
+            Convert object value to specific type value
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="objValue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ObjectToBase64String(System.Object)">
+            <summary>
+            Convert object to Base64 string
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.Base64StringToObj``1(System.String)">
+            <summary>
+            Convert Base64 string to specific object
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="stringBase64"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.JsonToObject``1(System.String)">
+            <summary>
+            covnert Json string to specific object
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="jsonString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ObjectToJson(System.Object)">
+            <summary>
+            convert object to Json string
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringAppend.ToString(System.String)">
+            <summary>
+            get final string which concat all appended string by <paramref name="concatBy"/>
+            </summary>
+            <param name="concatBy"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringAppend.Append(System.String)">
+            <summary>
+            get final string which concat all appended string
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsEquals(System.String,System.String,System.StringComparison,System.Boolean)">
+            <summary>
+            check whether string is equals to provide value, default ignore case, return false if value is null
+            </summary>
+            <param name="sourceValue"></param>
+            <param name="value"></param>
+            <param name="comparisonType"></param>
+            <param name="isTrim">whether use string.Trim() to remove space.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsIn(System.String,System.String[])">
+            <summary>
+            check whether this string value exists in values list, ignore case
+            </summary>
+            <param name="value"></param>
+            <param name="values"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsContains(System.String,System.String,System.StringComparison)">
+            <summary>
+            check whether string contains provided value, default ignore case, return false if value is null
+            </summary>
+            <param name="sourceValue"></param>
+            <param name="value"></param>
+            <param name="comparisonType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsStartsWith(System.String,System.String,System.StringComparison)">
+            <summary>
+            Determines whether the beginning of this string instance matches the specified string, default ignore case
+            </summary>
+            <param name="sourceValue"></param>
+            <param name="value"></param>
+            <param name="comparisonType"></param>
+            <returns>true if value matches the beginning of this string; otherwise, false.</returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsEndsWith(System.String,System.String,System.StringComparison)">
+            <summary>
+            Determines whether the end of this string instance matches the specified string, default ignore case
+            </summary>
+            <param name="sourceValue"></param>
+            <param name="value"></param>
+            <param name="comparisonType"></param>
+            <returns>true if value matches the beginning of this string; otherwise, false.</returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.Split(System.String,System.String[])">
+            <summary>
+            split string <paramref name="value"/> by <paramref name="separator"/>, will remove empty item
+            </summary>
+            <param name="value"></param>
+            <param name="separator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IndexOf(System.String,System.String,System.Int32,System.StringComparison,System.Boolean)">
+            <summary>
+            Reports the zero-based index of the first occurrence of the specified string in the current System.String object
+            </summary>
+            <param name="str"></param>
+            <param name="value">The string to seek.</param>
+            <param name="startIndex">The search starting position.</param>
+            <param name="comparisonType">One of the enumeration values that specifies the rules for the search.</param>
+            <param name="isWholeWord">true to match whold world during the comparison; otherwise, false.</param>
+            <returns>
+            The zero-based index position of the value parameter if that string is found, 
+            or -1 if it is not. If value is System.String.Empty, the return value is startIndex.
+            </returns>
+        </member>
+    </members>
+</doc>

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>DataService</name>
+        <name>TryIT.DataConversion</name>
     </assembly>
     <members>
-        <member name="M:DataService.DataConversion.StringToValue.ToDateTimeWithDefault(System.String,System.DateTime,System.String[])">
+        <member name="M:TryIT.DataConversion.ConvertString.ToDateTimeWithDefault(System.String,System.DateTime,System.String[])">
             <summary>
             Convert string to datetime, return default value if convert failed
             </summary>
@@ -13,7 +13,7 @@
             <param name="valueFormats">string values's format, if multiple format defined, will return with first valid format which convert success</param>
             <returns></returns>
         </member>
-        <member name="M:DataService.DataConversion.StringToValue.ToDateTime(System.String,System.String[])">
+        <member name="M:TryIT.DataConversion.ConvertString.ToDateTime(System.String,System.String[])">
             <summary>
             Convert string to datetime, return 0001-01-01 if convert failed
             </summary>
@@ -21,7 +21,7 @@
             <param name="valueFormats">string values's format, if multiple format defined, will return with first valid format which convert success</param>
             <returns></returns>
         </member>
-        <member name="M:DataService.DataConversion.StringToValue.ToDateTime(System.String,System.String)">
+        <member name="M:TryIT.DataConversion.ConvertString.ToDateTime(System.String,System.String)">
             <summary>
             Convert string to datetime
             </summary>
@@ -29,7 +29,7 @@
             <param name="valueFormat">string values's format</param>
             <returns></returns>
         </member>
-        <member name="M:DataService.DataConversion.StringToValue.ToInt(System.String)">
+        <member name="M:TryIT.DataConversion.ConvertString.ToInt(System.String)">
             <summary>
             convert string value to int, return 0 if convert failed
             <para>if value is "0", it will be 0 as well</para>
@@ -37,7 +37,7 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:DataService.DataConversion.StringToValue.ToEnum``1(System.String,``0)">
+        <member name="M:TryIT.DataConversion.ConvertString.ToEnum``1(System.String,``0)">
             <summary>
             convert string value to Enum item, return defaultEnum if convert failed
             </summary>
