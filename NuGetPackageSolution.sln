@@ -3,41 +3,39 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelFactory", "ExcelFactory\ExcelFactory.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlAdoService", "SqlAdoService\SqlAdoService.csproj", "{74510E8B-6A42-4802-A888-915311596FF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.SqlAdoService", "TryIT.SqlAdoService\TryIT.SqlAdoService.csproj", "{74510E8B-6A42-4802-A888-915311596FF2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest_Web", "NUnitTest_Web\NUnitTest_Web.csproj", "{8091148E-40E3-4426-8377-A68585FF314E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuartzJobBase", "QuartzJobBase\QuartzJobBase.csproj", "{45D8221D-E4A1-4660-8E08-B146B943F730}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.QuartzJobBase", "TryIT.QuartzJobBase\TryIT.QuartzJobBase.csproj", "{45D8221D-E4A1-4660-8E08-B146B943F730}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFTPService", "SFTPService\SFTPService.csproj", "{439078D8-F8FD-439A-9BFA-1A6691BD1624}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.SFTPService", "TryIT.SFTPService\TryIT.SFTPService.csproj", "{439078D8-F8FD-439A-9BFA-1A6691BD1624}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.HttpHandler", "TryIT.HttpHandler\TryIT.HttpHandler.csproj", "{D9A8C806-EFE6-4F03-A976-01097F726F20}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Impersonation.Win", "Impersonation.Win\Impersonation.Win.csproj", "{4DD580EA-75B2-4B43-A4E1-A96A512574D8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ActiveDirectory", "TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj", "{E3FDE038-19C9-4239-BEE6-365FCA7008A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "DataService\DataService.csproj", "{29DF7638-AD2D-4320-AECB-521A86CB156F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.DataConversion", "TryIT.DataConversion\TryIT.DataConversion.csproj", "{29DF7638-AD2D-4320-AECB-521A86CB156F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.CryptoService", "TryIT.CryptoService\TryIT.CryptoService.csproj", "{9E1AB63A-71EB-4AA8-9A2A-75BC8A16D70D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ObjectExtension", "TryIT.ObjectExtension\TryIT.ObjectExtension.csproj", "{82B18564-17D7-4FCC-A73B-A4EC0324495E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowService", "WindowService\WindowService.csproj", "{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.WindowService", "TryIT.WindowService\TryIT.WindowService.csproj", "{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService", "EmailService\EmailService.csproj", "{AEA6ACD5-0CEC-4704-9B94-39F8D843768F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileService", "TryIT.FileService\TryIT.FileService.csproj", "{D3AC6458-D284-4D63-83AA-33E75F53C416}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService", "FileService\FileService.csproj", "{D3AC6458-D284-4D63-83AA-33E75F53C416}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileService.Zip", "TryIT.FileService.Zip\TryIT.FileService.Zip.csproj", "{93E8F39F-994B-416F-BB5A-EB7790E4D279}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.Zip", "FileService.Zip\FileService.Zip.csproj", "{93E8F39F-994B-416F-BB5A-EB7790E4D279}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.RestApiService", "TryIT.RestApiService\TryIT.RestApiService.csproj", "{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestApiService", "RestApiService\RestApiService.csproj", "{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Impersonation.Win", "TryIT.Impersonation.Win\TryIT.Impersonation.Win.csproj", "{BFE27B6F-D79A-437D-A7BE-B59D638D299F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,10 +75,6 @@ Global
 		{D9A8C806-EFE6-4F03-A976-01097F726F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9A8C806-EFE6-4F03-A976-01097F726F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9A8C806-EFE6-4F03-A976-01097F726F20}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4DD580EA-75B2-4B43-A4E1-A96A512574D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4DD580EA-75B2-4B43-A4E1-A96A512574D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4DD580EA-75B2-4B43-A4E1-A96A512574D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4DD580EA-75B2-4B43-A4E1-A96A512574D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E3FDE038-19C9-4239-BEE6-365FCA7008A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E3FDE038-19C9-4239-BEE6-365FCA7008A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3FDE038-19C9-4239-BEE6-365FCA7008A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -101,10 +95,6 @@ Global
 		{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AEA6ACD5-0CEC-4704-9B94-39F8D843768F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AEA6ACD5-0CEC-4704-9B94-39F8D843768F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AEA6ACD5-0CEC-4704-9B94-39F8D843768F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AEA6ACD5-0CEC-4704-9B94-39F8D843768F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D3AC6458-D284-4D63-83AA-33E75F53C416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D3AC6458-D284-4D63-83AA-33E75F53C416}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3AC6458-D284-4D63-83AA-33E75F53C416}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -117,6 +107,10 @@ Global
 		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

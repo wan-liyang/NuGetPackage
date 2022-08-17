@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Liyang</Authors>
+    <Company>Liyang</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Provide method to operate window service, Start, Stop, Restart</Description>
+    <PackageId>TryIT.WindowService</PackageId>
+    <PackageTags>WindowService Service</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>Try.WindowService.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Core.System.ServiceProcess" Version="2.0.1" />
+  </ItemGroup>
+
+</Project>

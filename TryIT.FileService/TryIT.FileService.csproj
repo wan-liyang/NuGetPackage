@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Liyang</Authors>
+    <Company>Liyang</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Provide method to perform file operation</Description>
+    <PackageId>TryIT.FileService</PackageId>
+    <PackageTags>File</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>TryIT.FileService.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

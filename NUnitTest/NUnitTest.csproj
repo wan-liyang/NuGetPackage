@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -13,15 +13,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataService\DataService.csproj" />
-    <ProjectReference Include="..\ExcelFactory\ExcelFactory.csproj" />
-    <ProjectReference Include="..\FileService\FileService.csproj" />
-    <ProjectReference Include="..\MicrosoftGraphService\MicrosoftGraphService.csproj" />
-    <ProjectReference Include="..\ObjectExtension\ObjectExtension.csproj" />
-    <ProjectReference Include="..\RestApiService\RestApiService.csproj" />
-    <ProjectReference Include="..\SFTPService\SFTPService.csproj" />
-    <ProjectReference Include="..\SqlAdoService\SqlAdoService.csproj" />
-    <ProjectReference Include="..\WindowService\WindowService.csproj" />
+    <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
+    <ProjectReference Include="..\TryIT.SqlAdoService\TryIT.SqlAdoService.csproj" />
+    <ProjectReference Include="..\TryIT.SFTPService\TryIT.SFTPService.csproj" />
+    <ProjectReference Include="..\TryIT.RestApiService\TryIT.RestApiService.csproj" />
+    <ProjectReference Include="..\TryIT.QuartzJobBase\TryIT.QuartzJobBase.csproj" />
+    <ProjectReference Include="..\TryIT.ObjectExtension\TryIT.ObjectExtension.csproj" />
+    <ProjectReference Include="..\TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj" />
+    <ProjectReference Include="..\TryIT.Impersonation.Win\TryIT.Impersonation.Win.csproj" />
+    <ProjectReference Include="..\TryIT.HttpHandler\TryIT.HttpHandler.csproj" />
+    <ProjectReference Include="..\TryIT.FileService\TryIT.FileService.csproj" />
+    <ProjectReference Include="..\TryIT.FileService.Zip\TryIT.FileService.Zip.csproj" />
+    <ProjectReference Include="..\TryIT.ExcelService\TryIT.ExcelService.csproj" />
+    <ProjectReference Include="..\TryIT.DataConversion\TryIT.DataConversion.csproj" />
+    <ProjectReference Include="..\TryIT.CryptoService\TryIT.CryptoService.csproj" />
+    <ProjectReference Include="..\TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj" />
   </ItemGroup>
 
   <ItemGroup>

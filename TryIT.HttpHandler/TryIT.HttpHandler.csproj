@@ -8,9 +8,10 @@
     <Description>Provide method for HTTP request handler, Build Url, Get Current Request Information</Description>
     <PackageId>TryIT.HttpHandler</PackageId>
     <PackageTags>Http</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>TryIT.HttpHandler.xml</DocumentationFile>
   </PropertyGroup>
 

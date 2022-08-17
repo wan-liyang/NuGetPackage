@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Liyang</Authors>
+    <Company>Liyang</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Provide base method for Quartz Scheduler and example for how to achieve Quartz Scheduler</Description>
+    <PackageId>TryIT.QuartzJobBase</PackageId>
+    <PackageTags>Quartz</PackageTags>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>TryIT.QuartzJobBase.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Quartz" Version="3.3.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

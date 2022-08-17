@@ -75,11 +75,13 @@ private string GetToken()
 {
     /*
     * 1. get exists token (StateGuid, ExpiresOn, Access_token, Refresh_token)
-    * 2. if ExpiresOn < Now, need refresh token to get new token
+    * 2. check token expiry, if ExpiresOn < Now, need refresh token to get new token
     * 3. save new token
     */
 
-    if("token exists" == true)
+    var savedToken = "" // get saved token from session / db, this could be Object or DataTable
+
+    if("savedToken is valid" == true) // check the token validity, e.g. check is not null
     {
         GetTokenResponse token = new GetTokenResponse
         {
@@ -89,7 +91,7 @@ private string GetToken()
             refresh_token = "[get refresh_token from exists token]"
         };
 
-        // expires_on < DateTime.Now
+        // here check token expiry, expires_on < DateTime.Now, if expired, will call RefreshToken to get latest valid token
         if(token.expires_on < DateTime.Now)
         {
             MsGraphGetTokenConfig tokenConfig = GetTokenConfig;

@@ -2,18 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>TryIT.CryptoService</PackageId>
     <Authors>Liyang</Authors>
     <Company>Liyang</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes />
-    <PackageTags>Encryption Decryption Crypto</PackageTags>
-    <Description>Encryption &amp; Decryption method, DES, AES, MD5, SHA512Hash</Description>
-    <Configurations>Release;Debug</Configurations>
+    <Description>Provide base method for perform SQL action via .NET ADO</Description>
+    <PackageId>TryIT.SqlAdoService</PackageId>
+    <PackageTags>.NETADO ADO Database DB</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>TryIT.CryptoService.xml</DocumentationFile>
+    <DocumentationFile>TryIT.SqlAdoService.xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+  </ItemGroup>
 
 </Project>

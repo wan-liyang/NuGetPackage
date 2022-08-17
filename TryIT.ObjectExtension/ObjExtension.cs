@@ -100,7 +100,6 @@ namespace TryIT.ObjectExtension
                 }
                 catch (Exception ex)
                 {
-                    //Logger.Error(string.Format("ConvertValue - ObjValue: {0}", objValue.ToString()), ex);
                     throw ex;
                 }
             }

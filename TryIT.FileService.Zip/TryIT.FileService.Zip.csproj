@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Liyang</Authors>
+    <Company>Liyang</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Provide method to Zip Unzip file</Description>
+    <PackageId>TryIT.FileService.Zip</PackageId>
+    <PackageTags>Zip Unzip</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>TryIT.FileService.Zip.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" Version="1.3.3" />
+  </ItemGroup>
+
+</Project>

@@ -9,9 +9,10 @@
     <PackageId>TryIT.ActiveDirectory</PackageId>
     <PackageTags>AD ActiveDirectory</PackageTags>
     <Product>TryIT.ActiveDirectory</Product>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>TryIT.ActiveDirectory.xml</DocumentationFile>
   </PropertyGroup>
 

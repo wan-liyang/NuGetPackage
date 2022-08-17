@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Http;
-using HttpHandler;
+using TryIT.HttpHandler;
 
 namespace NUnitTest_Web.Pages.Test
 {

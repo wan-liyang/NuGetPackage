@@ -2,18 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>TryIT.CryptoService</PackageId>
     <Authors>Liyang</Authors>
     <Company>Liyang</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes />
-    <PackageTags>Encryption Decryption Crypto</PackageTags>
-    <Description>Encryption &amp; Decryption method, DES, AES, MD5, SHA512Hash</Description>
-    <Configurations>Release;Debug</Configurations>
+    <Description>Provide method to convert data</Description>
+    <PackageId>TryIT.DataConversion</PackageId>
+    <PackageTags>DataConversion</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>TryIT.CryptoService.xml</DocumentationFile>
+    <DocumentationFile>TryIT.DataConversion.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>

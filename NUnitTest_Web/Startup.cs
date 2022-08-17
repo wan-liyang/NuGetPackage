@@ -1,14 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NUnitTest_Web
 {
@@ -26,12 +21,12 @@ namespace NUnitTest_Web
         {
             services.AddRazorPages();
 
-            var sqlAdoConfig = new SqlAdoService.AdoConfig
+            var sqlAdoConfig = new TryIT.SqlAdoService.AdoConfig
             {
                 ConnectionString = "Test",
                 TimeoutSecond = 100
             };
-            SqlAdoService.SqlAdoStatic.InitConfig(sqlAdoConfig);
+            TryIT.SqlAdoService.SqlAdoStatic.InitConfig(sqlAdoConfig);
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
@@ -64,8 +59,8 @@ namespace NUnitTest_Web
 
             app.UsePathBase("/AppPath");
 
-            HttpHandler.Config.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
-            HttpHandler.Config.ConfigurePassword("password");
+            TryIT.HttpHandler.Config.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
+            TryIT.HttpHandler.Config.ConfigurePassword("password");
         }
     }
 }

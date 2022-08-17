@@ -9,9 +9,10 @@
     <PackageId>TryIT.MicrosoftGraphService</PackageId>
     <PackageTags>GraphAPI MicrosoftGraphAPI</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>TryIT.MicrosoftGraphService.xml</DocumentationFile>
   </PropertyGroup>
 
