@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.SqlAdoService", "TryIT.SqlAdoService\TryIT.SqlAdoService.csproj", "{74510E8B-6A42-4802-A888-915311596FF2}"
@@ -37,6 +35,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.RestApiService", "Try
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Impersonation.Win", "TryIT.Impersonation.Win\TryIT.Impersonation.Win.csproj", "{BFE27B6F-D79A-437D-A7BE-B59D638D299F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{264E7609-573D-49B9-81D7-C5C707405ACB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest02", "NUnitTest02\NUnitTest02.csproj", "{A78155D3-C073-4896-BF8A-10E9DB05D3AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,10 +49,6 @@ Global
 		{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D4BCF68-1D63-4163-9886-BFE9CFE9539D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{86CB1402-653E-4358-91C7-5AE9F5033054}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{86CB1402-653E-4358-91C7-5AE9F5033054}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86CB1402-653E-4358-91C7-5AE9F5033054}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -111,6 +109,14 @@ Global
 		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{264E7609-573D-49B9-81D7-C5C707405ACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{264E7609-573D-49B9-81D7-C5C707405ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{264E7609-573D-49B9-81D7-C5C707405ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{264E7609-573D-49B9-81D7-C5C707405ACB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

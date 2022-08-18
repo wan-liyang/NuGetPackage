@@ -8,6 +8,7 @@
     <Description>Provide method to Zip Unzip file</Description>
     <PackageId>TryIT.FileService.Zip</PackageId>
     <PackageTags>Zip Unzip</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

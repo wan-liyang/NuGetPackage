@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 
-namespace NUnitTest.Liyang_ObjectExtension
+namespace NUnitTest02.TryIT_ObjectExtension
 {
     class IEnumerableExtension_UnitTest
     {

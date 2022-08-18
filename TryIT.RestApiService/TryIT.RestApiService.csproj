@@ -8,6 +8,7 @@
     <Description>Provide method to execute RESTful API</Description>
     <PackageId>TryIT.RestApiService</PackageId>
     <PackageTags>API REST RESTful</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -8,6 +8,7 @@
     <Description>Provide method to operate window service, Start, Stop, Restart</Description>
     <PackageId>TryIT.WindowService</PackageId>
     <PackageTags>WindowService Service</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

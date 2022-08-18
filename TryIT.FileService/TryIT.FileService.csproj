@@ -8,6 +8,7 @@
     <Description>Provide method to perform file operation</Description>
     <PackageId>TryIT.FileService</PackageId>
     <PackageTags>File</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

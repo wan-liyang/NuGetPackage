@@ -8,6 +8,7 @@
     <Description>Provide method to execute code with Impersonation</Description>
     <PackageId>TryIT.Impersonation.Win</PackageId>
     <PackageTags>Impersonation</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

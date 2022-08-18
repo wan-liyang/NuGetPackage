@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
-    <ProjectReference Include="..\TryIT.SqlAdoService\TryIT.SqlAdoService.csproj" />
     <ProjectReference Include="..\TryIT.SFTPService\TryIT.SFTPService.csproj" />
     <ProjectReference Include="..\TryIT.RestApiService\TryIT.RestApiService.csproj" />
     <ProjectReference Include="..\TryIT.QuartzJobBase\TryIT.QuartzJobBase.csproj" />
@@ -31,9 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="testhost.dll.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

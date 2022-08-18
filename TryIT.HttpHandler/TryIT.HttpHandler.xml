@@ -1,109 +1,109 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>HttpHandler</name>
+        <name>TryIT.HttpHandler</name>
     </assembly>
     <members>
-        <member name="T:HttpHandler.Config">
+        <member name="T:TryIT.HttpHandler.Config">
             <summary>
             initial configuration of HttpHandler
             </summary>
         </member>
-        <member name="M:HttpHandler.Config.Configure(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+        <member name="M:TryIT.HttpHandler.Config.Configure(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
             <summary>
             config <see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/>
             </summary>
             <param name="httpContextAccessor"></param>
         </member>
-        <member name="M:HttpHandler.Config.ConfigurePassword(System.String)">
+        <member name="M:TryIT.HttpHandler.Config.ConfigurePassword(System.String)">
             <summary>
             config encrypt password, use to encrypt/decrypt query string
             </summary>
             <param name="urlQueryEncryptPassword"></param>
         </member>
-        <member name="T:HttpHandler.CurrentRequest">
+        <member name="T:TryIT.HttpHandler.CurrentRequest">
             <summary>
             helper for URL related
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.ClientIPAddress">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.ClientIPAddress">
             <summary>
             get client ip address, return empty if not applicable
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.UserAgent">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.UserAgent">
             <summary>
             get client user agent, return empty if not applicable
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.SessionId">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.SessionId">
             <summary>
             get SessionId for current request, return empty if not applicable
             </summary>
         </member>
-        <member name="T:HttpHandler.CurrentRequest.Url">
+        <member name="T:TryIT.HttpHandler.CurrentRequest.Url">
             <summary>
             {Scheme}://{Host}:{Port}/{AppPath}/{Page}?{Query}
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.Scheme">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.Scheme">
             <summary>
             get Scheme or current request, "http" / "https"
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.Port">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.Port">
             <summary>
             port of current request, 443 / 80
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.Host">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.Host">
             <summary>
             get host (with scheme, with port) of current request, return empty if not http request (e.g. backend schedule job)
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.AppPath">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.AppPath">
             <summary>
             get Reqeust Application Path, return empty if it's "/"
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.HostAndAppPath">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.HostAndAppPath">
             <summary>
             e.g. https://host:443/AppPath or https://host:443
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.Query">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.Query">
             <summary>
             query without '?'
             <para>e.g. a=1&amp;b=2</para>
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.QueryCollection">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.QueryCollection">
             <summary>
             querystring collection
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.Page">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.Page">
             <summary>
             e.g. /DEV/page.aspx
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.FullDisplayUrl">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.FullDisplayUrl">
             <summary>
             full url with query (if have), {Scheme}://{Host}:{Port}/{AppPath}/{Page}?{Query}
             <para>Returns the combined components of the request URL in a fully un-escaped form (except for the QueryString) suitable only for display. This format should not be used in HTTP headers or other HTTP operations.</para>
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.FulEncodedUrl">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.FulEncodedUrl">
             <summary>
             Returns the combined components of the request URL in a fully escaped form suitable for use in HTTP headers and other HTTP operations.
             </summary>
         </member>
-        <member name="P:HttpHandler.CurrentRequest.Url.FullUrlWithoutQuery">
+        <member name="P:TryIT.HttpHandler.CurrentRequest.Url.FullUrlWithoutQuery">
             <summary>
             full url without query, {Scheme}://{Host}:{Port}/{AppPath}/{Page}
             </summary>
         </member>
-        <member name="M:HttpHandler.CurrentRequest.GetAbsoluteUrl(System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+        <member name="M:TryIT.HttpHandler.CurrentRequest.GetAbsoluteUrl(System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>
             based on current request, get absolute url based on given url and query string list, querystring will be encrypted
             </summary>
@@ -111,7 +111,7 @@
             <param name="dicQueryString">query string dictionary</param>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.CurrentRequest.ConcatUrlAndQuery(System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.Boolean)">
+        <member name="M:TryIT.HttpHandler.CurrentRequest.ConcatUrlAndQuery(System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.Boolean)">
             <summary>
             Concat Url and Query into String
             </summary>
@@ -120,7 +120,7 @@
             <param name="isEncryptQuery">indicator whether encrypt query string, default false</param>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.CurrentRequest.GetQueryValue``1(System.String)">
+        <member name="M:TryIT.HttpHandler.CurrentRequest.GetQueryValue``1(System.String)">
             <summary>
             Get QueryStringValue from current request based on <paramref name="queryStringKey"/>
             </summary>
@@ -128,14 +128,14 @@
             <param name="queryStringKey"></param>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.CurrentRequest.IsPage(System.String)">
+        <member name="M:TryIT.HttpHandler.CurrentRequest.IsPage(System.String)">
             <summary>
             indicator current request is requesting specific page <paramref name="pageUrl"/>
             </summary>
             <param name="pageUrl"></param>
             <returns></returns>
         </member>
-        <member name="T:HttpHandler.UrlBuilder">
+        <member name="T:TryIT.HttpHandler.UrlBuilder">
             <summary>
             to build Absolute url with given url and parametr
             <para>Example Code</para>
@@ -144,20 +144,20 @@
             </para>
             </summary>
         </member>
-        <member name="M:HttpHandler.UrlBuilder.Url(System.String)">
+        <member name="M:TryIT.HttpHandler.UrlBuilder.Url(System.String)">
             <summary>
             the page to present in url
             </summary>
             <param name="page">the page use to build url</param>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.UrlBuilder.Host(System.String)">
+        <member name="M:TryIT.HttpHandler.UrlBuilder.Host(System.String)">
             <summary>
             the host to present in url
             </summary>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.UrlBuilder.Parameter(System.String,System.String)">
+        <member name="M:TryIT.HttpHandler.UrlBuilder.Parameter(System.String,System.String)">
             <summary>
             the query parameter to append into url
             </summary>
@@ -165,15 +165,15 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.UrlBuilder.Encrypt(System.Boolean)">
+        <member name="M:TryIT.HttpHandler.UrlBuilder.Encrypt(System.Boolean)">
             <summary>
             indicator whether encrypt query parameter, default false
-            <para>encrypt password refer to <see cref="M:HttpHandler.Config.ConfigurePassword(System.String)" /></para>
+            <para>encrypt password refer to <see cref="M:TryIT.HttpHandler.Config.ConfigurePassword(System.String)" /></para>
             </summary>
             <param name="isEncryptParameter"></param>
             <returns></returns>
         </member>
-        <member name="M:HttpHandler.UrlBuilder.ToString">
+        <member name="M:TryIT.HttpHandler.UrlBuilder.ToString">
             <summary>
             get final url string, 
             <para>if host provied, will be host + page + parameter</para>

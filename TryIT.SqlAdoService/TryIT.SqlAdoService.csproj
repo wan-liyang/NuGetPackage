@@ -8,6 +8,7 @@
     <Description>Provide base method for perform SQL action via .NET ADO</Description>
     <PackageId>TryIT.SqlAdoService</PackageId>
     <PackageTags>.NETADO ADO Database DB</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

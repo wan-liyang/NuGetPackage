@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System;
 
-namespace NUnitTest.TryIT_SqlAdoService
+namespace NUnitTest02.TryIT_SqlAdoService
 {
     class SqlAdoService_UnitTest
     {
@@ -25,7 +25,7 @@ namespace NUnitTest.TryIT_SqlAdoService
                 TimeoutSecond = 30
             };
 
-            Assert.Throws<System.Data.SqlClient.SqlException>(() => {
+            Assert.Throws<System.ArgumentException>(() => {
                 new SqlAdoObject(config).ExecuteNonQuery("SELECT 1 FROM dbo.__dummyTestTable", System.Data.CommandType.Text);
             });
         }
@@ -49,7 +49,7 @@ namespace NUnitTest.TryIT_SqlAdoService
                 TimeoutSecond = 30
             });
 
-            Assert.Throws<System.Data.SqlClient.SqlException>(() => {
+            Assert.Throws<System.ArgumentException>(() => {
                 SqlAdoStatic.FetchDataTable("SELECT 1 FROM dbo.__dummyTestTable", System.Data.CommandType.Text);
             });
         }

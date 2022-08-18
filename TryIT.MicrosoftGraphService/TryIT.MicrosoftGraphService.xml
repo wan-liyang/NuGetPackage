@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>MicrosoftGraphService</name>
+        <name>TryIT.MicrosoftGraphService</name>
     </assembly>
     <members>
-        <member name="T:MicrosoftGraphService.Config.MsGraphApiConfig">
+        <member name="T:TryIT.MicrosoftGraphService.Config.MsGraphApiConfig">
             <summary>
             Config information use for application perform graph api request
             </summary>
         </member>
-        <member name="T:MicrosoftGraphService.Config.MsGraphGetTokenConfig">
+        <member name="T:TryIT.MicrosoftGraphService.Config.MsGraphGetTokenConfig">
             <summary>
             Config information use for application obtain Token
             </summary>
         </member>
-        <member name="M:MicrosoftGraphService.ExtensionHelper.ExtensionMethod.JsonToObject``1(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.ExtensionHelper.ExtensionMethod.JsonToObject``1(System.String)">
             <summary>
             covnert Json string to specific object
             </summary>
@@ -22,34 +22,34 @@
             <param name="jsonString"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.ExtensionHelper.ExtensionMethod.ObjectToJson(System.Object)">
+        <member name="M:TryIT.MicrosoftGraphService.ExtensionHelper.ExtensionMethod.ObjectToJson(System.Object)">
             <summary>
             convert object to Json string
             </summary>
             <param name="obj"></param>
             <returns></returns>
         </member>
-        <member name="F:MicrosoftGraphService.ExtensionHelper.MIMEType.BIN">
+        <member name="F:TryIT.MicrosoftGraphService.ExtensionHelper.MIMEType.BIN">
             <summary>
             Any kind of binary data
             </summary>
         </member>
-        <member name="F:MicrosoftGraphService.ExtensionHelper.MIMEType.XLS">
+        <member name="F:TryIT.MicrosoftGraphService.ExtensionHelper.MIMEType.XLS">
             <summary>
             Microsoft Excel
             </summary>
         </member>
-        <member name="F:MicrosoftGraphService.ExtensionHelper.MIMEType.XLSX">
+        <member name="F:TryIT.MicrosoftGraphService.ExtensionHelper.MIMEType.XLSX">
             <summary>
             Microsoft Excel (OpenXML)
             </summary>
         </member>
-        <member name="F:MicrosoftGraphService.ExtensionHelper.MIMEType.CSV">
+        <member name="F:TryIT.MicrosoftGraphService.ExtensionHelper.MIMEType.CSV">
             <summary>
             Comma-separated values (CSV)
             </summary>
         </member>
-        <member name="M:MicrosoftGraphService.ExtensionHelper.MIMEType.GetContentType(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.ExtensionHelper.MIMEType.GetContentType(System.String)">
             <summary>
             get content type by fileName.
             <para>default application/octet-stream</para>
@@ -57,7 +57,7 @@
             <param name="fileName"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.Helper.MsGraphTeamHelper.GetMembers(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.Helper.MsGraphTeamHelper.GetMembers(System.String,System.String)">
             <summary>
             get list members of team, the <paramref name="userEmail"/> need be in the team, so that have permission to get the list
             </summary>
@@ -65,7 +65,7 @@
             <param name="userEmail"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.Helper.MsGraphTeamHelper.RemoveMember(System.String,System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.Helper.MsGraphTeamHelper.RemoveMember(System.String,System.String,System.String)">
             <summary>
             remove member from team by <paramref name="membershipId"/>
             </summary>
@@ -73,62 +73,68 @@
             <param name="userEmail"></param>
             <param name="membershipId"></param>
         </member>
-        <member name="M:MicrosoftGraphService.Helper.MsGraphUserHelper.GetUserInfo(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.Helper.MsGraphUserHelper.GetUserInfo(System.String)">
             <summary>
             get user info, if <paramref name="userEmail"/> is empty, get me
             </summary>
             <param name="emailAddress"></param>
             <returns></returns>
         </member>
-        <member name="T:MicrosoftGraphService.Helper.TokenHelper">
+        <member name="T:TryIT.MicrosoftGraphService.Helper.TokenHelper">
             <summary>
             this token helper use approach from https://docs.microsoft.com/en-us/graph/auth-v2-user
             </summary>
         </member>
-        <member name="T:MicrosoftGraphService.Helper.GetTokenResponse">
+        <member name="T:TryIT.MicrosoftGraphService.Helper.GetTokenResponse">
             <summary>
             refer to https://docs.microsoft.com/en-us/graph/auth-v2-user for detail explanation for each response parameter
             </summary>
         </member>
-        <member name="P:MicrosoftGraphService.Helper.GetTokenResponse.token_type">
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.token_type">
             <summary>
             Indicates the token type value. The only type that Azure AD supports is Bearer.
             </summary>
         </member>
-        <member name="P:MicrosoftGraphService.Helper.GetTokenResponse.scope">
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.scope">
             <summary>
             A space separated list of the Microsoft Graph permissions that the access_token is valid for.
             </summary>
         </member>
-        <member name="P:MicrosoftGraphService.Helper.GetTokenResponse.expires_in">
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.expires_in">
             <summary>
             How long the access token is valid (in seconds).
             </summary>
         </member>
-        <member name="P:MicrosoftGraphService.Helper.GetTokenResponse.access_token">
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.access_token">
             <summary>
             The requested access token. Your app can use this token to call Microsoft Graph.
             </summary>
         </member>
-        <member name="P:MicrosoftGraphService.Helper.GetTokenResponse.refresh_token">
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.refresh_token">
             <summary>
             An OAuth 2.0 refresh token. Your app can use this token to acquire additional access tokens after the current access token expires. Refresh tokens are long-lived, and can be used to retain access to resources for extended periods of time. For more detail, refer to the v2.0 token reference (https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-tokens).
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "P:MicrosoftGraphService.Helper.GetTokenResponse.issue_on" -->
-        <member name="P:MicrosoftGraphService.Helper.GetTokenResponse.expires_on">
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.issue_on">
+            <summary>
+            store first time access_token or refresh_token issue time, 
+            can use to identify whether refresh_token still available (up to 90 days)
+            https://docs.microsoft.com/en-us/azure/active-directory/develop/refresh-tokens
+            </summary>
+        </member>
+        <member name="P:TryIT.MicrosoftGraphService.Helper.GetTokenResponse.expires_on">
             <summary>
             store current access_token expire time (normally is one hour from current request)
             </summary>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.BaseHelper.GetJsonHttpContent(System.Object)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.BaseHelper.GetJsonHttpContent(System.Object)">
             <summary>
             get application/json HttpContent
             </summary>
             <param name="source"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetSite(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetSite(System.String,System.String)">
             <summary>
             get site info, https://graph.microsoft.com/v1.0/sites/groupncs.sharepoint.com:/sites/O365-IPMS469-NCS
             </summary>
@@ -136,7 +142,7 @@
             <param name="name"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetFileByName(System.String,System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetFileByName(System.String,System.String,System.String)">
             <summary>
             get specific file under the folder
             </summary>
@@ -145,7 +151,7 @@
             <param name="fileName"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetItemById(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetItemById(System.String,System.String)">
             <summary>
             get SharePoint DirveItem by Id, <paramref name="itemId"/> is SharePoint DriveItem Unique Id 
             </summary>
@@ -153,7 +159,7 @@
             <param name="itemId"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.CreateItemPreviewLink(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.CreateItemPreviewLink(System.String,System.String)">
             <summary>
             create Preview link for drive item, it can be use in iframe
             </summary>
@@ -161,22 +167,22 @@
             <param name="itemId"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.UploadFile(MicrosoftGraphService.Model.SharePointModel.SiteUploadFileModel)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.UploadFile(TryIT.MicrosoftGraphService.Model.SharePointModel.SiteUploadFileModel)">
             <summary>
             upload file into sharepoint, if file size less than 4 MB, use normal upload, otherwise use upload session 
             </summary>
             <param name="fileModule"></param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.UploadNormalFile(MicrosoftGraphService.Model.SharePointModel.SiteUploadFileModel)" -->
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.UploadLargeFile(MicrosoftGraphService.Model.SharePointModel.SiteUploadFileModel)">
+        <!-- Badly formed XML comment ignored for member "M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.UploadNormalFile(TryIT.MicrosoftGraphService.Model.SharePointModel.SiteUploadFileModel)" -->
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.UploadLargeFile(TryIT.MicrosoftGraphService.Model.SharePointModel.SiteUploadFileModel)">
             <summary>
             if file over 4 MB, use resumable upload session
             <para>https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0</para>
             </summary>
             <param name="fileModule"></param>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.DeleteItemById(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.DeleteItemById(System.String,System.String)">
             <summary>
             delete SharePoint DirveItem by Id, <paramref name="itemId"/> is SharePoint DriveItem Unique Id 
             </summary>
@@ -184,7 +190,7 @@
             <param name="itemId"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetFileContent(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.SharePointHelper.GetFileContent(System.String,System.String)">
             <summary>
             get file content in byte[] by fileId
             </summary>
@@ -192,27 +198,27 @@
             <param name="fileId"></param>
             <returns></returns>
         </member>
-        <member name="T:MicrosoftGraphService.HttpClientHelper.TeamHelper">
+        <member name="T:TryIT.MicrosoftGraphService.HttpClientHelper.TeamHelper">
             <summary>
             Use the Microsoft Graph API to work with Microsoft Teams
             https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0
             </summary>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.TeamHelper.GetJoinedTeam(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.TeamHelper.GetJoinedTeam(System.String)">
             <summary>
             get specific user joinded teams, if <paramref name="userEmail"/> is empty, then get my joined teams
             </summary>
             <param name="userEmail"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.TeamHelper.GetMembers(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.TeamHelper.GetMembers(System.String)">
             <summary>
             get team member list
             </summary>
             <param name="teamId"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.TeamHelper.AddMember(System.String,MicrosoftGraphService.Model.TeamAddMemberModel)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.TeamHelper.AddMember(System.String,TryIT.MicrosoftGraphService.Model.TeamAddMemberModel)">
             <summary>
             Add a member to a team using user principal name
             </summary>
@@ -220,31 +226,31 @@
             <param name="emailAddress"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.TeamHelper.RemoveMember(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.TeamHelper.RemoveMember(System.String,System.String)">
             <summary>
             Remove member from team
             </summary>
             <param name="teamId"></param>
             <param name="membershipId"></param>
         </member>
-        <member name="M:MicrosoftGraphService.HttpClientHelper.UserHelper.GetUserInfo(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.HttpClientHelper.UserHelper.GetUserInfo(System.String)">
             <summary>
             get user info, if <paramref name="userEmail"/> is empty, get me
             </summary>
             <param name="userEmail"></param>
             <returns></returns>
         </member>
-        <member name="P:MicrosoftGraphService.Model.SharePointCreateFolderModel.ConflictBehavior">
+        <member name="P:TryIT.MicrosoftGraphService.Model.SharePointCreateFolderModel.ConflictBehavior">
             <summary>
             The conflict resolution behavior for actions that create a new item. You can use the values fail, replace, or rename. The default for PUT is replace. An item will never be returned with this annotation. Write-only.
             </summary>
         </member>
-        <member name="P:MicrosoftGraphService.Model.CreateUploadSessionRequestBody.Name">
+        <member name="P:TryIT.MicrosoftGraphService.Model.CreateUploadSessionRequestBody.Name">
             <summary>
             file name
             </summary>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.UploadFileByFolderUrl(System.String,System.String,System.String,System.String,System.Byte[])">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.UploadFileByFolderUrl(System.String,System.String,System.String,System.String,System.Byte[])">
             <summary>
             upload file into SharePoint by folder absolute url
             </summary>
@@ -255,7 +261,7 @@
             <param name="fileContent"></param>
             <returns>created SharePoint item (Id and Name)</returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.UploadFileByFolderId(System.String,System.String,System.String,System.String,System.Byte[])">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.UploadFileByFolderId(System.String,System.String,System.String,System.String,System.Byte[])">
             <summary>
             upload file into SharePoint by folder unique Id
             </summary>
@@ -266,7 +272,7 @@
             <param name="fileContent"></param>
             <returns>created SharePoint item (Id and Name)</returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.GetFileContentByFileId(System.String,System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.GetFileContentByFileId(System.String,System.String,System.String)">
             <summary>
             get file content from SharePoint by fileId
             </summary>
@@ -275,7 +281,7 @@
             <param name="fileId"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.GetFileByName(System.String,System.String,System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.GetFileByName(System.String,System.String,System.String,System.String)">
             <summary>
             get file from SharePoint by specific file name, e.g. fileName = "test.xlsx"
             </summary>
@@ -285,7 +291,7 @@
             <param name="fileName"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.GetFileById(System.String,System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.GetFileById(System.String,System.String,System.String)">
             <summary>
             get file from SharePoint by the sharepoint unique id
             </summary>
@@ -294,7 +300,7 @@
             <param name="fileId"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.DeleteFileByFileId(System.String,System.String,System.String,System.Boolean)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.DeleteFileByFileId(System.String,System.String,System.String,System.Boolean)">
             <summary>
             delete file from SharePoint, return true if delete success, otherwise return false
             </summary>
@@ -304,7 +310,7 @@
             <param name="isDeleteFolderIfEmpty">indicator to remove folder if it become empty after file deleted</param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.SharePoint.CreateFolder(System.String,System.String,System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.SharePoint.CreateFolder(System.String,System.String,System.String,System.String)">
             <summary>
             create new SharePoint folder under <paramref name="parentFolderAbsUrl"/>, 
             <para>set <paramref name="folderNameOrPath"/> to "NewFolderName" to create a new folder</para>
@@ -316,14 +322,14 @@
             <param name="folderNameOrPath"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.User.GetUser(System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.User.GetUser(System.String)">
             <summary>
             get user info, if <paramref name="userEmail"/> is empty, get me
             </summary>
             <param name="emailAddress"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.Team.GetMembers(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.Team.GetMembers(System.String,System.String)">
             <summary>
             get list members of team, the <paramref name="userEmail"/> need be in the team, so that have permission to get the list
             </summary>
@@ -331,7 +337,7 @@
             <param name="userEmail"></param>
             <returns></returns>
         </member>
-        <member name="M:MicrosoftGraphService.MsGraphService.Outlook.GetMessages(System.String,System.String)">
+        <member name="M:TryIT.MicrosoftGraphService.MsGraphService.Outlook.GetMessages(System.String,System.String)">
             <summary>
             get message of user
             </summary>

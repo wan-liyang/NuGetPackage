@@ -9,6 +9,7 @@
     <PackageId>TryIT.ObjectExtension</PackageId>
     <PackageTags>ObjectExtension ExtensionMethod Extension</PackageTags>
     <Product>ObjectExtension</Product>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

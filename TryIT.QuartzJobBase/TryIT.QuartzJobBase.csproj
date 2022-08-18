@@ -8,6 +8,7 @@
     <Description>Provide base method for Quartz Scheduler and example for how to achieve Quartz Scheduler</Description>
     <PackageId>TryIT.QuartzJobBase</PackageId>
     <PackageTags>Quartz</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
 

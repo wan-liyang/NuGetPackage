@@ -8,6 +8,7 @@
     <Description>Provide method to operate Excel via EPPlus</Description>
     <PackageId>TryIT.ExcelService</PackageId>
     <PackageTags>Excel EPPlus</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

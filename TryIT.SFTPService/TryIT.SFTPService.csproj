@@ -8,6 +8,7 @@
     <Description>Provide method to communicate with SFTP</Description>
     <PackageId>TryIT.SFTPService</PackageId>
     <PackageTags>SFTP</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

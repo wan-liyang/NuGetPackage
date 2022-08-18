@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Data;
 
-namespace NUnitTest.Liyang_ObjectExtension
+namespace NUnitTest02.TryIT_ObjectExtension
 {
     class DataTableExtension_UnitTest
     {

@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>CryptoService</name>
+        <name>TryIT.CryptoService</name>
     </assembly>
     <members>
-        <member name="T:CryptoService.AESEncryption">
+        <member name="T:TryIT.CryptoService.AESEncryption">
             <summary>
             perform Encryption or Decryption with AES, Advanced Encryption Standard (Rijndael)
             </summary>
         </member>
-        <member name="M:CryptoService.AESEncryption.AESDecrypt(System.String,System.String,System.Boolean)">
+        <member name="M:TryIT.CryptoService.AESEncryption.AESDecrypt(System.String,System.String,System.Boolean)">
             <summary>
             AES Decrypt, return empty if cipherText not valid Base64String
             </summary>
@@ -18,7 +18,7 @@
             <param name="isReFormat">ReFormat string for URL, because standard Base64 may contain '/','+' it will show %xx in Url</param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.AESEncryption.AESEncrypt(System.String,System.String,System.Boolean)">
+        <member name="M:TryIT.CryptoService.AESEncryption.AESEncrypt(System.String,System.String,System.Boolean)">
             <summary>
             AES Encrypt
             </summary>
@@ -27,38 +27,38 @@
             <param name="isReFormat"></param>
             <returns></returns>
         </member>
-        <member name="T:CryptoService.DESEncryption">
+        <member name="T:TryIT.CryptoService.DESEncryption">
             <summary>
             Data Encryption Standard
             </summary>
         </member>
-        <member name="T:CryptoService.MD5Hash">
+        <member name="T:TryIT.CryptoService.MD5Hash">
             <summary>
             MD5 hash
             </summary>
         </member>
-        <member name="M:CryptoService.MD5Hash.GetMD5Hash(System.String)">
+        <member name="M:TryIT.CryptoService.MD5Hash.GetMD5Hash(System.String)">
             <summary>
             get MD5 hash result for a string value
             </summary>
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.MD5Hash.GetMD5Hash(System.IO.FileStream)">
+        <member name="M:TryIT.CryptoService.MD5Hash.GetMD5Hash(System.IO.FileStream)">
             <summary>
             get MD5 hash result for a FileStream value
             </summary>
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.MD5Hash.GetHash(System.Byte[])">
+        <member name="M:TryIT.CryptoService.MD5Hash.GetHash(System.Byte[])">
             <summary>
             Get hexadecimal string from byte
             </summary>
             <param name="data"></param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.MD5Hash.VerifyMd5Hash(System.String,System.String)">
+        <member name="M:TryIT.CryptoService.MD5Hash.VerifyMd5Hash(System.String,System.String)">
             <summary>
             Verify a hash against a string.
             </summary>
@@ -66,26 +66,26 @@
             <param name="hashValue"></param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.MD5Hash.GetFileMD5(System.String)">
+        <member name="M:TryIT.CryptoService.MD5Hash.GetFileMD5(System.String)">
             <summary>
             Get MD5 hash from file
             </summary>
             <param name="path"></param>
             <returns></returns>
         </member>
-        <member name="T:CryptoService.SHA512SaltHash">
+        <member name="T:TryIT.CryptoService.SHA512SaltHash">
             <summary>
             SHA512 generate/verify hash
             </summary>
         </member>
-        <member name="M:CryptoService.SHA512SaltHash.SHA512SaltComputeHash(System.String)">
+        <member name="M:TryIT.CryptoService.SHA512SaltHash.SHA512SaltComputeHash(System.String)">
             <summary>
             Compute SHA512 hash value with default salt
             </summary>
             <param name="stringToHash"></param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.SHA512SaltHash.SHA512SaltVerifyHash(System.String,System.String)">
+        <member name="M:TryIT.CryptoService.SHA512SaltHash.SHA512SaltVerifyHash(System.String,System.String)">
             <summary>
             Verify SHA512 hash value with default salt
             </summary>
@@ -93,7 +93,7 @@
             <param name="hash"></param>
             <returns></returns>
         </member>
-        <member name="M:CryptoService.UrlHelper.UrlBeauty_E(System.String)">
+        <member name="M:TryIT.CryptoService.UrlHelper.UrlBeauty_E(System.String)">
             <summary>
             Standard Base64 may contain '/','+' it will show %xx in Url, use this function to conver to readable string
             </summary>

@@ -8,6 +8,7 @@
     <Description>Provide method to convert data</Description>
     <PackageId>TryIT.DataConversion</PackageId>
     <PackageTags>DataConversion</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
