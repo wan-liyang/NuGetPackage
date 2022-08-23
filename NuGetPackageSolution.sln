@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest", "NUnitTest\NUni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest02", "NUnitTest02\NUnitTest02.csproj", "{A78155D3-C073-4896-BF8A-10E9DB05D3AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.EmailService", "TryIT.EmailService\TryIT.EmailService.csproj", "{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A78155D3-C073-4896-BF8A-10E9DB05D3AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

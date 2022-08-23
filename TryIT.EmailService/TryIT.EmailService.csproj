@@ -8,6 +8,7 @@
     <Description>Provide method for send email, e.g. via SMTP</Description>
     <PackageId>TryIT.EmailService</PackageId>
     <PackageTags>Email</PackageTags>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

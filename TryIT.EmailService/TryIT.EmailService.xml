@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>EmailService</name>
+        <name>TryIT.EmailService</name>
     </assembly>
     <members>
-        <member name="T:EmailService.EmailService_Smtp">
+        <member name="T:TryIT.EmailService.EmailService_Smtp">
             <summary>
             send email via SMTP
             </summary>
         </member>
-        <member name="M:EmailService.EmailService_Smtp.SendEmail(EmailService.Models.EmailContent)">
+        <member name="M:TryIT.EmailService.EmailService_Smtp.SendEmail(EmailService.Models.EmailContent)">
             <summary>
             send email
             </summary>
             <param name="emailContent"></param>
         </member>
-        <member name="M:EmailService.EmailService_Smtp.AddEmailToMailAddressCollection(System.String,System.Net.Mail.MailAddressCollection)">
+        <member name="M:TryIT.EmailService.EmailService_Smtp.AddEmailToMailAddressCollection(System.String,System.Net.Mail.MailAddressCollection)">
             <summary>
             add email address into MailMessage receiver (To / Cc / Bcc)
             </summary>
