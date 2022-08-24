@@ -22,6 +22,14 @@ namespace TryIT.HttpHandler
             }
         }
 
+        public static HttpRequest Request
+        {
+            get
+            {
+                return CurrentRequest.HttpContext.Current.Request;
+            }
+        }
+
         #region Request Static Info (ClientIP, UserAgent, SessionId)
         /// <summary>
         /// get client ip address, return empty if not applicable

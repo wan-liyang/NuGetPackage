@@ -9,9 +9,11 @@
     <PackageId>TryIT.HttpHandler</PackageId>
     <PackageTags>Http</PackageTags>
     <Configurations>Release;Debug</Configurations>
+    <SynchReleaseVersion>false</SynchReleaseVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType></DebugType>
     <DocumentationFile>TryIT.HttpHandler.xml</DocumentationFile>
   </PropertyGroup>
 
