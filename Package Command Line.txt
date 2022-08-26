@@ -10,7 +10,7 @@ dotnet pack ./EmailFactory/EmailFactory.csproj --output nupkgs -p:PackageVersion
 dotnet pack ./SqlAdoFactory/SqlAdoFactory.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./QuartzJobBase/QuartzJobBase.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./SFTP/SFTP.csproj --output nupkgs -p:PackageVersion=1.0.0.1
-dotnet pack ./HttpHandler/HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.7
+dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./Impersonation.Win/Impersonation.Win.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./DataUtility/DataUtility.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./CryptoUtility/CryptoUtility.csproj --output nupkgs -p:PackageVersion=1.0.5
