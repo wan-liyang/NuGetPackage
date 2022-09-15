@@ -3,7 +3,7 @@ dotnet pack --output nupkgs -p:PackageVersion=2.1.0
 
 -- package specific project
 dotnet pack ./ActiveDirectory/ActiveDirectory.csproj --output nupkgs -p:PackageVersion=1.0.2
-dotnet pack ./EmailService/EmailService.csproj --output nupkgs -p:PackageVersion=1.0.2
+dotnet pack ./TryIT.EmailService/TryIT.EmailService.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./ExcelFactory/ExcelFactory.csproj --output nupkgs -p:PackageVersion=1.0.0.3
 dotnet pack ./MicrosoftGraphService/MicrosoftGraphService.csproj --output nupkgs -p:PackageVersion=1.0.5
 dotnet pack ./EmailFactory/EmailFactory.csproj --output nupkgs -p:PackageVersion=1.0.0.5

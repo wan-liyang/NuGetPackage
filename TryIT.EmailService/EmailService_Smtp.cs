@@ -118,7 +118,15 @@ namespace TryIT.EmailService
                 string[] arrEmail = strEmails.Split(',', ';');
                 foreach (var item in arrEmail)
                 {
-                    mailAddressColl.Add(item);
+                    /*
+                        only add for non-empty item,
+                        if strEmails = 'abc@abc.com;' => this will get two items 'abc@abc.com' & empty item,
+                        and empty item will cause exception
+                     */
+                    if (!string.IsNullOrEmpty(item))
+                    {
+                        mailAddressColl.Add(item);
+                    }
                 }
             }
         }
