@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>Liyang</Authors>
-    <Company>Liyang</Company>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>Provide method to convert data</Description>
     <PackageId>TryIT.DataConversion</PackageId>

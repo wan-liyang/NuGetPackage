@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>Liyang</Authors>
-    <Company>Liyang</Company>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>Provide base method for perform SQL action via .NET ADO</Description>
     <PackageId>TryIT.SqlAdoService</PackageId>
