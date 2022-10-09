@@ -8,15 +8,15 @@ namespace TryIT.Azure
     /// <summary>
     /// Azure KeyVault related function
     /// </summary>
-    public class KeyVault
+    public class KeyVault_Secret
     {
         private SecretClient secretClient;
 
         /// <summary>
-        /// initial instance with Vault Url
+        /// initial instance with Vault Url and <see cref="DefaultAzureCredential"/>
         /// </summary>
         /// <param name="vaultUrl"></param>
-        public KeyVault(string vaultUrl)
+        public KeyVault_Secret(string vaultUrl)
         {
             secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
         }
@@ -26,7 +26,7 @@ namespace TryIT.Azure
         /// </summary>
         /// <param name="vaultUrl"></param>
         /// <param name="credential"></param>
-        public KeyVault(string vaultUrl, TokenCredential credential)
+        public KeyVault_Secret(string vaultUrl, TokenCredential credential)
         {
             secretClient = new SecretClient(new Uri(vaultUrl), credential);
         }

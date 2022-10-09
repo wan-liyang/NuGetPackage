@@ -8,7 +8,7 @@ dotnet pack ./TryIT.Azure/TryIT.Azure.csproj --output nupkgs -p:PackageVersion=1
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.EmailService/TryIT.EmailService.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.ActiveDirectory/TryIT.ActiveDirectory.csproj --output nupkgs -p:PackageVersion=1.0.1
-dotnet pack ./TryIT.CryptoService/TryIT.CryptoService.csproj --output nupkgs -p:PackageVersion=1.0.1
+dotnet pack ./TryIT.CryptoService/TryIT.CryptoService.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.DataConversion/TryIT.DataConversion.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.EmailService/TryIT.EmailService.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.ExcelService/TryIT.ExcelService.csproj --output nupkgs -p:PackageVersion=1.0.1
@@ -17,7 +17,7 @@ dotnet pack ./TryIT.FileService.Zip/TryIT.FileService.Zip.csproj --output nupkgs
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.4
 dotnet pack ./TryIT.Impersonation.Win/TryIT.Impersonation.Win.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.MicrosoftGraphService/TryIT.MicrosoftGraphService.csproj --output nupkgs -p:PackageVersion=1.0.1
-dotnet pack ./TryIT.ObjectExtension/TryIT.ObjectExtension.csproj --output nupkgs -p:PackageVersion=1.0.1
+dotnet pack ./TryIT.ObjectExtension/TryIT.ObjectExtension.csproj --output nupkgs -p:PackageVersion=1.0.4
 dotnet pack ./TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.RestApiService/TryIT.RestApiService.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.SFTPService/TryIT.SFTPService.csproj --output nupkgs -p:PackageVersion=1.0.1

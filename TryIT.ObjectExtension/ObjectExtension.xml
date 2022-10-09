@@ -18,6 +18,17 @@
             <param name="value"></param>
             <returns></returns>
         </member>
+        <member name="T:TryIT.ObjectExtension.AspNetExtension">
+            <summary>
+            the common extension method for AspNet
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.AspNetExtension.GetCurrentNamespace">
+            <summary>
+            get caller Assembly namespace
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:TryIT.ObjectExtension.DataTableExtension">
             <summary>
             extension method for <see cref="T:System.Data.DataTable"/>
@@ -92,6 +103,14 @@
             </param>
             <param name="columns">columns to include in html, default null to include all columns</param>
             <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ConvertColumnType(System.Data.DataTable,System.String,System.Type)">
+            <summary>
+            convert existing column <paramref name="columnName"/> to new type <paramref name="newType"/>, if existing data type equals to <paramref name="newType"/>, no action wil perform
+            </summary>
+            <param name="dataTable"></param>
+            <param name="columnName"></param>
+            <param name="newType"></param>
         </member>
         <member name="M:TryIT.ObjectExtension.DictionaryExtension.IsContainsKey(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
             <summary>

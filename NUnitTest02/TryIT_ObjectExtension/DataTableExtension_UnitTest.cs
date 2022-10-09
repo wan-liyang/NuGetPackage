@@ -98,5 +98,46 @@ namespace NUnitTest02.TryIT_ObjectExtension
 
             Assert.IsTrue(true);
         }
+
+        [Test]
+        public void ConvertColumnType_Test()
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1", typeof(string));
+            dataTable.Columns.Add("Col2", typeof(int));
+            dataTable.Columns.Add("Col3", typeof(bool));
+            dataTable.Columns.Add("Col4", typeof(DateTime));
+            dataTable.Columns.Add("Col5", typeof(decimal));
+
+            DataRow row = dataTable.NewRow();
+            row["Col1"] = "123";
+            row["Col2"] = 123;
+            row["Col3"] = true;
+            row["Col4"] = DateTime.Now;
+            row["Col5"] = 12.3;
+            dataTable.Rows.Add(row);
+
+            // before convert
+            Assert.That(dataTable.Columns["Col1"].DataType, Is.EqualTo(typeof(string)));
+            Assert.That(dataTable.Columns["Col2"].DataType, Is.EqualTo(typeof(int)));
+            Assert.That(dataTable.Columns["Col3"].DataType, Is.EqualTo(typeof(bool)));
+            Assert.That(dataTable.Columns["Col4"].DataType, Is.EqualTo(typeof(DateTime)));
+            Assert.That(dataTable.Columns["Col5"].DataType, Is.EqualTo(typeof(decimal)));
+
+
+            // do convert type
+            dataTable.ConvertColumnType("Col1", typeof(int));
+            dataTable.ConvertColumnType("Col2", typeof(string));
+            dataTable.ConvertColumnType("Col3", typeof(string));
+            dataTable.ConvertColumnType("Col4", typeof(string));
+            dataTable.ConvertColumnType("Col5", typeof(string));
+
+            // after convert
+            Assert.That(dataTable.Columns["Col1"].DataType, Is.EqualTo(typeof(int)));
+            Assert.That(dataTable.Columns["Col2"].DataType, Is.EqualTo(typeof(string)));
+            Assert.That(dataTable.Columns["Col3"].DataType, Is.EqualTo(typeof(string)));
+            Assert.That(dataTable.Columns["Col4"].DataType, Is.EqualTo(typeof(string)));
+            Assert.That(dataTable.Columns["Col5"].DataType, Is.EqualTo(typeof(string)));
+        }
     }
 }

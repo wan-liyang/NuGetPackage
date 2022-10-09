@@ -296,5 +296,37 @@ namespace TryIT.ObjectExtension
 
             return stringBuilder.ToString();
         }
+
+        /// <summary>
+        /// convert existing column <paramref name="columnName"/> to new type <paramref name="newType"/>, if existing data type equals to <paramref name="newType"/>, no action wil perform
+        /// </summary>
+        /// <param name="dataTable"></param>
+        /// <param name="columnName"></param>
+        /// <param name="newType"></param>
+        public static void ConvertColumnType(this DataTable dataTable, string columnName, Type newType)
+        {
+            // if same type, no action required
+            if(dataTable.Columns[columnName].DataType.IsEquivalentTo(newType))
+            {
+                return;
+            }
+
+            string tempColumnName = "Dummy_" + Guid.NewGuid().ToString().Replace("-", "");
+
+            using (DataColumn newColumn = new DataColumn(tempColumnName, newType))
+            {
+                int ordinal = dataTable.Columns[columnName].Ordinal;
+                dataTable.Columns.Add(newColumn);
+                newColumn.SetOrdinal(ordinal);
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    row[newColumn.ColumnName] = row[columnName] == DBNull.Value ? DBNull.Value : ConvertValueToType(row[columnName], newType);
+                }
+
+                dataTable.Columns.Remove(columnName);
+                newColumn.ColumnName = columnName;
+            }
+        }
     }
 }

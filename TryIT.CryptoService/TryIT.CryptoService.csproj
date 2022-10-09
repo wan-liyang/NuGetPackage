@@ -8,12 +8,17 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes />
     <PackageTags>Encryption Decryption Crypto</PackageTags>
-    <Description>Encryption &amp; Decryption method, DES, AES, MD5, SHA512Hash</Description>
+    <Description>Encryption &amp; Decryption method, DES, AES, MD5, SHA512Hash, RSA</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>TryIT.CryptoService.xml</DocumentationFile>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

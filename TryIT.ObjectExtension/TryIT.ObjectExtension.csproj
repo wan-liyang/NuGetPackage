@@ -8,7 +8,7 @@
     <Description>the extension method for various type, String, Array, DataTable, Dictionary, etc</Description>
     <PackageId>TryIT.ObjectExtension</PackageId>
     <PackageTags>ObjectExtension ExtensionMethod Extension</PackageTags>
-    <Product>ObjectExtension</Product>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
@@ -18,6 +18,10 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

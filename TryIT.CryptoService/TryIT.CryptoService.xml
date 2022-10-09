@@ -73,6 +73,27 @@
             <param name="path"></param>
             <returns></returns>
         </member>
+        <member name="T:TryIT.CryptoService.RSAEncryption">
+            <summary>
+            perform Encryption or Decryption with RSA based on Public and Private key pair
+            </summary>
+        </member>
+        <member name="M:TryIT.CryptoService.RSAEncryption.RSAEncrypt(System.Byte[],System.String)">
+            <summary>
+            encrypt data with public key (key needs in Xml format, as .NET Standard only support Xml)
+            </summary>
+            <param name="clearData">clear data to be encrypt</param>
+            <param name="publicKeyInXml">public key</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.CryptoService.RSAEncryption.RSADecrypt(System.Byte[],System.String)">
+            <summary>
+            decrypt data with public key (key needs in Xml format, as .NET Standard only support Xml)
+            </summary>
+            <param name="encryptedData">enrypted data to be decrypt</param>
+            <param name="privateKeyInXml">private key</param>
+            <returns></returns>
+        </member>
         <member name="T:TryIT.CryptoService.SHA512SaltHash">
             <summary>
             SHA512 generate/verify hash
