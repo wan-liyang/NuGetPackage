@@ -20,12 +20,42 @@ namespace TryIT.Azure
             keyClient = new KeyClient(new Uri(vaultUrl), credential);
         }
 
+        /// <summary>
+        /// get Key
+        /// </summary>
+        /// <param name="keyName"></param>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        public KeyVaultKey GetKey(string keyName, string version = null)
+        {
+            return keyClient.GetKey(keyName, version);
+        }
+
         public string Encrypt(string keyName, string plaintext)
         {
-            var cryptoClient = keyClient.GetCryptographyClient(keyName);
-            byte[] plaintextByte = Encoding.UTF8.GetBytes(plaintext);
+            byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
+            var result = Encrypt(keyName, _byte);
+            return Encoding.UTF8.GetString(result);
+        }
 
-            cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, plaintextByte);
+        public byte[] Encrypt(string keyName, byte[] plaintext)
+        {
+            var cryptoClient = keyClient.GetCryptographyClient(keyName);
+
+            return cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, plaintext).Ciphertext;
+        }
+
+        public string Decrypt(string keyName, string ciphertext)
+        {
+            byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
+            var result = Decrypt(keyName, _byte);
+            return Encoding.UTF8.GetString(result);
+        }
+        public byte[] Decrypt(string keyName, byte[] ciphertext)
+        {
+            var cryptoClient = keyClient.GetCryptographyClient(keyName);
+
+            return cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, ciphertext).Plaintext;
         }
     }
 }
