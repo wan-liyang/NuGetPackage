@@ -20,6 +20,12 @@ namespace TryIT.Azure
             keyClient = new KeyClient(new Uri(vaultUrl), credential);
         }
 
+        public KeyVault_CryptographyClient GetCryptographyClient(string keyName, string keyVersion = null)
+        {
+            var client = keyClient.GetCryptographyClient(keyName);
+            return new KeyVault_CryptographyClient(client);
+        }
+
         /// <summary>
         /// get Key
         /// </summary>
@@ -31,32 +37,46 @@ namespace TryIT.Azure
             return keyClient.GetKey(keyName, version);
         }
 
-        public string Encrypt(string keyName, string plaintext)
-        {
-            byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
-            var result = Encrypt(keyName, _byte);
-            return Encoding.UTF8.GetString(result);
-        }
+        // public string Encrypt(CryptographyClient cryptoClient, string plaintext)
+        // {
+        //     byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
+        //     var result = cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, _byte).Ciphertext;
+        //     return Encoding.UTF8.GetString(result);
+        // }
 
-        public byte[] Encrypt(string keyName, byte[] plaintext)
-        {
-            var cryptoClient = keyClient.GetCryptographyClient(keyName);
+        // public string Decrypt(CryptographyClient cryptoClient, string ciphertext)
+        // {
+        //     byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
+        //     var result = cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, _byte).Plaintext;
+        //     return Encoding.UTF8.GetString(result);
+        // }
 
-            return cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, plaintext).Ciphertext;
-        }
+        // public string Encrypt(string keyName, string plaintext)
+        // {
+        //     byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
+        //     var result = Encrypt(keyName, _byte);
+        //     return Encoding.UTF8.GetString(result);
+        // }
 
-        public string Decrypt(string keyName, string ciphertext)
-        {
-            byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
-            var result = Decrypt(keyName, _byte);
-            return Encoding.UTF8.GetString(result);
-        }
-        public byte[] Decrypt(string keyName, byte[] ciphertext)
-        {
-            var cryptoClient = keyClient.GetCryptographyClient(keyName);
+        // public byte[] Encrypt(string keyName, byte[] plaintext)
+        // {
+        //     var cryptoClient = keyClient.GetCryptographyClient(keyName);
 
-            return cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, ciphertext).Plaintext;
-        }
+        //     return cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, plaintext).Ciphertext;
+        // }
+
+        // public string Decrypt(string keyName, string ciphertext)
+        // {
+        //     byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
+        //     var result = Decrypt(keyName, _byte);
+        //     return Encoding.UTF8.GetString(result);
+        // }
+        // public byte[] Decrypt(string keyName, byte[] ciphertext)
+        // {
+        //     var cryptoClient = keyClient.GetCryptographyClient(keyName);
+
+        //     return cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, ciphertext).Plaintext;
+        // }
     }
 }
 
