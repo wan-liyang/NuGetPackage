@@ -7,7 +7,7 @@ namespace TryIT.MicrosoftGraphService.Helper
 {
     internal class WebProxyHelper
     {
-        public static WebProxy GetProxy(string url, string username, string password)
+        public static WebProxy GetProxy(string url, string username = "", string password = "")
         {
             WebProxy proxy = null;
 

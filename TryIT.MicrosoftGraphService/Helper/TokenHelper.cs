@@ -19,6 +19,9 @@ namespace TryIT.MicrosoftGraphService.Helper
             _config = config;
         }
 
+        /// <summary>
+        /// indicator whether OAuth parameter is defined
+        /// </summary>
         public bool IsOAuthParameterValid
         {
             get
@@ -147,7 +150,7 @@ namespace TryIT.MicrosoftGraphService.Helper
             }
             else
             {
-                throw new Exception("Invalid Token Request");
+                throw new Exception($"Request token failed: {response.Item2}");
             }
         }
 
