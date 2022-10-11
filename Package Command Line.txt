@@ -4,7 +4,7 @@ dotnet pack --output nupkgs -p:PackageVersion=2.1.0
 -- package specific project
 
 
-dotnet pack ./TryIT.Azure/TryIT.Azure.csproj --output nupkgs -p:PackageVersion=1.0.4
+dotnet pack ./TryIT.Azure/TryIT.Azure.csproj --output nupkgs -p:PackageVersion=1.0.6
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.EmailService/TryIT.EmailService.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.ActiveDirectory/TryIT.ActiveDirectory.csproj --output nupkgs -p:PackageVersion=1.0.1
