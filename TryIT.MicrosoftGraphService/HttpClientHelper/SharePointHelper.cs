@@ -384,7 +384,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         }
 
 
-        public List<GetDriveItemResponse> GetItemsByUrl(string folderAbsoluteUrl)
+        public GetDriveItemListResponse GetItemsByUrl(string folderAbsoluteUrl)
         {
             string encodedUrl = Base64EncodeUrl(folderAbsoluteUrl);
 
@@ -396,7 +396,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                return content.JsonToObject<List<GetDriveItemResponse>>();
+                return content.JsonToObject<GetDriveItemListResponse>();
             }
             catch (Exception ex)
             {

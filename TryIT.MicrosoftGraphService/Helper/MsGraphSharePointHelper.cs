@@ -129,7 +129,7 @@ namespace TryIT.MicrosoftGraphService.Helper
         public List<SharePointModel.SiteDriveItemModel> GetFiles(string folderAbsUrl)
         {
             var files = _helper.GetItemsByUrl(folderAbsUrl);
-            return files.Select(p => p.ToSiteDriveItem()).ToList();
+            return files.value.Select(p => p.ToSiteDriveItem()).ToList();
         }
 
         public SharePointModel.SiteDriveItemPreviewModule CreateItemPreviewLink(string hostName, string siteName, string fileId)

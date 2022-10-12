@@ -6,7 +6,7 @@
 
 
 ### How to use TokenHelper to obtain access_token
-1. add reference to ```TryIT.MicrosoftGraphServic``` into your code
+1. add reference to ```TryIT.MicrosoftGraphService``` into your code
 1. create a page to allow Administrator initial token
 2. in that page, use example code below to get token and save it
 
