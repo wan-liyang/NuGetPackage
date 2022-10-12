@@ -16,67 +16,66 @@ namespace TryIT.MicrosoftGraphService.Helper
 
         public TokenHelper(MsGraphGetTokenConfig config)
         {
+            if(config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+            
+            if(string.IsNullOrEmpty(config.OAuth_TenantId))
+            {
+                throw new ArgumentNullException(nameof(config.OAuth_TenantId));
+            }
+            if(string.IsNullOrEmpty(config.OAuth_ClientId))
+            {
+                throw new ArgumentNullException(nameof(config.OAuth_ClientId));
+            }
+            if(string.IsNullOrEmpty(config.OAuth_ClientSecret))
+            {
+                throw new ArgumentNullException(nameof(config.OAuth_ClientSecret));
+            }
+            if(string.IsNullOrEmpty(config.OAuth_GetTokenUrl))
+            {
+                throw new ArgumentNullException(nameof(config.OAuth_GetTokenUrl));
+            }
+
+            if (config.OAuth_IsProxyRequired)
+            {
+                if (string.IsNullOrEmpty(config.Proxy_Url))
+                {
+                    throw new ArgumentNullException(nameof(config.Proxy_Url));
+                }
+            }
+
             _config = config;
         }
 
         /// <summary>
-        /// indicator whether OAuth parameter is defined
+        /// get authorize url for user to perform manual sign in, system should redirect to this url for user to sign in
         /// </summary>
-        public bool IsOAuthParameterValid
-        {
-            get
-            {
-                string oauthurl = _config.OAuth_AuthorizeUrl;
-                string tenantId = _config.OAuth_TenantId;
-                string clientId = _config.OAuth_ClientId;
-                string redirectUrl = _config.OAuth_RedirectUrl;
-                string scope = _config.OAuth_Scope;
-
-                string getTokenUrl = _config.OAuth_GetTokenUrl;
-                string clientSecret = _config.OAuth_ClientSecret;
-
-                bool isProxyRequired = _config.OAuth_IsProxyRequired;
-
-                if (isProxyRequired)
-                {
-                    string proxyUrl = _config.Proxy_Url;
-
-                    if (string.IsNullOrEmpty(proxyUrl))
-                    {
-                        return false;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(oauthurl)
-                   && !string.IsNullOrEmpty(tenantId)
-                   && !string.IsNullOrEmpty(clientId)
-                   && !string.IsNullOrEmpty(redirectUrl)
-                   && !string.IsNullOrEmpty(scope)
-                   && !string.IsNullOrEmpty(getTokenUrl)
-                   && !string.IsNullOrEmpty(clientSecret))
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
         public string AuthorizeUrl
         {
             get
             {
-
-                string oauthurl = _config.OAuth_AuthorizeUrl;
                 string tenantId = _config.OAuth_TenantId;
                 string clientId = _config.OAuth_ClientId;
-                string redirectUrl = _config.OAuth_RedirectUrl;
-                string scope = _config.OAuth_Scope;
 
-                string authorizeURL = oauthurl.Replace("{tenant_id}", tenantId)
+                if(string.IsNullOrEmpty(_config.OAuth_AuthorizeUrl))
+                {
+                    throw new ArgumentNullException(nameof(_config.OAuth_AuthorizeUrl));
+                }
+                if(string.IsNullOrEmpty(_config.OAuth_RedirectUrl))
+                {
+                    throw new ArgumentNullException(nameof(_config.OAuth_RedirectUrl));
+                }
+                if(string.IsNullOrEmpty(_config.OAuth_Scope))
+                {
+                    throw new ArgumentNullException(nameof(_config.OAuth_Scope));
+                }
+
+                string authorizeURL = _config.OAuth_AuthorizeUrl.Replace("{tenant_id}", tenantId)
                     .Replace("{client_id}", clientId)
-                    .Replace("{redirect_uri}", redirectUrl)
-                    .Replace("{scope}", scope)
+                    .Replace("{redirect_uri}", _config.OAuth_RedirectUrl)
+                    .Replace("{scope}", _config.OAuth_Scope)
                     + "&state=" + Guid.NewGuid().ToString() + "&prompt=select_account";
 
                 return authorizeURL;
