@@ -102,6 +102,16 @@ namespace TryIT.MicrosoftGraphService
                 return helper.GetFileByName(hostName, siteName, folderAbsUrl, fileName);
             }
 
+            public List<SharePointModel.SiteDriveItemModel> GetFiles(string hostName, string siteName, string folderAbsUrl)
+            {
+                NotEmptyParameter(ParamName_HostName, hostName);
+                NotEmptyParameter(ParamName_SiteName, siteName);
+                NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
+                
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                return helper.GetFiles(folderAbsUrl);
+            }
+
             /// <summary>
             /// get file from SharePoint by the sharepoint unique id
             /// </summary>

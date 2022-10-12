@@ -2,6 +2,7 @@
 using TryIT.MicrosoftGraphService.HttpClientHelper;
 using TryIT.MicrosoftGraphService.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TryIT.MicrosoftGraphService.Helper
 {
@@ -118,6 +119,17 @@ namespace TryIT.MicrosoftGraphService.Helper
             var site = this.GetSite(hostName, siteName);
             var file = _helper.GetItemById(site.Id, fileId);
             return file.ToSiteDriveItem();
+        }
+
+        /// <summary>
+        /// get files from a absolute url of the folder (the browser display url after access inside the folder)
+        /// </summary>
+        /// <param name="folderAbsUrl"></param>
+        /// <returns></returns>
+        public List<SharePointModel.SiteDriveItemModel> GetFiles(string folderAbsUrl)
+        {
+            var files = _helper.GetItemsByUrl(folderAbsUrl);
+            return files.Select(p => p.ToSiteDriveItem()).ToList();
         }
 
         public SharePointModel.SiteDriveItemPreviewModule CreateItemPreviewLink(string hostName, string siteName, string fileId)
