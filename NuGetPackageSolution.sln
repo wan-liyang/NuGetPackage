@@ -3,7 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
- = ======
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
