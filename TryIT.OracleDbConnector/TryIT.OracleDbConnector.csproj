@@ -4,6 +4,9 @@
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DocumentationFile>bin\Debug\netstandard2.1\TryIT.OracleDbConnector.xml</DocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="Oracle.ManagedDataAccess.Core" />
   </ItemGroup>

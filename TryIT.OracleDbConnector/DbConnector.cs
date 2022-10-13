@@ -4,9 +4,17 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace TryIT.OracleDbConnector
 {
+    /// <summary>
+    /// Oracle DB Connector
+    /// </summary>
     public class DbConnector
     {
         private string _connectionString;
+        /// <summary>
+        /// initial DB connector with connection string
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public DbConnector(string connectionString)
         {
             if(string.IsNullOrEmpty(connectionString))
