@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
+ = ======
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
@@ -39,9 +40,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest02", "NUnitTest02\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.EmailService", "TryIT.EmailService\TryIT.EmailService.csproj", "{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}"
 EndProject
-Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{D55363EF-12B0-4F53-B861-08A2C1B5593F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Azure", "TryIT.Azure\TryIT.Azure.csproj", "{AF957991-06A2-4AEB-84FC-071DAE41A31C}"
+EndProject
+Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{B2C9301C-CF4F-4C95-B449-458C35CB8C0F}"
+EndProject
+Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{401F79BE-227B-40C8-A2FB-C0A796EE5BAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,14 +124,14 @@ Global
 		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D55363EF-12B0-4F53-B861-08A2C1B5593F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D55363EF-12B0-4F53-B861-08A2C1B5593F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D55363EF-12B0-4F53-B861-08A2C1B5593F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D55363EF-12B0-4F53-B861-08A2C1B5593F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF957991-06A2-4AEB-84FC-071DAE41A31C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF957991-06A2-4AEB-84FC-071DAE41A31C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF957991-06A2-4AEB-84FC-071DAE41A31C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF957991-06A2-4AEB-84FC-071DAE41A31C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C9301C-CF4F-4C95-B449-458C35CB8C0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C9301C-CF4F-4C95-B449-458C35CB8C0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C9301C-CF4F-4C95-B449-458C35CB8C0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C9301C-CF4F-4C95-B449-458C35CB8C0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
