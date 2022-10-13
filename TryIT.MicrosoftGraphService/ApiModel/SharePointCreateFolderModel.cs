@@ -1,9 +1,8 @@
 ﻿using Newtonsoft.Json;
-using static TryIT.MicrosoftGraphService.Model.SharePointResponse.GetDriveItemResponse;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public class SharePointCreateFolderModel
+    internal class SharePointCreateFolderModel
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -14,6 +13,6 @@ namespace TryIT.MicrosoftGraphService.Model
         public string ConflictBehavior { get; set; }
 
         [JsonProperty("folder")]
-        public Folder Folder { get; set; }
+        public SharePointResponse.GetDriveItemResponse.Folder Folder { get; set; }
     }
 }

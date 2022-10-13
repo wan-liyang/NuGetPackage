@@ -1,6 +1,8 @@
-﻿namespace TryIT.MicrosoftGraphService.Model
+﻿using TryIT.MicrosoftGraphService.Model;
+
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public static class TeamResponseExt
+    internal static class TeamResponseExt
     {
         public static TeamModel.Team ToTeamModel_Team(this TeamResponse.Team response)
         {

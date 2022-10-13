@@ -1,6 +1,8 @@
-﻿namespace TryIT.MicrosoftGraphService.Model
+﻿using TryIT.MicrosoftGraphService.Model;
+
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public static class UserResponseExt
+    internal static class UserResponseExt
     {
         public static UserModel ToUserModule(this UserResponse user)
         {

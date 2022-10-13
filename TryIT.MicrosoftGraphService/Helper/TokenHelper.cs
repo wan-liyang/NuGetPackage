@@ -1,4 +1,4 @@
-﻿using TryIT.MicrosoftGraphService.Config;
+﻿using TryIT.MicrosoftGraphService.Model;
 using TryIT.MicrosoftGraphService.ExtensionHelper;
 using System;
 using System.Collections.Generic;

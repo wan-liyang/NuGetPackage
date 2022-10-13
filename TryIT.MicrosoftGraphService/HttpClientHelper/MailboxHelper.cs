@@ -1,11 +1,12 @@
 ﻿using TryIT.MicrosoftGraphService.ExtensionHelper;
+using TryIT.MicrosoftGraphService.ApiModel;
 using TryIT.MicrosoftGraphService.Model;
 using System;
 using System.Net.Http;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    public class MailboxHelper
+    internal class MailboxHelper
     {
         private HttpClient _httpClient;
 

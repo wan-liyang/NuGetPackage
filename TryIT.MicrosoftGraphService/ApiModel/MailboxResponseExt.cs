@@ -1,6 +1,8 @@
-﻿namespace TryIT.MicrosoftGraphService.Model
+﻿using TryIT.MicrosoftGraphService.Model;
+
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public static class MailboxResponseExt
+    internal static class MailboxResponseExt
     {
         public static MailboxModel.Message ToMessageModule(this MailboxResponse message)
         {

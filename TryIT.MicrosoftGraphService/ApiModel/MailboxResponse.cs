@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public class MailboxResponseList
+    internal class MailboxResponseList
     {
         [JsonProperty("@odata.context")]
         public string OdataContext { get; set; }
@@ -15,7 +15,7 @@ namespace TryIT.MicrosoftGraphService.Model
         public List<MailboxResponse> value { get; set; }
     }
 
-    public class MailboxResponse
+    internal class MailboxResponse
     {
         [JsonProperty("@odata.etag")]
         public string OdataEtag { get; set; }

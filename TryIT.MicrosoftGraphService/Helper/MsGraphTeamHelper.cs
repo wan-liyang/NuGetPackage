@@ -1,12 +1,12 @@
-﻿using TryIT.MicrosoftGraphService.Config;
-using TryIT.MicrosoftGraphService.HttpClientHelper;
+﻿using TryIT.MicrosoftGraphService.HttpClientHelper;
+using TryIT.MicrosoftGraphService.ApiModel;
 using TryIT.MicrosoftGraphService.Model;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace TryIT.MicrosoftGraphService.Helper
 {
-    public class MsGraphTeamHelper
+    internal class MsGraphTeamHelper
     {
         private static TeamHelper _helper;
         public MsGraphTeamHelper(MsGraphApiConfig config)

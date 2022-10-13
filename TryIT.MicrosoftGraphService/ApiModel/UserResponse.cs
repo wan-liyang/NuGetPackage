@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public class UserResponse
+    internal class UserResponse
     {
         [JsonProperty("@odata.context")]
         public string OdataContext { get; set; }

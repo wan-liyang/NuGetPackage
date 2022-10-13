@@ -1,9 +1,9 @@
 ﻿using TryIT.MicrosoftGraphService.ExtensionHelper;
-using TryIT.MicrosoftGraphService.Model;
+using TryIT.MicrosoftGraphService.ApiModel;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using static TryIT.MicrosoftGraphService.Model.TeamResponse;
+using static TryIT.MicrosoftGraphService.ApiModel.TeamResponse;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
@@ -11,7 +11,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
     /// Use the Microsoft Graph API to work with Microsoft Teams
     /// https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0
     /// </summary>
-    public class TeamHelper : BaseHelper
+    internal class TeamHelper : BaseHelper
     {
         private HttpClient _httpClient;
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TryIT.MicrosoftGraphService.Config
+namespace TryIT.MicrosoftGraphService.Model
 {
     /// <summary>
     /// Config information use for application obtain Token

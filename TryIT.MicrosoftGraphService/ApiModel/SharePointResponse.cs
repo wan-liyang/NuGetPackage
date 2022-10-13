@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public class SharePointResponse
+    internal class SharePointResponse
     {
         public class GetSiteResponse
         {

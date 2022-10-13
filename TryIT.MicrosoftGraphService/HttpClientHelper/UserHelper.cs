@@ -1,11 +1,11 @@
 ﻿using TryIT.MicrosoftGraphService.ExtensionHelper;
-using TryIT.MicrosoftGraphService.Model;
+using TryIT.MicrosoftGraphService.ApiModel;
 using System;
 using System.Net.Http;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    public class UserHelper
+    internal class UserHelper
     {
         private HttpClient _httpClient;
 

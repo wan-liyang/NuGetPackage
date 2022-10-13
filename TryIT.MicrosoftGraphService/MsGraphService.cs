@@ -1,5 +1,4 @@
-﻿using TryIT.MicrosoftGraphService.Config;
-using TryIT.MicrosoftGraphService.Helper;
+﻿using TryIT.MicrosoftGraphService.Helper;
 using TryIT.MicrosoftGraphService.Model;
 using System.Collections.Generic;
 

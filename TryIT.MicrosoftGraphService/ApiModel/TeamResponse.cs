@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public class TeamResponse
+    internal class TeamResponse
     {
         public class GetJoinedTeamsResponse
         {

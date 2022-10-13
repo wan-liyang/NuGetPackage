@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public class TeamAddMemberModel
+    internal class TeamAddMemberModel
     {
         [JsonProperty("@odata.type")]
         public string Type

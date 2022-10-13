@@ -3,20 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TryIT.MicrosoftGraphService.Model
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    class SharePointRequestBody
+    internal class SharePointRequestBody
     {
     }
 
-    public enum ConflictBehavior
+    internal enum ConflictBehavior
     {
         fail,
         replace,
         rename
     }
 
-    public class CreateUploadSessionRequestBody
+    internal class CreateUploadSessionRequestBody
     {
         /// <summary>
         /// file name

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    public class BaseHelper
+    internal class BaseHelper
     {
         protected void CheckStatusCode(HttpResponseMessage responseMessage)
         {

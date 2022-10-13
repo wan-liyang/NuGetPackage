@@ -1,4 +1,4 @@
-﻿using TryIT.MicrosoftGraphService.Config;
+﻿using TryIT.MicrosoftGraphService.Model;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;

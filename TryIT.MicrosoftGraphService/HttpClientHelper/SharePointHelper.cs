@@ -1,4 +1,5 @@
 ﻿using TryIT.MicrosoftGraphService.ExtensionHelper;
+using TryIT.MicrosoftGraphService.ApiModel;
 using TryIT.MicrosoftGraphService.Model;
 using System;
 using System.Collections.Generic;
@@ -6,11 +7,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using static TryIT.MicrosoftGraphService.Model.SharePointResponse;
+using static TryIT.MicrosoftGraphService.ApiModel.SharePointResponse;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    public class SharePointHelper : BaseHelper
+    internal class SharePointHelper : BaseHelper
     {
         private HttpClient _httpClient;
 

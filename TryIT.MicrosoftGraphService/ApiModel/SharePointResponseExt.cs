@@ -1,6 +1,8 @@
-﻿namespace TryIT.MicrosoftGraphService.Model
+﻿using TryIT.MicrosoftGraphService.Model;
+
+namespace TryIT.MicrosoftGraphService.ApiModel
 {
-    public static class SharePointResponseExt
+    internal static class SharePointResponseExt
     {
         public static SharePointModel.Site ToSiteModule(this SharePointResponse.GetSiteResponse site)
         {
