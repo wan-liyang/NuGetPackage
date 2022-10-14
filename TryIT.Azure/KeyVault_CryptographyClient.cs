@@ -14,18 +14,23 @@ namespace TryIT.Azure
             this.cryptoClient = cryptoClient;
         }
 
-        public string Encrypt(string plaintext)
+        /// <summary>
+        /// do encryption, return byte value, when do decryption needs pass same byte value
+        /// </summary>
+        /// <param name="plaintext"></param>
+        public byte[] Encrypt(string plaintext)
         {
             byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
-            var result = cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, _byte).Ciphertext;
-            return Encoding.UTF8.GetString(result);
+            return cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, _byte).Ciphertext;
         }
 
-        public string Decrypt(string ciphertext)
+        /// <summary>
+        /// do decryption, required byte value from Encrypt method, return byte value for convert to expected result
+        /// </summary>
+        /// <param name="cipherValue"></param>
+        public byte[] Decrypt(byte[] cipherValue)
         {
-            byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
-            var result = cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, _byte).Plaintext;
-            return Encoding.UTF8.GetString(result);
+            return cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, cipherValue).Plaintext;
         }
     }
 }
