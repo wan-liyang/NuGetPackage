@@ -1,5 +1,7 @@
 ﻿## How to use this library
 
+### access https://docs.microsoft.com/en-us/graph/auth-v2-user to understand more ###
+
 1. create a page to allow manual sign in account
 2. page callback method, obtain access_token and save it in somewhere (e.g. Session / DB)
 3. use that access_token to call Graph Service

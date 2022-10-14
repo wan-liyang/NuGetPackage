@@ -24,7 +24,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         }
 
         /// <summary>
-        /// get site info, https://graph.microsoft.com/v1.0/sites/groupncs.sharepoint.com:/sites/O365-IPMS469-NCS
+        /// get site info, https://graph.microsoft.com/v1.0/sites/{hostname}:/sites/{sitename}
         /// </summary>
         /// <param name="hostname"></param>
         /// <param name="name"></param>
