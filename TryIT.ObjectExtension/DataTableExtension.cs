@@ -107,6 +107,11 @@ namespace TryIT.ObjectExtension
         {
             try
             {
+                if (type == typeof(System.Data.SqlTypes.SqlBinary))
+                {
+                    return Encoding.UTF8.GetBytes(value.ToString());
+                }
+
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Boolean:
@@ -299,6 +304,7 @@ namespace TryIT.ObjectExtension
 
         /// <summary>
         /// convert existing column <paramref name="columnName"/> to new type <paramref name="newType"/>, if existing data type equals to <paramref name="newType"/>, no action wil perform
+        /// <para>if convert to System.Data.SqlTypes.SqlBinary, the value will proceed as String value then conver to byte[]</para>
         /// </summary>
         /// <param name="dataTable"></param>
         /// <param name="columnName"></param>

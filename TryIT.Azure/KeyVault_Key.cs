@@ -36,47 +36,6 @@ namespace TryIT.Azure
         {
             return keyClient.GetKey(keyName, version);
         }
-
-        // public string Encrypt(CryptographyClient cryptoClient, string plaintext)
-        // {
-        //     byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
-        //     var result = cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, _byte).Ciphertext;
-        //     return Encoding.UTF8.GetString(result);
-        // }
-
-        // public string Decrypt(CryptographyClient cryptoClient, string ciphertext)
-        // {
-        //     byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
-        //     var result = cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, _byte).Plaintext;
-        //     return Encoding.UTF8.GetString(result);
-        // }
-
-        // public string Encrypt(string keyName, string plaintext)
-        // {
-        //     byte[] _byte = Encoding.UTF8.GetBytes(plaintext);
-        //     var result = Encrypt(keyName, _byte);
-        //     return Encoding.UTF8.GetString(result);
-        // }
-
-        // public byte[] Encrypt(string keyName, byte[] plaintext)
-        // {
-        //     var cryptoClient = keyClient.GetCryptographyClient(keyName);
-
-        //     return cryptoClient.Encrypt(EncryptionAlgorithm.RsaOaep256, plaintext).Ciphertext;
-        // }
-
-        // public string Decrypt(string keyName, string ciphertext)
-        // {
-        //     byte[] _byte = Encoding.UTF8.GetBytes(ciphertext);
-        //     var result = Decrypt(keyName, _byte);
-        //     return Encoding.UTF8.GetString(result);
-        // }
-        // public byte[] Decrypt(string keyName, byte[] ciphertext)
-        // {
-        //     var cryptoClient = keyClient.GetCryptographyClient(keyName);
-
-        //     return cryptoClient.Decrypt(EncryptionAlgorithm.RsaOaep256, ciphertext).Plaintext;
-        // }
     }
 }
 
