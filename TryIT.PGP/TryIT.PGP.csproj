@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>implement PGP encryption</Description>
+    <PackageId>TryIT.PGP</PackageId>
+    <PackageTags>PGP</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Release;Debug</Configurations>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Remove="BouncyCastle" />
+    <None Remove="BouncyCastle.NetCore" />
+    <None Remove="PgpCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="PgpCore" Version="5.8.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
