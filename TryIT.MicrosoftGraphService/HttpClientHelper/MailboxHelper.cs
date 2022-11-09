@@ -94,10 +94,12 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 }
             };
 
+            model.message.toRecipients = new System.Collections.Generic.List<Recipient>();
+            model.message.ccRecipients = new System.Collections.Generic.List<Recipient>();
+            model.message.bccRecipients = new System.Collections.Generic.List<Recipient>();
+
             if (message.ToRecipients != null && message.ToRecipients.Length > 0)
             {
-                model.message.toRecipients = new System.Collections.Generic.List<Recipient>();
-
                 foreach (var item in message.ToRecipients)
                 {
                     model.message.toRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
@@ -106,8 +108,6 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
             if (message.CcRecipients != null && message.CcRecipients.Length > 0)
             {
-                model.message.ccRecipients = new System.Collections.Generic.List<Recipient>();
-
                 foreach (var item in message.CcRecipients)
                 {
                     model.message.ccRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
@@ -116,8 +116,6 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
             if (message.BccRecipients != null && message.BccRecipients.Length > 0)
             {
-                model.message.bccRecipients = new System.Collections.Generic.List<Recipient>();
-
                 foreach (var item in message.BccRecipients)
                 {
                     model.message.bccRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
@@ -153,7 +151,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
             try
             {
-                string jsonContent = message.ObjectToJson();
+                string jsonContent = model.ObjectToJson();
 
                 HttpContent httpContent = new StringContent(jsonContent);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
