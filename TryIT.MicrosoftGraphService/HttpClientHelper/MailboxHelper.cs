@@ -3,10 +3,11 @@ using TryIT.MicrosoftGraphService.ApiModel;
 using TryIT.MicrosoftGraphService.Model;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    internal class MailboxHelper
+    internal class MailboxHelper : BaseHelper
     {
         private HttpClient _httpClient;
 
@@ -69,6 +70,97 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
                 return content.JsonToObject<MailboxResponseList>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public void SendMessage(SendMessageModel message)
+        {
+            string url = $"https://graph.microsoft.com/v1.0/me/sendMail";
+
+            var model = new MessageRequestModel
+            {
+                message = new MessageRequestModel.Message
+                {
+                    subject = message.Subject,
+                    body = new Body
+                    {
+                        contentType = "Text",
+                        content = message.Body
+                    }
+                }
+            };
+
+            if (message.ToRecipients != null && message.ToRecipients.Length > 0)
+            {
+                model.message.toRecipients = new System.Collections.Generic.List<Recipient>();
+
+                foreach (var item in message.ToRecipients)
+                {
+                    model.message.toRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
+                }
+            }
+
+            if (message.CcRecipients != null && message.CcRecipients.Length > 0)
+            {
+                model.message.ccRecipients = new System.Collections.Generic.List<Recipient>();
+
+                foreach (var item in message.CcRecipients)
+                {
+                    model.message.ccRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
+                }
+            }
+
+            if (message.BccRecipients != null && message.BccRecipients.Length > 0)
+            {
+                model.message.bccRecipients = new System.Collections.Generic.List<Recipient>();
+
+                foreach (var item in message.BccRecipients)
+                {
+                    model.message.bccRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
+                }
+            }
+
+            /*
+             {
+              "message": {
+                "subject": "Meet for lunch?",
+                "body": {
+                  "contentType": "Text",
+                  "content": "The new cafeteria is open."
+                },
+                "toRecipients": [
+                  {
+                    "emailAddress": {
+                      "address": "fannyd@contoso.onmicrosoft.com"
+                    }
+                  }
+                ],
+                "ccRecipients": [
+                  {
+                    "emailAddress": {
+                      "address": "danas@contoso.onmicrosoft.com"
+                    }
+                  }
+                ]
+              },
+              "saveToSentItems": "false"
+            }
+             */
+
+            try
+            {
+                string jsonContent = message.ObjectToJson();
+
+                HttpContent httpContent = new StringContent(jsonContent);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                HttpResponseMessage response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+                string content = response.Content.ReadAsStringAsync().Result;
             }
             catch (Exception ex)
             {

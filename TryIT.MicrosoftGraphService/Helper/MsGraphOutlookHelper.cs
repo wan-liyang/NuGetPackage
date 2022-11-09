@@ -22,5 +22,10 @@ namespace TryIT.MicrosoftGraphService.Helper
 
             return list;
         }
+
+        public void SendMessage(SendMessageModel message)
+        {
+            _helper.SendMessage(message);
+        }
     }
 }

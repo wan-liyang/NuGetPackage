@@ -15,6 +15,20 @@ namespace TryIT.MicrosoftGraphService.ApiModel
         public List<MailboxResponse> value { get; set; }
     }
 
+    internal class MessageRequestModel
+    {
+        public Message message { get; set; }
+
+        public class Message
+        {
+            public string subject { get; set; }
+            public Body body { get; set; }
+            public List<Recipient> toRecipients { get; set; }
+            public List<Recipient> ccRecipients { get; set; }
+            public List<Recipient> bccRecipients { get; set; }
+        }
+    }
+
     internal class MailboxResponse
     {
         [JsonProperty("@odata.etag")]
@@ -49,23 +63,6 @@ namespace TryIT.MicrosoftGraphService.ApiModel
         public object replyTo { get; set; }
         public Flag flag { get; set; }
 
-        public class Body
-        {
-            public string contentType { get; set; }
-            public string content { get; set; }
-        }
-
-        public class EmailAddress
-        {
-            public string name { get; set; }
-            public string address { get; set; }
-        }
-        public class Recipient
-        {
-            public EmailAddress emailAddress { get; set; }
-        }
-
-
         public class DueDateTime
         {
             public DateTime? dateTime { get; set; }
@@ -84,5 +81,21 @@ namespace TryIT.MicrosoftGraphService.ApiModel
             public DueDateTime dueDateTime { get; set; }
             public StartDateTime startDateTime { get; set; }
         }
+    }
+
+    public class Body
+    {
+        public string contentType { get; set; }
+        public string content { get; set; }
+    }
+
+    public class EmailAddress
+    {
+        public string name { get; set; }
+        public string address { get; set; }
+    }
+    public class Recipient
+    {
+        public EmailAddress emailAddress { get; set; }
     }
 }

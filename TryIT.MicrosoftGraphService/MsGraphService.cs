@@ -249,6 +249,16 @@ namespace TryIT.MicrosoftGraphService
                 MsGraphOutlookHelper helper = new MsGraphOutlookHelper(_config);
                 return helper.GetMessages(userEmail, folder);
             }
+
+            /// <summary>
+            /// send message as current user
+            /// </summary>
+            /// <param name="message"></param>
+            public void SendMessage(SendMessageModel message)
+            {
+                MsGraphOutlookHelper helper = new MsGraphOutlookHelper(_config);
+                helper.SendMessage(message);
+            }
         }
 
         #region Parameter Validation
