@@ -23,6 +23,7 @@ namespace TryIT.FileService.Zip
         /// <para>if already exists, do nothing</para>
         /// </summary>
         /// <param name="folderPathOrFilePath"></param>
+        /// <param name="pathType"></param>
         private static void CreateIfNotExists(string folderPathOrFilePath, PathType pathType)
         {
             if (string.IsNullOrEmpty(folderPathOrFilePath))

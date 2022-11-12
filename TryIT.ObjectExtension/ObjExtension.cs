@@ -98,9 +98,9 @@ namespace TryIT.ObjectExtension
                             break;
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    throw ex;
+                    throw;
                 }
             }
             return value;

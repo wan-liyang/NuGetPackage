@@ -104,16 +104,15 @@ namespace TryIT.RestApiService
         /// call Rest Api with GET
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="securityProtocolType">default use <see cref="SecurityProtocolType.Tls12"/> for more secure</param>
         /// <returns></returns>
-        public static ApiResponse Get(ApiRequest request)
+        public static ApiResponse Get(ApiRequest request, SecurityProtocolType securityProtocolType = SecurityProtocolType.Tls12)
         {
             HttpClient client = GetHttpClient(request);
 
             try
             {
-                
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
+                ServicePointManager.SecurityProtocol = securityProtocolType;
                 var clientResult = client.GetAsync(request.Url).GetAwaiter().GetResult();
 
                 return new ApiResponse
@@ -122,9 +121,9 @@ namespace TryIT.RestApiService
                     Content = clientResult.Content
                 };
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -136,14 +135,15 @@ namespace TryIT.RestApiService
         /// call Rest Api with POST
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="securityProtocolType">default use <see cref="SecurityProtocolType.Tls12"/> for more secure</param>
         /// <returns></returns>
-        public static ApiResponse Post(ApiRequest request)
+        public static ApiResponse Post(ApiRequest request, SecurityProtocolType securityProtocolType = SecurityProtocolType.Tls12)
         {
             HttpClient client = GetHttpClient(request);
 
             try
             {
-                ServicePointManager.SecurityProtocol = GetSecurityProtocol();
+                ServicePointManager.SecurityProtocol = securityProtocolType;
 
                 StringContent requestContent = new StringContent(request.Body, System.Text.Encoding.UTF8, "application/json");
 
@@ -155,9 +155,9 @@ namespace TryIT.RestApiService
                     Content = clientResult.Content
                 };
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             finally
             {

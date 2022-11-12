@@ -45,9 +45,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetJoinedTeamsResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -68,9 +68,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetMembersResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -78,7 +78,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         /// Add a member to a team using user principal name
         /// </summary>
         /// <param name="teamId"></param>
-        /// <param name="emailAddress"></param>
+        /// <param name="model"></param>
         /// <returns></returns>
         public AddMemberResponse AddMember(string teamId, TeamAddMemberModel model)
         {
@@ -97,9 +97,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<AddMemberResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -118,9 +118,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 CheckStatusCode(response);
                 string content = response.Content.ReadAsStringAsync().Result;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
     }

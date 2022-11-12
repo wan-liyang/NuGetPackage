@@ -137,9 +137,9 @@ namespace TryIT.SqlAdoService
                             break;
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    throw ex;
+                    throw;
                 }
             }
             return value;

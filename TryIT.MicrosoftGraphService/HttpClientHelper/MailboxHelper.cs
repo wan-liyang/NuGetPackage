@@ -71,9 +71,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<MailboxResponseList>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -160,9 +160,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 CheckStatusCode(response);
                 string content = response.Content.ReadAsStringAsync().Result;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
     }

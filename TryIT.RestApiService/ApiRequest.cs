@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Security;
-using System.Text;
 
 namespace TryIT.RestApiService
 {

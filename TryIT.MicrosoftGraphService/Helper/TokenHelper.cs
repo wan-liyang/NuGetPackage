@@ -179,9 +179,9 @@ namespace TryIT.MicrosoftGraphService.Helper
                 statusCode = response.StatusCode.ToString();
                 content = response.Content.ReadAsStringAsync().Result;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
 
             return new Tuple<string, string>(statusCode, content);

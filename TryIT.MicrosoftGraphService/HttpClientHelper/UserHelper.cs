@@ -39,9 +39,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<UserResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
     }

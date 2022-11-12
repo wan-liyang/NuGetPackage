@@ -31,9 +31,9 @@ namespace TryIT.CryptoService
                 byte[] decryptedData = EncryptOrDecrypt(cipherBytes, password, false);
                 value = Encoding.Unicode.GetString(decryptedData);
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             return value;
         }

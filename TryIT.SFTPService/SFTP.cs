@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TryIT.SFTPService
 {
@@ -15,12 +16,12 @@ namespace TryIT.SFTPService
     {
         #region Init Connection Info
         /// <summary>
-        /// init connection with username & password
+        /// init connection with username and password
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="ip">sftp server ip address</param>
+        /// <param name="port">sftp server port</param>
+        /// <param name="username">sftp account username</param>
+        /// <param name="password">sftp account password</param>
         /// <returns></returns>
         public static ConnectionInfo InitConenctionInfoPassword(string ip, int port, string username, string password)
         {
@@ -62,6 +63,11 @@ namespace TryIT.SFTPService
         }
         #endregion
 
+        /// <summary>
+        /// test SFTP connection, return true if connect success, otherwise false
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public static bool TestConnection(ConnectionInfo connection)
         {
             bool success = false;
@@ -78,10 +84,7 @@ namespace TryIT.SFTPService
         /// <summary>
         /// list all directory from SFTP root path "/"
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="connection"></param>
         /// <returns></returns>
         public static List<string> ListDirectory(ConnectionInfo connection)
         {
@@ -103,10 +106,7 @@ namespace TryIT.SFTPService
         /// <summary>
         /// list all directory and file from SFTP root path "/"
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="connection"></param>
         /// <returns></returns>
         public static List<string> ListDirectoryAndFile(ConnectionInfo connection)
         {
@@ -128,10 +128,7 @@ namespace TryIT.SFTPService
         /// <summary>
         /// create directory into SFTP folder, if directory already exists, then no action will be perform
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="connection"></param>
         /// <param name="folderPath"></param>
         public static void CreateDirectory(ConnectionInfo connection, string folderPath)
         {
@@ -153,10 +150,7 @@ namespace TryIT.SFTPService
         /// <summary>
         /// upload source file into SFTP folder, the <paramref name="targetFileNameAndPath"/> folder must exists
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="connection"></param>
         /// <param name="sourceFileNameAndPath"></param>
         /// <param name="targetFileNameAndPath"></param>
         public static void Upload(ConnectionInfo connection, string sourceFileNameAndPath, string targetFileNameAndPath)
@@ -172,7 +166,74 @@ namespace TryIT.SFTPService
 
                 sftp.Disconnect();
             }
-        } 
+        }
+
+        /// <summary>
+        /// list all files from <paramref name="sftpPath"/>
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="sftpPath"></param>
+        /// <param name="fileNameFilterRegex">filter file name with Regex</param>
+        /// <returns></returns>
+        public static List<string> ListFile(ConnectionInfo connection, string sftpPath = "/", string fileNameFilterRegex = "")
+        {
+            List<string> files = null;
+            using (var sftp = new SftpClient(connection))
+            {
+                sftp.Connect();
+
+                files = sftp.ListDirectory(sftpPath)
+                    .Where(p => p.IsRegularFile == true)
+                    .Select(p => p.Name) // not use FullName, for caller based on only file name to save the file
+                    .ToList();
+
+                sftp.Disconnect();
+            }
+
+            if (files != null && files.Count > 0 && !string.IsNullOrEmpty(fileNameFilterRegex))
+            {
+                return files.Where(p => Regex.IsMatch(p, fileNameFilterRegex)).ToList();
+            }
+
+            return files;
+        }
+
+        /// <summary>
+        /// download sftp file into <paramref name="downloadPath"/> directory
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="sftpPath">sftp path, if not subdirectory, put "/"</param>
+        /// <param name="sftpFile">sftp file name</param>
+        /// <param name="downloadPath">target path to store downloaded file, this is directory</param>
+        public static void DownloadFile(ConnectionInfo connection, string sftpPath, string sftpFile, string downloadPath)
+        {
+            using(var sftp = new SftpClient(connection))
+            {
+                sftp.Connect();
+                string fileToDownload = sftpPath + sftpFile;
+                string fileToWrite = System.IO.Path.Combine(downloadPath, sftpFile);
+                using (var fileStream = File.Create(fileToWrite))
+                {
+                    sftp.DownloadFile(fileToDownload, fileStream);
+                }
+            }
+        }
+
+        /// <summary>
+        /// delete sftp file
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="sftpPath">sftp path, if not subdirectory, put "/"</param>
+        /// <param name="sftpFile">sftp file name</param>
+        public static void DeleteFile(ConnectionInfo connection, string sftpPath, string sftpFile)
+        {
+            using (var sftp = new SftpClient(connection))
+            {
+                sftp.Connect();
+                string fileToDelete = System.IO.Path.Combine(sftpPath, sftpFile);
+                sftp.DeleteFile(fileToDelete);
+            }
+        }
         #endregion
     }
 }

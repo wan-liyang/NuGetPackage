@@ -98,7 +98,7 @@ namespace TryIT.ActiveDirectory
             /// <summary>
             /// find user by Email Address
             /// </summary>
-            /// <param name="emailAddress"></param>
+            /// <param name="userLogin"></param>
             /// <returns></returns>
             public static AdUser FindUserByUserLogin(string userLogin)
             {

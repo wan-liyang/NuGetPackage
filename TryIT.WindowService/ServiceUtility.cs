@@ -81,9 +81,9 @@ namespace TryIT.WindowService
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    throw ex;
+                    throw;
                 }
             }
             return isRunning;
@@ -123,9 +123,9 @@ namespace TryIT.WindowService
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -150,9 +150,9 @@ namespace TryIT.WindowService
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -179,9 +179,9 @@ namespace TryIT.WindowService
                     service.WaitForStatus(ServiceControllerStatus.Running);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -203,9 +203,9 @@ namespace TryIT.WindowService
                     service.ExecuteCommand(command);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
         #endregion
@@ -228,9 +228,9 @@ namespace TryIT.WindowService
                     return service.Status.ToString();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
     }

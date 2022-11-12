@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace TryIT.FileService
 {
+    /// <summary>
+    /// provide method to operate File
+    /// </summary>
     public class FileUtility
     {
 
@@ -57,6 +60,11 @@ namespace TryIT.FileService
         } 
         #endregion
 
+        /// <summary>
+        /// save <paramref name="fileByte"/> byte value as a file <paramref name="fileNameAndPath"/>
+        /// </summary>
+        /// <param name="fileNameAndPath"></param>
+        /// <param name="fileByte"></param>
         public static void SaveAs(string fileNameAndPath, byte[] fileByte)
         {
             CreateIfNotExists(fileNameAndPath, PathType.FilePath_CreateFolder);
@@ -64,18 +72,23 @@ namespace TryIT.FileService
             File.WriteAllBytes(fileNameAndPath, fileByte);
         }
 
-        public static void DeleteFile(string filePath, bool isRemoveFolderIfEmpty = false)
+        /// <summary>
+        /// delete file <paramref name="fileNameAndPath"/>
+        /// </summary>
+        /// <param name="fileNameAndPath">the file to delete</param>
+        /// <param name="isRemoveFolderIfEmpty">indicator whether delete the directory if directory become empty after delete the file</param>
+        public static void DeleteFile(string fileNameAndPath, bool isRemoveFolderIfEmpty = false)
         {
             // delete file if exists
-            if (File.Exists(filePath))
+            if (File.Exists(fileNameAndPath))
             {
-                File.Delete(filePath);
+                File.Delete(fileNameAndPath);
             }
 
             // delete directory if empty
             if (isRemoveFolderIfEmpty)
             {
-                string dir = Path.GetDirectoryName(filePath);
+                string dir = Path.GetDirectoryName(fileNameAndPath);
                 DeleteFolder(dir);
             }
         }
@@ -199,6 +212,7 @@ namespace TryIT.FileService
         /// <para>if already exists, do nothing</para>
         /// </summary>
         /// <param name="folderPathOrFilePath"></param>
+        /// <param name="pathType"></param>
         public static void CreateIfNotExists(string folderPathOrFilePath, PathType pathType)
         {
             if (string.IsNullOrEmpty(folderPathOrFilePath))
@@ -242,6 +256,82 @@ namespace TryIT.FileService
                 fileName = fileName.Substring(0, maxLength);
             }
             return fileName;
+        }
+
+        /// <summary>
+        /// move <paramref name="sourceFileNameAndPath"/> into <paramref name="destinationFolder"/>, if folder not exists, will create the folder
+        /// </summary>
+        /// <param name="sourceFileNameAndPath"></param>
+        /// <param name="destinationFolder"></param>
+        public static void MoveInto(string sourceFileNameAndPath, string destinationFolder)
+        {
+            if (!Directory.Exists(destinationFolder))
+            {
+                Directory.CreateDirectory(destinationFolder);
+            }
+
+            string destinationFileName = Path.GetFileName(sourceFileNameAndPath);
+            string destinationFileNameAndPath = Path.Combine(destinationFolder, destinationFileName);
+            File.Move(sourceFileNameAndPath, destinationFileNameAndPath);
+        }
+
+        /// <summary>
+        /// move <paramref name="sourceFileNameAndPath"/> into sub directory under current directory, create sub directory if not exists
+        /// </summary>
+        /// <param name="sourceFileNameAndPath"></param>
+        /// <param name="subDirName"></param>
+        public static void MoveIntoSubDir(string sourceFileNameAndPath, string subDirName)
+        {
+            string sourceDir = Path.GetDirectoryName(sourceFileNameAndPath);
+            string sourceFileName = Path.GetFileName(sourceFileNameAndPath);
+
+            string destDir = Path.Combine(sourceDir, subDirName);
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            string destFileNameAndPath = Path.Combine(destDir, sourceFileName);
+            File.Move(sourceFileNameAndPath, destFileNameAndPath);
+        }
+
+        /// <summary>
+        /// move <paramref name="sourceFileNameAndPath"/> into sub directory, and append string at end of file name
+        /// </summary>
+        /// <param name="sourceFileNameAndPath"></param>
+        /// <param name="subDirName"></param>
+        /// <param name="appendFileName"></param>
+        public static void MoveIntoSubDir(string sourceFileNameAndPath, string subDirName, string appendFileName)
+        {
+            string sourceDir = Path.GetDirectoryName(sourceFileNameAndPath);
+            string sourceFileNameNoExtension = Path.GetFileNameWithoutExtension(sourceFileNameAndPath);
+            string sourceFileExtension = Path.GetExtension(sourceFileNameAndPath);
+
+            string destDir = Path.Combine(sourceDir, subDirName);
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            string destFileName = $"{sourceFileNameNoExtension}{appendFileName}{sourceFileExtension}";
+            string destFileNameAndPath = Path.Combine(destDir, destFileName);
+            File.Move(sourceFileNameAndPath, destFileNameAndPath);
+        }
+
+        /// <summary>
+        /// move <paramref name="sourceFileNameAndPath"/> as <paramref name="destinationFileNameAndPath"/>, if destination folder not exists, will create the folder
+        /// </summary>
+        /// <param name="sourceFileNameAndPath"></param>
+        /// <param name="destinationFileNameAndPath"></param>
+        public static void Move(string sourceFileNameAndPath, string destinationFileNameAndPath)
+        {
+            string destinationFolder = Path.GetDirectoryName(destinationFileNameAndPath);
+            if (!Directory.Exists(destinationFolder))
+            {
+                Directory.CreateDirectory(destinationFolder);
+            }
+
+            File.Move(sourceFileNameAndPath, destinationFileNameAndPath);
         }
     }
 }

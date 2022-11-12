@@ -26,8 +26,8 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         /// <summary>
         /// get site info, https://graph.microsoft.com/v1.0/sites/{hostname}:/sites/{sitename}
         /// </summary>
-        /// <param name="hostname"></param>
-        /// <param name="name"></param>
+        /// <param name="hostName"></param>
+        /// <param name="siteName"></param>
         /// <returns></returns>
         public SharePointResponse.GetSiteResponse GetSite(string hostName, string siteName)
         {
@@ -41,9 +41,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<SharePointResponse.GetSiteResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -61,9 +61,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -85,9 +85,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 var item = content.JsonToObject<GetDriveItemResponse>();
                 return item;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -117,9 +117,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 }
                 return null;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -141,9 +141,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -165,9 +165,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemPreviewResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -191,7 +191,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
         /// <summary>
         /// upload file into sharepoint
-        /// <para>https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&tabs=http</para>
+        /// <para>https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&amp;tabs=http</para>
         /// </summary>
         /// <param name="fileModule"></param>
         /// <returns></returns>
@@ -231,9 +231,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -271,9 +271,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<CreateUploadSessionResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -294,9 +294,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -320,9 +320,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 }
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -347,9 +347,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -399,9 +399,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemListResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -419,9 +419,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
                 return content.JsonToObject<GetDriveItemResponse>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
         }
 

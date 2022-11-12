@@ -59,9 +59,9 @@ namespace TryIT.EmailService
                                 message.Attachments.Add(new System.Net.Mail.Attachment(stream, fileName));
                                 listStream.Add(stream);
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                throw ex;
+                                throw;
                             }
                         }
                     }
@@ -70,7 +70,7 @@ namespace TryIT.EmailService
                 message.Subject = subject;
                 message.SubjectEncoding = System.Text.Encoding.UTF8;
 
-                message.Body = "<p style='font-family:Calibri; font-size:11px;'>" + body + "</p>";
+                message.Body = $"<p>{body}</p>";
                 message.IsBodyHtml = true;
                 message.BodyEncoding = System.Text.Encoding.UTF8;
 
@@ -80,9 +80,9 @@ namespace TryIT.EmailService
                     {
                         client.Send(message);
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        throw ex;
+                        throw;
                     }
                     finally
                     {

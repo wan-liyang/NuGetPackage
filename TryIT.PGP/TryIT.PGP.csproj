@@ -1,6 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>TryIT</Authors>
     <Company>TryIT</Company>
@@ -12,6 +18,9 @@
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
   
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DocumentationFile>bin\Debug\netstandard2.1\TryIT.PGP.xml</DocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="BouncyCastle" />
     <None Remove="BouncyCastle.NetCore" />

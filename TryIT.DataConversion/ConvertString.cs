@@ -3,6 +3,9 @@ using System.Globalization;
 
 namespace TryIT.DataConversion
 {
+    /// <summary>
+    /// convert string value to other type of value, e.g. convert string date to datetime
+    /// </summary>
     public static class ConvertString
     {
         /// <summary>
@@ -68,9 +71,9 @@ namespace TryIT.DataConversion
                     DateTime.TryParseExact(value, valueFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out dt);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             return dt;
         }

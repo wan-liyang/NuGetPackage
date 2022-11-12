@@ -14,7 +14,7 @@ namespace TryIT.MicrosoftGraphService.Helper
         }
 
         /// <summary>
-        /// get user info, if <paramref name="userEmail"/> is empty, get me
+        /// get user info, if <paramref name="emailAddress"/> is empty, get me
         /// </summary>
         /// <param name="emailAddress"></param>
         /// <returns></returns>
