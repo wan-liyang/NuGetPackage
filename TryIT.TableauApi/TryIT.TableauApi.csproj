@@ -5,31 +5,39 @@
     <DeterministicSourcePaths>true</DeterministicSourcePaths>
     <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
     <Configurations>Debug;Release</Configurations>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>TryIT</Authors>
     <Company>TryIT</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Description>implement PGP encryption</Description>
-    <PackageId>TryIT.PGP</PackageId>
-    <PackageTags>PGP</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Tableau REST API method</Description>
+    <PackageId>TryIT.TableauApi</PackageId>
+    <PackageTags>TableauApi</PackageTags>
     <Configurations>Release;Debug</Configurations>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile>bin\Debug\netstandard2.1\TryIT.PGP.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.1\TryIT.TableauApi.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="BouncyCastle" />
-    <None Remove="BouncyCastle.NetCore" />
-    <None Remove="PgpCore" />
+    <None Remove="ApiResponse\" />
+    <None Remove="Model\" />
+    <None Remove="Newtonsoft.Json" />
+    <None Remove="SiteModel\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PgpCore" Version="5.8.1" />
+    <Folder Include="ApiResponse\" />
+    <Folder Include="Model\" />
+    <Folder Include="SiteModel\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>

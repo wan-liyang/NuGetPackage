@@ -23,6 +23,7 @@
     <None Remove="TryIT_WindowService\" />
     <None Remove="TryIT_CryptoService\" />
     <None Remove="TryIT_PGP\" />
+    <None Remove="TryIT_TableauApi\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="TryIT_ActiveDirectory\" />
@@ -31,6 +32,7 @@
     <Folder Include="TryIT_WindowService\" />
     <Folder Include="TryIT_CryptoService\" />
     <Folder Include="TryIT_PGP\" />
+    <Folder Include="TryIT_TableauApi\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj" />
@@ -39,5 +41,6 @@
     <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
     <ProjectReference Include="..\TryIT.CryptoService\TryIT.CryptoService.csproj" />
     <ProjectReference Include="..\TryIT.PGP\TryIT.PGP.csproj" />
+    <ProjectReference Include="..\TryIT.TableauApi\TryIT.TableauApi.csproj" />
   </ItemGroup>
 </Project>
