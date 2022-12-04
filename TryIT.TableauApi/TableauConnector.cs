@@ -167,6 +167,8 @@ namespace TryIT.TableauApi
         /// <returns></returns>
         public SiteModel.Group GetGroup(string groupName)
         {
+            groupName = groupName.Replace(" ", "+");
+
             string url = $"/api/{apiVersion}/sites/{siteId}/groups?filter=name:eq:{groupName}";
             var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
