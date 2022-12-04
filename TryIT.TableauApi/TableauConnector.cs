@@ -173,6 +173,10 @@ namespace TryIT.TableauApi
             var content = responseMessage.Content.ReadAsStringAsync().Result;
 
             var result = content.JsonToObject<GetGroupResponse.Response>();
+            if (result.groups.group == null)
+            {
+                return null;
+            }
             return result.groups.group.First().ToGroup();
         }
 
