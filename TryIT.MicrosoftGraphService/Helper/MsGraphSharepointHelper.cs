@@ -168,5 +168,16 @@ namespace TryIT.MicrosoftGraphService.Helper
 
             return _byte;
         }
+
+        /// <summary>
+        /// get items under a folder, either file or folder
+        /// </summary>
+        /// <param name="folderAbsUrl"></param>
+        /// <returns></returns>
+        public List<SharepointModel.SiteDriveItemModel> GetItems(string folderAbsUrl)
+        {
+            var files = _helper.GetItemsByUrl(folderAbsUrl);
+            return files.value.Select(p => p.ToSiteDriveItem()).ToList();
+        }
     }
 }

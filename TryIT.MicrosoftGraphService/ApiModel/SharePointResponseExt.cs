@@ -6,35 +6,37 @@ namespace TryIT.MicrosoftGraphService.ApiModel
     {
         public static SharepointModel.Site ToSiteModule(this SharePointResponse.GetSiteResponse site)
         {
-            SharepointModel.Site module = new SharepointModel.Site();
+            SharepointModel.Site model = new SharepointModel.Site();
             if (site != null)
             {
-                module.Id = site.id;
-                module.Name = site.name;
-                module.DisplayName = site.displayName;
+                model.Id = site.id;
+                model.Name = site.name;
+                model.DisplayName = site.displayName;
             }
-            return module;
+            return model;
         }
 
         public static SharepointModel.SiteDriveItemModel ToSiteDriveItem(this SharePointResponse.GetDriveItemResponse driveItem)
         {
-            SharepointModel.SiteDriveItemModel module = new SharepointModel.SiteDriveItemModel();
+            SharepointModel.SiteDriveItemModel model = new SharepointModel.SiteDriveItemModel();
             if (driveItem != null)
             {
-                module.Id = driveItem.id;
-                module.Name = driveItem.name;
+                model.Id = driveItem.id;
+                model.Name = driveItem.name;
+                model.IsFile = driveItem.file != null;
+                model.WebUrl = driveItem.webUrl;
             }
-            return module;
+            return model;
         }
 
         public static SharepointModel.SiteDriveItemPreviewModule ToSiteDriveItemPreviewModule(this SharePointResponse.GetDriveItemPreviewResponse driveItem)
         {
-            SharepointModel.SiteDriveItemPreviewModule module = new SharepointModel.SiteDriveItemPreviewModule();
+            SharepointModel.SiteDriveItemPreviewModule model = new SharepointModel.SiteDriveItemPreviewModule();
             if (driveItem != null)
             {
-                module.Url = driveItem.getUrl;
+                model.Url = driveItem.getUrl;
             }
-            return module;
+            return model;
         }
     }
 }

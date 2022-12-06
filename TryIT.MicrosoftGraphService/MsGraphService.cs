@@ -1,6 +1,7 @@
 ﻿using TryIT.MicrosoftGraphService.Helper;
 using TryIT.MicrosoftGraphService.Model;
 using System.Collections.Generic;
+using System.IO;
 
 namespace TryIT.MicrosoftGraphService
 {
@@ -177,7 +178,97 @@ namespace TryIT.MicrosoftGraphService
                 return helper.CreateFolder(hostName, siteName, parentFolderAbsUrl, folderNameOrPath);
             }
 
-            public void GetSubFolder(string hostName, string siteName, string folderAbsUrl)
+            /// <summary>
+            /// get items inside a folder, either is file or is a sub folder
+            /// </summary>
+            /// <param name="hostName"></param>
+            /// <param name="siteName"></param>
+            /// <param name="folderAbsUrl"></param>
+            /// <returns></returns>
+            public List<SharepointModel.SiteDriveItemModel> GetItems(string hostName, string siteName, string folderAbsUrl)
+            {
+                NotEmptyParameter(ParamName_HostName, hostName);
+                NotEmptyParameter(ParamName_SiteName, siteName);
+                NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
+
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                return helper.GetItems(folderAbsUrl);
+            }
+
+            string _hostName;
+            string _siteName;
+            List<string> _listFiles;
+            /// <summary>
+            /// download Sharepoint folder into <paramref name="localRootFolder"/>, this method will create same folder structure
+            /// </summary>
+            /// <param name="hostName"></param>
+            /// <param name="siteName"></param>
+            /// <param name="folderAbsUrl"></param>
+            /// <param name="localRootFolder"></param>
+            /// <returns>download file list</returns>
+            /// <exception cref="System.ArgumentNullException"></exception>
+            public List<string> DownloadFolder(string hostName, string siteName, string folderAbsUrl, string localRootFolder)
+            {
+                NotEmptyParameter(ParamName_HostName, hostName);
+                NotEmptyParameter(ParamName_SiteName, siteName);
+                NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
+
+                if (string.IsNullOrEmpty(localRootFolder))
+                {
+                    throw new System.ArgumentNullException(nameof(localRootFolder));
+                }
+
+                _hostName = hostName;
+                _siteName = siteName;
+                _listFiles = new List<string>();
+
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                var driveItems = helper.GetItems(folderAbsUrl);
+
+                foreach (var item in driveItems)
+                {
+                    DownloadFile(item, localRootFolder);
+                }
+
+                return _listFiles;
+            }
+
+            private void DownloadFile(SharepointModel.SiteDriveItemModel item, string folderPath)
+            {
+                if (item.IsFile)
+                {
+                    var _byte = GetFileContentByFileId(_hostName, _siteName, item.Id);
+                    string localFileNameAndPath = System.IO.Path.Combine(folderPath, item.Name);
+
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    File.WriteAllBytes(localFileNameAndPath, _byte);
+                    _listFiles.Add(localFileNameAndPath);
+                }
+                else
+                {
+                    string parentPath = Path.Combine(folderPath, item.Name);
+                    if (!Directory.Exists(parentPath))
+                    {
+                        Directory.CreateDirectory(parentPath);
+                    }
+
+                    var subItems = GetItems(_hostName, _siteName, item.WebUrl);
+                    if (subItems.Count > 0)
+                    {
+                        foreach (var subItem in subItems)
+                        {
+                            DownloadFile(subItem, parentPath);
+                        }
+                    }
+                }
+            }
+
+
+            private void UploadFolder(string hostName, string siteName, string folderAbsUrl, string localRootFolder)
             {
 
             }

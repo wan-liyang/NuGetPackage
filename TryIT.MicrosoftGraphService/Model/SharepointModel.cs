@@ -22,6 +22,16 @@
             public string Id { get; set; }
             public string Name { get; set; }
 
+            /// <summary>
+            /// true: is file object, falsse: is folder object
+            /// </summary>
+            public bool IsFile { get; set; }
+
+            /// <summary>
+            /// the web url of the file or folder
+            /// </summary>
+            public string WebUrl { get; set; }
+
             public SiteDriveItemModel ParentDriveItem { get; set; }
         }
 
