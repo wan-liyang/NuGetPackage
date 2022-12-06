@@ -6,10 +6,10 @@ using System.Linq;
 
 namespace TryIT.MicrosoftGraphService.Helper
 {
-    internal class MsGraphSharePointHelper
+    internal class MsGraphSharepointHelper
     {
         private static SharepointHelper _helper;
-        public MsGraphSharePointHelper(MsGraphApiConfig config)
+        public MsGraphSharepointHelper(MsGraphApiConfig config)
         {
             MsGraphHelper graphHelper = new MsGraphHelper(config);
             _helper = new SharepointHelper(graphHelper.GetHttpClient());

@@ -40,7 +40,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_FileName, fileName);
                 NotNullParameter(ParamName_FileContent, fileContent);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.UploadFileByFolderUrl(hostName, siteName, folderAbsoluteUrl, fileName, fileContent);
             }
 
@@ -61,7 +61,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_FileName, fileName);
                 NotNullParameter(ParamName_FileContent, fileContent);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.UploadFileByFolderId(hostName, siteName, folderId, fileName, fileContent);
             }
 
@@ -78,7 +78,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.GetFileContentByFileId(hostName, siteName, fileId);
             }
 
@@ -97,7 +97,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
                 NotEmptyParameter(ParamName_FileName, fileName);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.GetFileByName(hostName, siteName, folderAbsUrl, fileName);
             }
 
@@ -107,7 +107,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
                 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.GetFiles(folderAbsUrl);
             }
 
@@ -124,7 +124,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.GetFileById(hostName, siteName, fileId);
             }
 
@@ -134,7 +134,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.CreateItemPreviewLink(hostName, siteName, fileId);
             }
 
@@ -152,7 +152,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.DeleteFileById(hostName, siteName, fileId, isDeleteFolderIfEmpty);
             }
 
@@ -173,7 +173,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_FolderAbsoluteUrl, parentFolderAbsUrl);
                 NotEmptyParameter(ParamName_FolderName, folderNameOrPath);
 
-                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
                 return helper.CreateFolder(hostName, siteName, parentFolderAbsUrl, folderNameOrPath);
             }
         }
