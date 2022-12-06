@@ -6,41 +6,41 @@ using System.Linq;
 
 namespace TryIT.MicrosoftGraphService.Helper
 {
-    internal class MsGraphSharepointHelper
+    internal class MsGraphSharePointHelper
     {
         private static SharepointHelper _helper;
-        public MsGraphSharepointHelper(MsGraphApiConfig config)
+        public MsGraphSharePointHelper(MsGraphApiConfig config)
         {
             MsGraphHelper graphHelper = new MsGraphHelper(config);
             _helper = new SharepointHelper(graphHelper.GetHttpClient());
         }
 
-        public SharePointModel.Site GetSite(string hostName, string siteName)
+        public SharepointModel.Site GetSite(string hostName, string siteName)
         {
             var site = _helper.GetSite(hostName, siteName);
             return site.ToSiteModule();
         }
 
-        public SharePointModel.SiteDriveItemModel GetFolderByUrl(string absoluteUrl)
+        public SharepointModel.SiteDriveItemModel GetFolderByUrl(string absoluteUrl)
         {
             var folder = _helper.GetFolderByUrl(absoluteUrl);
             return folder.ToSiteDriveItem();
         }
 
-        public List<SharePointModel.SiteDriveItemModel> CreateFolder(string hostName, string siteName, string parentFolderAbsUrl, string folderNameOrPath)
+        public List<SharepointModel.SiteDriveItemModel> CreateFolder(string hostName, string siteName, string parentFolderAbsUrl, string folderNameOrPath)
         {
             var site = this.GetSite(hostName, siteName);
             var parentFolder = this.GetFolderByUrl(parentFolderAbsUrl);
 
-            List<SharePointModel.SiteDriveItemModel> listNewFolders = new List<SharePointModel.SiteDriveItemModel>();
+            List<SharepointModel.SiteDriveItemModel> listNewFolders = new List<SharepointModel.SiteDriveItemModel>();
 
             string[] folders = folderNameOrPath.Split('\\');
 
             for (int i = 0; i < folders.Length; i++)
             {
-                SharePointModel.SiteDriveItemModel siteDriveItem = new SharePointModel.SiteDriveItemModel
+                SharepointModel.SiteDriveItemModel siteDriveItem = new SharepointModel.SiteDriveItemModel
                 {
-                    ParentDriveItem = new SharePointModel.SiteDriveItemModel
+                    ParentDriveItem = new SharepointModel.SiteDriveItemModel
                     {
                         Id = parentFolder.Id,
                         Name = parentFolder.Name,
@@ -59,7 +59,7 @@ namespace TryIT.MicrosoftGraphService.Helper
             return listNewFolders;
         }
 
-        private static SharePointModel.SiteDriveItemModel CreateFolder(string siteId, string parentFolderId, string folderName)
+        private static SharepointModel.SiteDriveItemModel CreateFolder(string siteId, string parentFolderId, string folderName)
         {
             SharePointCreateFolderModel model = new SharePointCreateFolderModel
             {
@@ -72,12 +72,12 @@ namespace TryIT.MicrosoftGraphService.Helper
             return item.ToSiteDriveItem();
         }
 
-        public SharePointModel.SiteDriveItemModel UploadFileByFolderUrl(string hostName, string siteName, string absoluteUrl, string fileName, byte[] fileContent)
+        public SharepointModel.SiteDriveItemModel UploadFileByFolderUrl(string hostName, string siteName, string absoluteUrl, string fileName, byte[] fileContent)
         {
             var site = this.GetSite(hostName, siteName);
             var folder = this.GetFolderByUrl(absoluteUrl);
 
-            SharePointModel.SiteUploadFileModel module = new SharePointModel.SiteUploadFileModel
+            SharepointModel.SiteUploadFileModel module = new SharepointModel.SiteUploadFileModel
             {
                 FileName = fileName,
                 FileContent = fileContent,
@@ -89,11 +89,11 @@ namespace TryIT.MicrosoftGraphService.Helper
             return item.ToSiteDriveItem();
         }
 
-        public SharePointModel.SiteDriveItemModel UploadFileByFolderId(string hostName, string siteName, string folderId, string fileName, byte[] fileContent)
+        public SharepointModel.SiteDriveItemModel UploadFileByFolderId(string hostName, string siteName, string folderId, string fileName, byte[] fileContent)
         {
             var site = this.GetSite(hostName, siteName);
 
-            SharePointModel.SiteUploadFileModel module = new SharePointModel.SiteUploadFileModel
+            SharepointModel.SiteUploadFileModel module = new SharepointModel.SiteUploadFileModel
             {
                 FileName = fileName,
                 FileContent = fileContent,
@@ -105,7 +105,7 @@ namespace TryIT.MicrosoftGraphService.Helper
             return item.ToSiteDriveItem();
         }
 
-        public SharePointModel.SiteDriveItemModel GetFileByName(string hostName, string siteName, string folderAbsUrl, string fileName)
+        public SharepointModel.SiteDriveItemModel GetFileByName(string hostName, string siteName, string folderAbsUrl, string fileName)
         {
             var site = this.GetSite(hostName, siteName);
             var folder = this.GetFolderByUrl(folderAbsUrl);
@@ -114,7 +114,7 @@ namespace TryIT.MicrosoftGraphService.Helper
             return file.ToSiteDriveItem();
         }
 
-        public SharePointModel.SiteDriveItemModel GetFileById(string hostName, string siteName, string fileId)
+        public SharepointModel.SiteDriveItemModel GetFileById(string hostName, string siteName, string fileId)
         {
             var site = this.GetSite(hostName, siteName);
             var file = _helper.GetItemById(site.Id, fileId);
@@ -126,13 +126,13 @@ namespace TryIT.MicrosoftGraphService.Helper
         /// </summary>
         /// <param name="folderAbsUrl"></param>
         /// <returns></returns>
-        public List<SharePointModel.SiteDriveItemModel> GetFiles(string folderAbsUrl)
+        public List<SharepointModel.SiteDriveItemModel> GetFiles(string folderAbsUrl)
         {
             var files = _helper.GetItemsByUrl(folderAbsUrl);
             return files.value.Select(p => p.ToSiteDriveItem()).ToList();
         }
 
-        public SharePointModel.SiteDriveItemPreviewModule CreateItemPreviewLink(string hostName, string siteName, string fileId)
+        public SharepointModel.SiteDriveItemPreviewModule CreateItemPreviewLink(string hostName, string siteName, string fileId)
         {
             var site = this.GetSite(hostName, siteName);
             var file = _helper.CreateItemPreviewLink(site.Id, fileId);

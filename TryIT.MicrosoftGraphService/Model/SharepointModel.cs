@@ -1,6 +1,6 @@
 ﻿namespace TryIT.MicrosoftGraphService.Model
 {
-    public class SharePointModel
+    public class SharepointModel
     {
         public class Site
         {

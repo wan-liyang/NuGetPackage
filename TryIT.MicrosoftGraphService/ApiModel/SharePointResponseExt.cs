@@ -4,9 +4,9 @@ namespace TryIT.MicrosoftGraphService.ApiModel
 {
     internal static class SharePointResponseExt
     {
-        public static SharePointModel.Site ToSiteModule(this SharePointResponse.GetSiteResponse site)
+        public static SharepointModel.Site ToSiteModule(this SharePointResponse.GetSiteResponse site)
         {
-            SharePointModel.Site module = new SharePointModel.Site();
+            SharepointModel.Site module = new SharepointModel.Site();
             if (site != null)
             {
                 module.Id = site.id;
@@ -16,9 +16,9 @@ namespace TryIT.MicrosoftGraphService.ApiModel
             return module;
         }
 
-        public static SharePointModel.SiteDriveItemModel ToSiteDriveItem(this SharePointResponse.GetDriveItemResponse driveItem)
+        public static SharepointModel.SiteDriveItemModel ToSiteDriveItem(this SharePointResponse.GetDriveItemResponse driveItem)
         {
-            SharePointModel.SiteDriveItemModel module = new SharePointModel.SiteDriveItemModel();
+            SharepointModel.SiteDriveItemModel module = new SharepointModel.SiteDriveItemModel();
             if (driveItem != null)
             {
                 module.Id = driveItem.id;
@@ -27,9 +27,9 @@ namespace TryIT.MicrosoftGraphService.ApiModel
             return module;
         }
 
-        public static SharePointModel.SiteDriveItemPreviewModule ToSiteDriveItemPreviewModule(this SharePointResponse.GetDriveItemPreviewResponse driveItem)
+        public static SharepointModel.SiteDriveItemPreviewModule ToSiteDriveItemPreviewModule(this SharePointResponse.GetDriveItemPreviewResponse driveItem)
         {
-            SharePointModel.SiteDriveItemPreviewModule module = new SharePointModel.SiteDriveItemPreviewModule();
+            SharepointModel.SiteDriveItemPreviewModule module = new SharepointModel.SiteDriveItemPreviewModule();
             if (driveItem != null)
             {
                 module.Url = driveItem.getUrl;

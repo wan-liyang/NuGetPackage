@@ -32,7 +32,7 @@ namespace TryIT.MicrosoftGraphService
             /// <param name="fileName"></param>
             /// <param name="fileContent"></param>
             /// <returns>created SharePoint item (Id and Name)</returns>
-            public SharePointModel.SiteDriveItemModel UploadFileByFolderUrl(string hostName, string siteName, string folderAbsoluteUrl, string fileName, byte[] fileContent)
+            public SharepointModel.SiteDriveItemModel UploadFileByFolderUrl(string hostName, string siteName, string folderAbsoluteUrl, string fileName, byte[] fileContent)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
@@ -40,7 +40,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_FileName, fileName);
                 NotNullParameter(ParamName_FileContent, fileContent);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.UploadFileByFolderUrl(hostName, siteName, folderAbsoluteUrl, fileName, fileContent);
             }
 
@@ -53,7 +53,7 @@ namespace TryIT.MicrosoftGraphService
             /// <param name="fileName"></param>
             /// <param name="fileContent"></param>
             /// <returns>created SharePoint item (Id and Name)</returns>
-            public SharePointModel.SiteDriveItemModel UploadFileByFolderId(string hostName, string siteName, string folderId, string fileName, byte[] fileContent)
+            public SharepointModel.SiteDriveItemModel UploadFileByFolderId(string hostName, string siteName, string folderId, string fileName, byte[] fileContent)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
@@ -61,7 +61,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_FileName, fileName);
                 NotNullParameter(ParamName_FileContent, fileContent);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.UploadFileByFolderId(hostName, siteName, folderId, fileName, fileContent);
             }
 
@@ -78,7 +78,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.GetFileContentByFileId(hostName, siteName, fileId);
             }
 
@@ -90,24 +90,24 @@ namespace TryIT.MicrosoftGraphService
             /// <param name="folderAbsUrl"></param>
             /// <param name="fileName"></param>
             /// <returns></returns>
-            public SharePointModel.SiteDriveItemModel GetFileByName(string hostName, string siteName, string folderAbsUrl, string fileName)
+            public SharepointModel.SiteDriveItemModel GetFileByName(string hostName, string siteName, string folderAbsUrl, string fileName)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
                 NotEmptyParameter(ParamName_FileName, fileName);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.GetFileByName(hostName, siteName, folderAbsUrl, fileName);
             }
 
-            public List<SharePointModel.SiteDriveItemModel> GetFiles(string hostName, string siteName, string folderAbsUrl)
+            public List<SharepointModel.SiteDriveItemModel> GetFiles(string hostName, string siteName, string folderAbsUrl)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
                 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.GetFiles(folderAbsUrl);
             }
 
@@ -118,23 +118,23 @@ namespace TryIT.MicrosoftGraphService
             /// <param name="siteName"></param>
             /// <param name="fileId"></param>
             /// <returns></returns>
-            public SharePointModel.SiteDriveItemModel GetFileById(string hostName, string siteName, string fileId)
+            public SharepointModel.SiteDriveItemModel GetFileById(string hostName, string siteName, string fileId)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.GetFileById(hostName, siteName, fileId);
             }
 
-            public SharePointModel.SiteDriveItemPreviewModule CreateItemPreviewLink(string hostName, string siteName, string fileId)
+            public SharepointModel.SiteDriveItemPreviewModule CreateItemPreviewLink(string hostName, string siteName, string fileId)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.CreateItemPreviewLink(hostName, siteName, fileId);
             }
 
@@ -152,7 +152,7 @@ namespace TryIT.MicrosoftGraphService
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FileID, fileId);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.DeleteFileById(hostName, siteName, fileId, isDeleteFolderIfEmpty);
             }
 
@@ -166,15 +166,20 @@ namespace TryIT.MicrosoftGraphService
             /// <param name="parentFolderAbsUrl"></param>
             /// <param name="folderNameOrPath"></param>
             /// <returns></returns>
-            public List<SharePointModel.SiteDriveItemModel> CreateFolder(string hostName, string siteName, string parentFolderAbsUrl, string folderNameOrPath)
+            public List<SharepointModel.SiteDriveItemModel> CreateFolder(string hostName, string siteName, string parentFolderAbsUrl, string folderNameOrPath)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 NotEmptyParameter(ParamName_FolderAbsoluteUrl, parentFolderAbsUrl);
                 NotEmptyParameter(ParamName_FolderName, folderNameOrPath);
 
-                MsGraphSharepointHelper helper = new MsGraphSharepointHelper(_config);
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.CreateFolder(hostName, siteName, parentFolderAbsUrl, folderNameOrPath);
+            }
+
+            public void GetSubFolder(string hostName, string siteName, string folderAbsUrl)
+            {
+
             }
         }
 

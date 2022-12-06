@@ -176,7 +176,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         /// </summary>
         /// <param name="fileModule"></param>
         /// <returns></returns>
-        public GetDriveItemResponse UploadFile(SharePointModel.SiteUploadFileModel fileModule)
+        public GetDriveItemResponse UploadFile(SharepointModel.SiteUploadFileModel fileModule)
         {
             // if file size < 4 MB, use normal upload, otherwise use upload session
             if (fileModule.FileContent.Length < 4 * 1024 * 1024)
@@ -195,7 +195,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         /// </summary>
         /// <param name="fileModule"></param>
         /// <returns></returns>
-        private GetDriveItemResponse UploadNormalFile(SharePointModel.SiteUploadFileModel fileModule)
+        private GetDriveItemResponse UploadNormalFile(SharepointModel.SiteUploadFileModel fileModule)
         {
             string siteId = fileModule.SiteId;
             string driveItemId = fileModule.DriveItemId;
@@ -242,7 +242,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         /// <para>https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0</para>
         /// </summary>
         /// <param name="fileModule"></param>
-        private GetDriveItemResponse UploadLargeFile(SharePointModel.SiteUploadFileModel fileModule)
+        private GetDriveItemResponse UploadLargeFile(SharepointModel.SiteUploadFileModel fileModule)
         {
             string siteId = fileModule.SiteId;
             string driveItemId = fileModule.DriveItemId;
@@ -277,7 +277,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             }
         }
 
-        private GetDriveItemResponse UploadFileWithUploadSession(CreateUploadSessionResponse uploadSession, SharePointModel.SiteUploadFileModel fileModule)
+        private GetDriveItemResponse UploadFileWithUploadSession(CreateUploadSessionResponse uploadSession, SharepointModel.SiteUploadFileModel fileModule)
         {
             string url = uploadSession.uploadUrl;
 
