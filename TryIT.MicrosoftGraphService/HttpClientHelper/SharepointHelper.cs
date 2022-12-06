@@ -11,11 +11,11 @@ using static TryIT.MicrosoftGraphService.ApiModel.SharePointResponse;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    internal class SharePointHelper : BaseHelper
+    internal class SharepointHelper : BaseHelper
     {
         private HttpClient _httpClient;
 
-        public SharePointHelper(HttpClient httpClient)
+        public SharepointHelper(HttpClient httpClient)
         {
             if (null == httpClient)
                 throw new ArgumentNullException(nameof(httpClient));

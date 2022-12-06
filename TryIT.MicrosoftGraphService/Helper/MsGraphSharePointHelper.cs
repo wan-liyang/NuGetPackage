@@ -8,11 +8,11 @@ namespace TryIT.MicrosoftGraphService.Helper
 {
     internal class MsGraphSharePointHelper
     {
-        private static SharePointHelper _helper;
+        private static SharepointHelper _helper;
         public MsGraphSharePointHelper(MsGraphApiConfig config)
         {
             MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new SharePointHelper(graphHelper.GetHttpClient());
+            _helper = new SharepointHelper(graphHelper.GetHttpClient());
         }
 
         public SharePointModel.Site GetSite(string hostName, string siteName)
