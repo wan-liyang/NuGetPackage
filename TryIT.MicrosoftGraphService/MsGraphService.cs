@@ -2,6 +2,7 @@
 using TryIT.MicrosoftGraphService.Model;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace TryIT.MicrosoftGraphService
 {
@@ -268,9 +269,69 @@ namespace TryIT.MicrosoftGraphService
             }
 
 
-            private void UploadFolder(string hostName, string siteName, string folderAbsUrl, string localRootFolder)
+            /// <summary>
+            /// upload local folder to Sharepoint folder
+            /// </summary>
+            /// <param name="hostName"></param>
+            /// <param name="siteName"></param>
+            /// <param name="folderAbsUrl"></param>
+            /// <param name="localRootFolder"></param>
+            /// <returns></returns>
+            /// <exception cref="System.ArgumentNullException"></exception>
+            /// <exception cref="DirectoryNotFoundException"></exception>
+            public List<string> UploadFolder(string hostName, string siteName, string folderAbsUrl, string localRootFolder)
             {
+                NotEmptyParameter(ParamName_HostName, hostName);
+                NotEmptyParameter(ParamName_SiteName, siteName);
+                NotEmptyParameter(ParamName_FolderAbsoluteUrl, folderAbsUrl);
 
+                if (string.IsNullOrEmpty(localRootFolder))
+                {
+                    throw new System.ArgumentNullException(nameof(localRootFolder));
+                }
+
+                if (!Directory.Exists(localRootFolder))
+                {
+                    throw new DirectoryNotFoundException($"Source directory not found: {localRootFolder}");
+                }
+
+                _hostName = hostName;
+                _siteName = siteName;
+                _listFiles = new List<string>();
+
+                UploadFile(localRootFolder, folderAbsUrl);
+                return _listFiles;
+            }
+            private void UploadFile(string sourceDir, string sharepointFolderUrl)
+            {
+                var dir = new DirectoryInfo(sourceDir);
+
+                DirectoryInfo[] dirs = dir.GetDirectories();
+
+                foreach (FileInfo file in dir.GetFiles())
+                {
+                    UploadFileByFolderUrl(_hostName, _siteName, sharepointFolderUrl, file.Name, File.ReadAllBytes(file.FullName));
+
+                    _listFiles.Add(Path.Combine(sourceDir, file.FullName));
+                }
+
+                foreach (DirectoryInfo subDir in dirs)
+                {
+                    var items = GetItems(_hostName, _siteName, sharepointFolderUrl);
+                    var subfolder = items.Where(p => !p.IsFile && p.Name.Equals(subDir.Name, System.StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+                    string subFolderUrl = string.Empty;
+                    if (subfolder == null)
+                    {
+                        var newfolder = CreateFolder(_hostName, _siteName, sharepointFolderUrl, subDir.Name);
+                        subFolderUrl = newfolder.First().WebUrl;
+                    }
+                    else
+                    {
+                        subFolderUrl = subfolder.WebUrl;
+                    }
+
+                    UploadFile(subDir.FullName, subFolderUrl);
+                }
             }
         }
 

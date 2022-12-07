@@ -44,6 +44,7 @@ namespace TryIT.MicrosoftGraphService.Helper
                     {
                         Id = parentFolder.Id,
                         Name = parentFolder.Name,
+                        WebUrl = parentFolder.WebUrl
                     }
                 };
 
@@ -52,6 +53,7 @@ namespace TryIT.MicrosoftGraphService.Helper
 
                 siteDriveItem.Id = parentFolder.Id;
                 siteDriveItem.Name = parentFolder.Name;
+                siteDriveItem.WebUrl = parentFolder.WebUrl;
 
                 listNewFolders.Add(siteDriveItem);
             }
