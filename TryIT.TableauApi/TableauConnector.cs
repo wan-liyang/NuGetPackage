@@ -86,7 +86,28 @@ namespace TryIT.TableauApi
 
             if (result.users.user != null)
             {
-                return result.users.user.Select(p => p.ToUser()).First();
+                return result.users.user.FirstOrDefault().ToUser();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// get user based on assigned id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public SiteModel.User GetUserById(string userId)
+        {
+            string url = $"/api/{apiVersion}/sites/{siteId}/users/{userId}";
+            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
+
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<GetUserResponse.Response>();
+
+            if (result.user != null)
+            {
+                return result.user.ToUser();
             }
             return null;
         }
@@ -105,7 +126,9 @@ namespace TryIT.TableauApi
             var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
 
-            return GetUser(username);
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<AddUserResponse.Response>();
+            return result.user.ToUser();
         }
 
         /// <summary>
@@ -124,9 +147,7 @@ namespace TryIT.TableauApi
             var responseMessage = httpClient.PutAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
-            var result = content.JsonToObject<GetUsersResponse.Response>();
-            return result.users.user.First().ToUser();
+            return GetUserById(userId);
         }
 
         /// <summary>
