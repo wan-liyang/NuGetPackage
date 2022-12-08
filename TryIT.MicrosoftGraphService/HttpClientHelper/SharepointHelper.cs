@@ -199,7 +199,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         {
             string siteId = fileModule.SiteId;
             string driveItemId = fileModule.DriveItemId;
-            string fileName = fileModule.FileName;
+            string fileName = CleanFileName(fileModule.FileName);
             byte[] fileContent = fileModule.FileContent;
 
             var file = GetFileByName(siteId, driveItemId, fileName);
@@ -226,7 +226,16 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
                 var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+
+                // catch error to response with detail file information
+                try
+                {
+                    CheckStatusCode(response);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Upload failed, fileName: {fileName}, Url: {url}", ex);
+                }
                 string content = response.Content.ReadAsStringAsync().Result;
 
                 return content.JsonToObject<GetDriveItemResponse>();
@@ -246,7 +255,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         {
             string siteId = fileModule.SiteId;
             string driveItemId = fileModule.DriveItemId;
-            string filename = fileModule.FileName;
+            string filename = CleanFileName(fileModule.FileName);
 
             CreateUploadSessionRequestBody requestBody = new CreateUploadSessionRequestBody
             {
@@ -284,7 +293,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             try
             {
                 HttpContent httpContent = new ByteArrayContent(fileModule.FileContent);
-                string contentType = MIMEType.GetContentType(fileModule.FileName);
+                string contentType = MIMEType.GetContentType(CleanFileName(fileModule.FileName));
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
                 httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModule.FileContent.Length - 1, fileModule.FileContent.Length);
 
@@ -318,6 +327,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 {
                     return true;
                 }
+                CheckStatusCode(response);
                 return false;
             }
             catch
@@ -430,6 +440,11 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url));
             string encodedUrl = "u!" + base64Value.TrimEnd('=').Replace('/', '_').Replace('+', '-');
             return encodedUrl;
+        }
+
+        private string CleanFileName(string filename)
+        {
+            return filename.Replace("#", "_");
         }
     }
 }

@@ -8,32 +8,32 @@ namespace TryIT.MicrosoftGraphService
 {
     public class MsGraphService
     {
-        private const string ParamName_HostName = "SharePoint Host Name";
-        private const string ParamName_SiteName = "SharePoint Site Name";
-        private const string ParamName_FolderID = "SharePoint Folder Unique ID";
-        private const string ParamName_FolderAbsoluteUrl = "SharePoint Folder Absolute Url";
-        private const string ParamName_FileID = "SharePoint File Unique ID";
-        private const string ParamName_FileName = "SharePoint File Name";
-        private const string ParamName_FileContent = "SharePoint File Content";
-        private const string ParamName_FolderName = "SharePoint Folder Name or Path";
+        private const string ParamName_HostName = "Sharepoint Host Name";
+        private const string ParamName_SiteName = "Sharepoint Site Name";
+        private const string ParamName_FolderID = "Sharepoint Folder Unique ID";
+        private const string ParamName_FolderAbsoluteUrl = "Sharepoint Folder Absolute Url";
+        private const string ParamName_FileID = "Sharepoint File Unique ID";
+        private const string ParamName_FileName = "Sharepoint File Name";
+        private const string ParamName_FileContent = "Sharepoint File Content";
+        private const string ParamName_FolderName = "Sharepoint Folder Name or Path";
 
-        public class SharePoint
+        public class Sharepoint
         {
             private MsGraphApiConfig _config;
-            public SharePoint(MsGraphApiConfig config)
+            public Sharepoint(MsGraphApiConfig config)
             {
                 _config = config;
             }
 
             /// <summary>
-            /// upload file into SharePoint by folder absolute url
+            /// upload file into Sharepoint by folder absolute url
             /// </summary>
             /// <param name="hostName"></param>
             /// <param name="siteName"></param>
             /// <param name="folderAbsoluteUrl"></param>
             /// <param name="fileName"></param>
             /// <param name="fileContent"></param>
-            /// <returns>created SharePoint item (Id and Name)</returns>
+            /// <returns>created Sharepoint item (Id and Name)</returns>
             public SharepointModel.SiteDriveItemModel UploadFileByFolderUrl(string hostName, string siteName, string folderAbsoluteUrl, string fileName, byte[] fileContent)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
@@ -47,14 +47,14 @@ namespace TryIT.MicrosoftGraphService
             }
 
             /// <summary>
-            /// upload file into SharePoint by folder unique Id
+            /// upload file into Sharepoint by folder unique Id
             /// </summary>
             /// <param name="hostName"></param>
             /// <param name="siteName"></param>
             /// <param name="folderId"></param>
             /// <param name="fileName"></param>
             /// <param name="fileContent"></param>
-            /// <returns>created SharePoint item (Id and Name)</returns>
+            /// <returns>created Sharepoint item (Id and Name)</returns>
             public SharepointModel.SiteDriveItemModel UploadFileByFolderId(string hostName, string siteName, string folderId, string fileName, byte[] fileContent)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
@@ -68,7 +68,7 @@ namespace TryIT.MicrosoftGraphService
             }
 
             /// <summary>
-            /// get file content from SharePoint by fileId
+            /// get file content from Sharepoint by fileId
             /// </summary>
             /// <param name="hostName"></param>
             /// <param name="siteName"></param>
@@ -85,7 +85,7 @@ namespace TryIT.MicrosoftGraphService
             }
 
             /// <summary>
-            /// get file from SharePoint by specific file name, e.g. fileName = "test.xlsx"
+            /// get file from Sharepoint by specific file name, e.g. fileName = "test.xlsx"
             /// </summary>
             /// <param name="hostName"></param>
             /// <param name="siteName"></param>
@@ -114,7 +114,7 @@ namespace TryIT.MicrosoftGraphService
             }
 
             /// <summary>
-            /// get file from SharePoint by the sharepoint unique id
+            /// get file from Sharepoint by the sharepoint unique id
             /// </summary>
             /// <param name="hostName"></param>
             /// <param name="siteName"></param>
@@ -141,11 +141,11 @@ namespace TryIT.MicrosoftGraphService
             }
 
             /// <summary>
-            /// delete file from SharePoint, return true if delete success, otherwise return false
+            /// delete file from Sharepoint, return true if delete success, otherwise return false
             /// </summary>
             /// <param name="hostName"></param>
             /// <param name="siteName"></param>
-            /// <param name="fileId">the File SharePoint Unique Id</param>
+            /// <param name="fileId">the File Sharepoint Unique Id</param>
             /// <param name="isDeleteFolderIfEmpty">indicator to remove folder if it become empty after file deleted</param>
             /// <returns></returns>
             public bool DeleteFileByFileId(string hostName, string siteName, string fileId, bool isDeleteFolderIfEmpty)
@@ -159,7 +159,7 @@ namespace TryIT.MicrosoftGraphService
             }
 
             /// <summary>
-            /// create new SharePoint folder under <paramref name="parentFolderAbsUrl"/>, 
+            /// create new Sharepoint folder under <paramref name="parentFolderAbsUrl"/>, 
             /// <para>set <paramref name="folderNameOrPath"/> to "NewFolderName" to create a new folder</para>
             /// <para>set <paramref name="folderNameOrPath"/> to "NewFolderName\NewSubFolderName" to create a new folder and sub folder</para>
             /// </summary>
@@ -332,6 +332,28 @@ namespace TryIT.MicrosoftGraphService
 
                     UploadFile(subDir.FullName, subFolderUrl);
                 }
+            }
+            
+            /// <summary>
+            /// delete item from Sharepoint
+            /// </summary>
+            /// <param name="hostName"></param>
+            /// <param name="siteName"></param>
+            /// <param name="itemId"></param>
+            /// <returns></returns>
+            /// <exception cref="System.ArgumentNullException"></exception>
+            public bool DeleteItem(string hostName, string siteName, string itemId)
+            {
+                NotEmptyParameter(ParamName_HostName, hostName);
+                NotEmptyParameter(ParamName_SiteName, siteName);
+                
+                if (string.IsNullOrEmpty(itemId))
+                {
+                    throw new System.ArgumentNullException(nameof(itemId));
+                }
+
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                return helper.DeleteItem(hostName, siteName, itemId);
             }
         }
 
