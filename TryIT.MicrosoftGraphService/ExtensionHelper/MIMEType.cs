@@ -39,7 +39,13 @@
                 case ".XLSX":
                     type = XLSX;
                     break;
+                case ".XLSM":
+                    type = XLSX;
+                    break;
                 case ".CSV":
+                    type = CSV;
+                    break;
+                case ".TXT":
                     type = CSV;
                     break;
                 default:

@@ -181,5 +181,17 @@ namespace TryIT.MicrosoftGraphService.Helper
             var files = _helper.GetItemsByUrl(folderAbsUrl);
             return files.value.Select(p => p.ToSiteDriveItem()).ToList();
         }
+
+        /// <summary>
+        /// delete SharePoint DirveItem by Id, <paramref name="itemId"/> is SharePoint DriveItem Unique Id
+        /// </summary>
+        /// <param name="siteId"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public bool DeleteItem(string hostName, string siteName, string itemId)
+        {
+            var site = this.GetSite(hostName, siteName);
+            return _helper.DeleteItemById(site.Id, itemId);
+        }
     }
 }

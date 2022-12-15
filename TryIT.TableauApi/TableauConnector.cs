@@ -22,7 +22,8 @@ namespace TryIT.TableauApi
         /// </summary>
         /// <param name="hostUrl">https://xxx</param>
         /// <param name="apiVersion">api version for specific tableau server, refer to https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm</param>
-        /// <param name="personalToken"></param>
+        /// <param name="tokenName"></param>
+        /// <param name="tokenSecret"></param>
         /// <param name="sitename"></param>
         public TableauConnector(string hostUrl, string apiVersion, string tokenName, string tokenSecret, string sitename)
         {
@@ -55,14 +56,54 @@ namespace TryIT.TableauApi
         /// get all users for current site
         /// </summary>
         /// <returns></returns>
-        public List<SiteModel.User> GetAllUsers()
+        public List<SiteModel.User> GetUsers()
         {
+            List<SiteModel.User> users = new List<SiteModel.User>();
+
             string url = $"/api/{apiVersion}/sites/{siteId}/users";
-            var clientResult = httpClient.GetAsync(url).GetAwaiter().GetResult();
-            var content = clientResult.Content.ReadAsStringAsync().Result;
+            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
 
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
             var result = content.JsonToObject<GetUsersResponse.Response>();
+            if (result.users.user != null)
+            {
+                users.AddRange(result.users.user.Select(p => p.ToUser()).ToList());
+            }
 
+            int pageNumber = Convert.ToInt32(result.pagination.pageNumber);
+            int totalAvailable = Convert.ToInt32(result.pagination.totalAvailable);
+            int pageSize = Convert.ToInt32(result.pagination.pageSize);
+            int totalPage = GetTotalPages(pageSize, totalAvailable);
+
+            if (totalPage > pageNumber)
+            {
+                for(int i = pageNumber + 1; i <= totalPage; i++)
+                {
+                    var pageUser = GetUsers(i, pageSize);
+                    if (pageUser != null)
+                    {
+                        users.AddRange(pageUser);
+                    }
+                }
+            }
+            return users;
+        }
+
+        /// <summary>
+        /// get users by pages
+        /// </summary>
+        /// <returns></returns>
+        private List<SiteModel.User> GetUsers(int pageNumber, int pageSize)
+        {
+            // GET /api/api-version/sites/site-id/users?pageSize=page-size&pageNumber=page-number
+
+            string url = $"/api/{apiVersion}/sites/{siteId}/users?pageSize={pageSize}&pageNumber={pageNumber}";
+            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
+
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<GetUsersResponse.Response>();
             if (result.users.user != null)
             {
                 return result.users.user.Select(p => p.ToUser()).ToList();
@@ -86,7 +127,28 @@ namespace TryIT.TableauApi
 
             if (result.users.user != null)
             {
-                return result.users.user.Select(p => p.ToUser()).First();
+                return result.users.user.FirstOrDefault().ToUser();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// get user based on assigned id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public SiteModel.User GetUserById(string userId)
+        {
+            string url = $"/api/{apiVersion}/sites/{siteId}/users/{userId}";
+            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
+
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<GetUserResponse.Response>();
+
+            if (result.user != null)
+            {
+                return result.user.ToUser();
             }
             return null;
         }
@@ -105,7 +167,9 @@ namespace TryIT.TableauApi
             var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
 
-            return GetUser(username);
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<AddUserResponse.Response>();
+            return result.user.ToUser();
         }
 
         /// <summary>
@@ -124,9 +188,7 @@ namespace TryIT.TableauApi
             var responseMessage = httpClient.PutAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
-            var result = content.JsonToObject<GetUsersResponse.Response>();
-            return result.users.user.First().ToUser();
+            return GetUserById(userId);
         }
 
         /// <summary>
@@ -172,8 +234,8 @@ namespace TryIT.TableauApi
             string url = $"/api/{apiVersion}/sites/{siteId}/groups?filter=name:eq:{groupName}";
             var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
 
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
             var result = content.JsonToObject<GetGroupResponse.Response>();
             if (result.groups.group == null)
             {
@@ -183,24 +245,65 @@ namespace TryIT.TableauApi
         }
 
         /// <summary>
-        /// get list user from group
+        /// get all user from a group
         /// </summary>
         /// <param name="groupId"></param>
         /// <returns></returns>
         public List<SiteModel.User> GetGroupUser(string groupId)
         {
+            List<SiteModel.User> users = new List<SiteModel.User>();
+
             string url = $"/api/{apiVersion}/sites/{siteId}/groups/{groupId}/users";
             var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
+
             var content = responseMessage.Content.ReadAsStringAsync().Result;
-
             var result = content.JsonToObject<GetGroupUserResponse.Response>();
+            if (result.users.user != null)
+            {
+                users.AddRange(result.users.user.Select(p => p.ToUser()).ToList());
+            }
 
+            int pageNumber = Convert.ToInt32(result.pagination.pageNumber);
+            int totalAvailable = Convert.ToInt32(result.pagination.totalAvailable);
+            int pageSize = Convert.ToInt32(result.pagination.pageSize);
+            int totalPage = GetTotalPages(pageSize, totalAvailable);
+
+            if (totalPage > pageNumber)
+            {
+                for(int i = pageNumber + 1; i <= totalPage; i++)
+                {
+                    var pageUser = GetGroupUser(groupId, i, pageSize);
+                    if (pageUser != null)
+                    {
+                        users.AddRange(pageUser);
+                    }
+                }
+            }
+            return users;
+        }
+
+        /// <summary>
+        /// get user by page
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        private List<SiteModel.User> GetGroupUser(string groupId, int pageNumber, int pageSize)
+        {
+            // /api/api-version/sites/site-id/groups/group-id/users?pageSize=page-size&pageNumber=page-number
+
+            string url = $"/api/{apiVersion}/sites/{siteId}/groups/{groupId}/users?pageSize={pageSize}&pageNumber={pageNumber}";
+            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
+
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<GetGroupUserResponse.Response>();
             if (result.users.user == null)
             {
                 return null;
             }
-
             return result.users.user.Select(p => p.ToUser()).ToList();
         }
 
@@ -221,8 +324,6 @@ namespace TryIT.TableauApi
         /// <summary>
         /// remove an user from group
         /// </summary>
-        /// <param name="token"></param>
-        /// <param name="siteId"></param>
         /// <param name="groupId"></param>
         /// <param name="userId"></param>
         public void RemoveUserFromGroup(string groupId, string userId)
@@ -445,6 +546,23 @@ namespace TryIT.TableauApi
             {
                 throw new Exception($"operation failed: {responseMessage.Content.ReadAsStringAsync().Result}");
             }
+        }
+
+        /// <summary>
+        /// get total pages based on PageSize and TotalAvailable items
+        /// </summary>
+        /// <param name="pageSize"></param>
+        /// <param name="totalAvailable"></param>
+        private int GetTotalPages(int pageSize, int totalAvailable)
+        {
+            int pages = totalAvailable / pageSize;
+
+            if (totalAvailable % pageSize > 0)
+            {
+                pages++;
+            }
+
+            return pages;
         }
     }
 }

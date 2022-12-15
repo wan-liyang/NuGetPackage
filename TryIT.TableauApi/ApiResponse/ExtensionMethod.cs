@@ -48,6 +48,41 @@ namespace TryIT.TableauApi.ApiResponse
                 language = user.language
             };
         }
+        
+        public static SiteModel.User ToUser(this GetUserResponse.User user)
+        {
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new SiteModel.User
+            {
+                externalAuthUserId = user.externalAuthUserId,
+                id = user.id,
+                lastLogin = user.lastLogin,
+                name = user.name,
+                siteRole = user.siteRole,
+                locale = user.locale,
+                language = user.language
+            };
+        }
+        
+        public static SiteModel.User ToUser(this AddUserResponse.User user)
+        {
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new SiteModel.User
+            {
+                externalAuthUserId = user.externalAuthUserId,
+                id = user.id,
+                name = user.name,
+                siteRole = user.siteRole
+            };
+        }
 
         public static SiteModel.User ToUser(this GetGroupUserResponse.User user)
         {

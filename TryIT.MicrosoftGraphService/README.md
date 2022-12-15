@@ -132,3 +132,6 @@ MsOutlook.GetMessages("emailaddress", "Inbox");
 ```
 
 
+### Note
+
+```MsGraphService.Sharepoint``` Upload file method will replace `#` to `_` in file name
