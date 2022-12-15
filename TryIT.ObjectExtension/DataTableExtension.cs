@@ -334,5 +334,88 @@ namespace TryIT.ObjectExtension
                 newColumn.ColumnName = columnName;
             }
         }
+
+        /// <summary>
+        /// copy <paramref name="dtSource"/> as new DataTable with selected columns from <paramref name="columns"/>
+        /// </summary>
+        /// <param name="dtSource"></param>
+        /// <param name="columns"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="columns"/> cannot be null</exception>
+        public static DataTable Copy(DataTable dtSource, params string[] columns)
+        {
+            if (dtSource == null)
+            {
+                throw new ArgumentNullException(nameof(dtSource), "Source table cannot be null");
+            }
+
+            if (columns.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(columns), "Column list cannot be null");
+            }
+
+            DataTable dtNew = new DataTable();
+            foreach (var column in columns)
+            {
+                DataColumn dtColumn = new DataColumn(column, dtSource.Columns[column].DataType);
+                dtNew.Columns.Add(dtColumn);
+            }
+
+            foreach (DataRow row in dtSource.Rows)
+            {
+                DataRow dtRow = dtNew.NewRow();
+                foreach (var column in columns)
+                {
+                    dtRow[column] = row[column];
+                }
+                dtNew.Rows.Add(dtRow);
+            }
+
+            return dtNew;
+        }
+
+        /// <summary>
+        /// get <paramref name="dtSource"/> as csv format with <paramref name="separator"/>
+        /// </summary>
+        /// <param name="dtSource"></param>
+        /// <param name="separator"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="columns"/> cannot be null</exception>
+        public static string ToString(this DataTable dtSource, string separator)
+        {
+            if (dtSource == null)
+            {
+                throw new ArgumentNullException(nameof(dtSource), "Source table cannot be null");
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            // DataColumn to header
+            for (int i = 0; i < dtSource.Columns.Count; i++)
+            {
+                stringBuilder.Append(dtSource.Columns[i].ColumnName);
+                if (i < dtSource.Columns.Count - 1)
+                {
+                    stringBuilder.Append(separator);
+                }
+            }
+            stringBuilder.AppendLine();
+
+            // DataRow to row
+            for (int i = 0; i < dtSource.Rows.Count; i++)
+            {
+                for (int j = 0; j < dtSource.Columns.Count; j++)
+                {
+                    stringBuilder.Append(dtSource.Rows[i][j].ToString());
+                    if (j < dtSource.Columns.Count - 1)
+                    {
+                        stringBuilder.Append(separator);
+                    }
+                }
+                stringBuilder.AppendLine();
+            }
+
+            return stringBuilder.ToString();
+        }
     }
 }
