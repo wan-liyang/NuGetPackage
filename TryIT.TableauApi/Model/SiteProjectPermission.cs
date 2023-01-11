@@ -79,7 +79,7 @@ namespace TryIT.TableauApi.Model
             {
                 capabilities.Add(new Capability
                 {
-                    Type = CapabilityType_Project.Read.ToString(),
+                    Type = CapabilityType_Project.Write.ToString(),
                     Mode = GetCapabilityMode(permission.P_Publish)
                 });
             }

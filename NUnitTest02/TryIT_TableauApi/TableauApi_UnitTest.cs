@@ -16,7 +16,7 @@ namespace NUnitTest02.TryIT_TableauApi
             string sitename = "";
             using(TableauConnector connector = new TableauConnector(hostUrl, apiVersion, tokenName, tokenSecret, sitename))
             {
-                connector.GetAllUsers();
+                connector.GetUsers();
             }
         }
     }

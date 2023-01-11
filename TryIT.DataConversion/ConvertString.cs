@@ -109,5 +109,37 @@ namespace TryIT.DataConversion
 
             return Enum.TryParse<T>(value, true, out result) ? result : defaultEnum;
         }
+
+        /// <summary>
+        /// try convert string value to decimal value, return null if input value is empty or convert failed, 1% will convert to 0.01
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static decimal? ToDecimal(this string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
+            if (value.EndsWith("%"))
+            {
+                decimal output;
+                if (decimal.TryParse(value.TrimEnd('%'), out output))
+                {
+                    return output / 100;
+                }
+                return null;
+            }
+            else
+            {
+                decimal output;
+                if(decimal.TryParse(value, out output))
+                {
+                    return output;
+                }
+                return null;
+            }
+        }
     }
 }

@@ -16,4 +16,11 @@ namespace TryIT.TableauApi.Model
         databases,
         tables
     }
+
+    public enum ProjectContentPermission
+    {
+        ManagedByOwner,
+        LockedToProject,
+        LockedToProjectWithoutNested
+    }
 }

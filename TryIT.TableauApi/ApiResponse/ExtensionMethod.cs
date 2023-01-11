@@ -142,7 +142,7 @@ namespace TryIT.TableauApi.ApiResponse
             }
             return new SiteModel.Project
             {
-                ownerId = project.owner.id,
+                ownerId = project.owner?.id,
                 id = project.id,
                 name = project.name,
                 description = project.description,
