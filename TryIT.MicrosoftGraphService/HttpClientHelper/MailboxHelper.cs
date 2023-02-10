@@ -97,6 +97,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             model.message.toRecipients = new System.Collections.Generic.List<Recipient>();
             model.message.ccRecipients = new System.Collections.Generic.List<Recipient>();
             model.message.bccRecipients = new System.Collections.Generic.List<Recipient>();
+            model.message.attachments = new System.Collections.Generic.List<MessageRequestModel.Attachment>();
 
             if (message.ToRecipients != null && message.ToRecipients.Length > 0)
             {
@@ -119,6 +120,20 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 foreach (var item in message.BccRecipients)
                 {
                     model.message.bccRecipients.Add(new Recipient { emailAddress = new EmailAddress { address = item } });
+                }
+            }
+
+            if (message.Attachments != null && message.Attachments.Count > 0)
+            {
+                foreach (var item in message.Attachments)
+                {
+                    model.message.attachments.Add(new MessageRequestModel.Attachment
+                    {
+                        OdataType = "#microsoft.graph.fileAttachment",
+                        name = item.FileName,
+                        contentType = MIMEType.GetContentType(item.FileName),
+                        contentBytes = Convert.ToBase64String(System.IO.File.ReadAllBytes(item.FileNameAndPath))
+                    });
                 }
             }
 
@@ -145,7 +160,15 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                   }
                 ]
               },
-              "saveToSentItems": "false"
+              "saveToSentItems": "false",
+              "attachments": [
+                  {
+                    "@odata.type": "#microsoft.graph.fileAttachment",
+                    "name": "attachment.txt",
+                    "contentType": "text/plain",
+                    "contentBytes": "SGVsbG8gV29ybGQh"
+                  }
+                ]
             }
              */
 

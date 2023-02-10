@@ -26,6 +26,16 @@ namespace TryIT.MicrosoftGraphService.ApiModel
             public List<Recipient> toRecipients { get; set; }
             public List<Recipient> ccRecipients { get; set; }
             public List<Recipient> bccRecipients { get; set; }
+            public List<Attachment> attachments { get; set; }
+        }
+
+        public class Attachment
+        {
+            [JsonProperty("@odata.type")]
+            public string OdataType { get; set; }
+            public string name { get; set; }
+            public string contentType { get; set; }
+            public string contentBytes { get; set; }
         }
     }
 
