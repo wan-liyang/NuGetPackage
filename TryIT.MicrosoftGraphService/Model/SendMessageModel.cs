@@ -17,9 +17,9 @@ namespace TryIT.MicrosoftGraphService.Model
     {
         public string FileName { get; set; }
         /// <summary>
-        /// use to get file byte data
+        /// attachment byte data
         /// </summary>
-        public string FileNameAndPath { get; set; }
+        public byte[] FileContent { get; set; }
     }
 }
 

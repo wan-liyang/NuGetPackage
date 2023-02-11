@@ -132,7 +132,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                         OdataType = "#microsoft.graph.fileAttachment",
                         name = item.FileName,
                         contentType = MIMEType.GetContentType(item.FileName),
-                        contentBytes = Convert.ToBase64String(System.IO.File.ReadAllBytes(item.FileNameAndPath))
+                        contentBytes = Convert.ToBase64String(item.FileContent)
                     });
                 }
             }
