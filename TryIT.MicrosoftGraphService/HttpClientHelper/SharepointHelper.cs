@@ -341,12 +341,11 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         /// move item into another folder
         /// </summary>
         /// <param name="siteId"></param>
-        /// <param name="itemId">item unique id which need move</param>
-        /// <param name="newParentId">destination folder unique id</param>
+        /// <param name="moveItem"></param>
         /// <returns></returns>
-        public bool MoveItem(string siteId, string itemId, string newParentId)
+        public bool MoveItem(string siteId, MoveSharepointItemModel moveItem)
         {
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/drive/items/{itemId}";
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/drive/items/{moveItem.itemId}";
 
             try
             {
@@ -354,8 +353,9 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 {
                     parentReference = new ParentReference
                     {
-                        id = newParentId
-                    }
+                        id = moveItem.parentId
+                    },
+                    name = moveItem.name
                 };
 
                 string jsonContent = requestBody.ObjectToJson();

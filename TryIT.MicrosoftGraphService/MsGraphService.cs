@@ -365,22 +365,26 @@ namespace TryIT.MicrosoftGraphService
             /// <param name="newParentId"></param>
             /// <returns></returns>
             /// <exception cref="System.ArgumentNullException"></exception>
-            public bool MoveItem(string hostName, string siteName, string itemId, string newParentId)
+            public bool MoveItem(string hostName, string siteName, MoveSharepointItemModel moveItem)
             {
                 NotEmptyParameter(ParamName_HostName, hostName);
                 NotEmptyParameter(ParamName_SiteName, siteName);
                 
-                if (string.IsNullOrEmpty(itemId))
+                if (moveItem == null)
                 {
-                    throw new System.ArgumentNullException(nameof(itemId));
+                    throw new System.ArgumentNullException(nameof(moveItem));
                 }
-                if (string.IsNullOrEmpty(newParentId))
+                if (string.IsNullOrEmpty(moveItem.itemId))
                 {
-                    throw new System.ArgumentNullException(nameof(newParentId));
+                    throw new System.ArgumentNullException(nameof(moveItem.itemId));
+                }
+                if (string.IsNullOrEmpty(moveItem.parentId))
+                {
+                    throw new System.ArgumentNullException(nameof(moveItem.parentId));
                 }
 
                 MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
-                return helper.MoveItem(hostName, siteName, itemId, newParentId);
+                return helper.MoveItem(hostName, siteName, moveItem);
             }
         }
 

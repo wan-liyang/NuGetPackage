@@ -31,6 +31,7 @@ namespace TryIT.MicrosoftGraphService.ApiModel
     internal class MoveItemRequestBody
     {
         public ParentReference parentReference { get; set; }
+        public string name { get; set; }
     }
 
     internal class ParentReference
