@@ -13,6 +13,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
     internal class SharepointHelper : BaseHelper
     {
+        private readonly string GraphApiRootUrl = "https://graph.microsoft.com/v1.0";
         private HttpClient _httpClient;
 
         public SharepointHelper(HttpClient httpClient)
@@ -322,6 +323,47 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             try
             {
                 var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return true;
+                }
+                CheckStatusCode(response);
+                return false;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// move item into another folder
+        /// </summary>
+        /// <param name="siteId"></param>
+        /// <param name="itemId">item unique id which need move</param>
+        /// <param name="newParentId">destination folder unique id</param>
+        /// <returns></returns>
+        public bool MoveItem(string siteId, string itemId, string newParentId)
+        {
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/drive/items/{itemId}";
+
+            try
+            {
+                MoveItemRequestBody requestBody = new MoveItemRequestBody
+                {
+                    parentReference = new ParentReference
+                    {
+                        id = newParentId
+                    }
+                };
+
+                string jsonContent = requestBody.ObjectToJson();
+
+                HttpContent httpContent = new StringContent(jsonContent);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
 
                 if (response.StatusCode == HttpStatusCode.NoContent)
                 {

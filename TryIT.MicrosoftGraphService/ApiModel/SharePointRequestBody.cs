@@ -27,4 +27,14 @@ namespace TryIT.MicrosoftGraphService.ApiModel
         [JsonProperty("@microsoft.graph.conflictBehavior")]
         public string ConflictBehavior { get; set; }
     }
+
+    internal class MoveItemRequestBody
+    {
+        public ParentReference parentReference { get; set; }
+    }
+
+    internal class ParentReference
+    {
+        public string id { get; set; }
+    }
 }

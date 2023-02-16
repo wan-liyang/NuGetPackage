@@ -355,6 +355,33 @@ namespace TryIT.MicrosoftGraphService
                 MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.DeleteItem(hostName, siteName, itemId);
             }
+
+            /// <summary>
+            /// move item into another folder
+            /// </summary>
+            /// <param name="hostName"></param>
+            /// <param name="siteName"></param>
+            /// <param name="itemId"></param>
+            /// <param name="newParentId"></param>
+            /// <returns></returns>
+            /// <exception cref="System.ArgumentNullException"></exception>
+            public bool MoveItem(string hostName, string siteName, string itemId, string newParentId)
+            {
+                NotEmptyParameter(ParamName_HostName, hostName);
+                NotEmptyParameter(ParamName_SiteName, siteName);
+                
+                if (string.IsNullOrEmpty(itemId))
+                {
+                    throw new System.ArgumentNullException(nameof(itemId));
+                }
+                if (string.IsNullOrEmpty(newParentId))
+                {
+                    throw new System.ArgumentNullException(nameof(newParentId));
+                }
+
+                MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
+                return helper.MoveItem(hostName, siteName, itemId, newParentId);
+            }
         }
 
         public class User

@@ -185,13 +185,28 @@ namespace TryIT.MicrosoftGraphService.Helper
         /// <summary>
         /// delete SharePoint DirveItem by Id, <paramref name="itemId"/> is SharePoint DriveItem Unique Id
         /// </summary>
-        /// <param name="siteId"></param>
+        /// <param name="hostName"></param>
+        /// <param name="siteName"></param>
         /// <param name="itemId"></param>
         /// <returns></returns>
         public bool DeleteItem(string hostName, string siteName, string itemId)
         {
             var site = this.GetSite(hostName, siteName);
             return _helper.DeleteItemById(site.Id, itemId);
+        }
+
+        /// <summary>
+        /// move SharePoint item into another folder
+        /// </summary>
+        /// <param name="hostName"></param>
+        /// <param name="siteName"></param>
+        /// <param name="itemId">item unique id which need move</param>
+        /// <param name="newParentId">destination folder unique id</param>
+        /// <returns></returns>
+        public bool MoveItem(string hostName, string siteName, string itemId, string newParentId)
+        {
+            var site = this.GetSite(hostName, siteName);
+            return _helper.MoveItem(site.Id, itemId, newParentId);
         }
     }
 }
