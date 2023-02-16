@@ -6,13 +6,13 @@ namespace TryIT.EmailService
     {
         public string SmtpServer { get; set; }
         public int SmtpPort { get; set; }
+        public bool EnableSsl {get; set;}
         public string FromAddress { get; set; }
     }
 
     public class Config
     {
         internal static EmailConfig CurrentConfig;
-
         
         internal static string SmtpServer
         {
@@ -46,6 +46,18 @@ namespace TryIT.EmailService
                 }
 
                 return CurrentConfig.SmtpPort;
+            }
+        }
+        internal static bool EnableSsl
+        {
+            get
+            {
+                if (CurrentConfig == null)
+                {
+                    throw new ArgumentNullException("EmailConfig is null, please call Configure method in Startup.cs");
+                }
+
+                return CurrentConfig.EnableSsl;
             }
         }
         internal static string FromAddress

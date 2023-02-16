@@ -78,6 +78,7 @@ namespace TryIT.EmailService
                 {
                     try
                     {
+                        client.EnableSsl = Config.EnableSsl;
                         client.Send(message);
                     }
                     catch
