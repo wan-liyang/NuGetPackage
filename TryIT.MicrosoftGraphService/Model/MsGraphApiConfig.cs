@@ -14,5 +14,10 @@ namespace TryIT.MicrosoftGraphService.Model
         public string Proxy_Password { get; set; }
 
         public string Token { get; set; }
+
+        /// <summary>
+        /// determine request timeout second, default is 100 seconds, https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.timeout?view=net-7.0
+        /// </summary>
+        public double TimeoutSecond { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System;
 
 namespace TryIT.MicrosoftGraphService.Helper
 {
@@ -32,6 +33,11 @@ namespace TryIT.MicrosoftGraphService.Helper
             _httpClient = new HttpClient(clientHandler);
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + config.Token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+
+            if (config.TimeoutSecond > 0)
+            {
+                _httpClient.Timeout = TimeSpan.FromSeconds(config.TimeoutSecond);
+            }
         }
 
         public HttpClient GetHttpClient()
