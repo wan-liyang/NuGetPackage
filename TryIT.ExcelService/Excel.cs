@@ -5,10 +5,21 @@ using System.IO;
 
 namespace TryIT.ExcelService
 {
+    /// <summary>
+    /// excel component
+    /// </summary>
     public class ExcelComponent : IDisposable
     {
+        /// <summary>
+        /// excel package after load file
+        /// </summary>
         public ExcelPackage ExcelPackage { get; set; }
 
+        /// <summary>
+        /// initial excell package from a file
+        /// </summary>
+        /// <param name="fileNameAndPath"></param>
+        /// <exception cref="FileNotFoundException"></exception>
         public ExcelComponent(string fileNameAndPath)
         {
             FileInfo fileInfo = new FileInfo(fileNameAndPath);
@@ -21,6 +32,66 @@ namespace TryIT.ExcelService
                 string fileName = Path.GetFileName(fileNameAndPath);
                 throw new FileNotFoundException($"file '{fileName}' not found.");
             }
+        }
+
+        /// <summary>
+        /// determine cell is number format
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        public bool IsNumberFormat(ExcelRangeBase cell)
+        {
+            int numId = cell.Style.Numberformat.NumFmtID;
+
+            switch (numId)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 9:
+                case 10:
+                case 11:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 48: return true;
+                default:
+                    return false;
+            }
+
+            /*
+             0 => "General",
+            1 => "0",
+            2 => "0.00",
+            3 => "#,##0",
+            4 => "#,##0.00",
+            9 => "0%",
+            10 => "0.00%",
+            11 => "0.00E+00",
+            12 => "# ?/?",
+            13 => "# ??/??",
+            14 => "mm-dd-yy",
+            15 => "d-mmm-yy",
+            16 => "d-mmm",
+            17 => "mmm-yy",
+            18 => "h:mm AM/PM",
+            19 => "h:mm:ss AM/PM",
+            20 => "h:mm",
+            21 => "h:mm:ss",
+            22 => "m/d/yy h:mm",
+            37 => "#,##0 ;(#,##0)",
+            38 => "#,##0 ;[Red](#,##0)",
+            39 => "#,##0.00;(#,##0.00)",
+            40 => "#,##0.00;[Red](#,##0.00)",
+            45 => "mm:ss",
+            46 => "[h]:mm:ss",
+            47 => "mmss.0",
+            48 => "##0.0",
+            49 => "@",
+            _ => string.Empty,
+             */
         }
 
         /// <summary>
@@ -79,7 +150,15 @@ namespace TryIT.ExcelService
 
                     if (!string.IsNullOrEmpty(cell.Text))
                     {
-                        dtRow[newDRColIndex] = cell.Text.ToString();
+                        // if cell is number format, get actual value, e.g. cell.Value is 3.1415926, cell.Text is 3.14
+                        if (IsNumberFormat(cell))
+                        {
+                            dtRow[newDRColIndex] = cell.RichText.Value.ToString();
+                        }
+                        else
+                        {
+                            dtRow[newDRColIndex] = cell.Text.ToString();
+                        }
                     }
 
                     // Once isEmptyRow is false, skip
@@ -98,6 +177,9 @@ namespace TryIT.ExcelService
             return dt;
         }
 
+        /// <summary>
+        /// release resource
+        /// </summary>
         public void Dispose()
         {
             if (ExcelPackage != null)

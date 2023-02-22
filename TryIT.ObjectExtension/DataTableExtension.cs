@@ -84,16 +84,19 @@ namespace TryIT.ObjectExtension
                             var prop = props.Where(p => p.Name.IsEquals(propName)).FirstOrDefault();
                             if (prop != null)
                             {
-                                if (prop.PropertyType.IsGenericType && prop.PropertyType.Name.Contains("Nullable"))
+                                if (row[colName] != DBNull.Value)
                                 {
-                                    if (!string.IsNullOrEmpty(row[colName].ToString()))
+                                    if (prop.PropertyType.IsGenericType && prop.PropertyType.Name.Contains("Nullable"))
                                     {
-                                        prop.SetValue(obj, ConvertValueToType(row[colName], Nullable.GetUnderlyingType(prop.PropertyType)));
+                                        if (!string.IsNullOrEmpty(row[colName].ToString()))
+                                        {
+                                            prop.SetValue(obj, ConvertValueToType(row[colName], Nullable.GetUnderlyingType(prop.PropertyType)));
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    prop.SetValue(obj, ConvertValueToType(row[colName], prop.PropertyType), null);
+                                    else
+                                    {
+                                        prop.SetValue(obj, ConvertValueToType(row[colName], prop.PropertyType), null);
+                                    }
                                 }
                             }
                         }
@@ -312,7 +315,7 @@ namespace TryIT.ObjectExtension
         public static void ConvertColumnType(this DataTable dataTable, string columnName, Type newType)
         {
             // if same type, no action required
-            if(dataTable.Columns[columnName].DataType.IsEquivalentTo(newType))
+            if (dataTable.Columns[columnName].DataType.IsEquivalentTo(newType))
             {
                 return;
             }

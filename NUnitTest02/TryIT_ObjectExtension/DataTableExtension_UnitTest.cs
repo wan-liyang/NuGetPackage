@@ -71,6 +71,50 @@ namespace NUnitTest02.TryIT_ObjectExtension
             Assert.AreEqual(456, list[0].Prop4);
         }
 
+
+        [Test]
+        public void DataTable_ToList_Test2()
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1");
+            dataTable.Columns.Add("Col2");
+            dataTable.Columns.Add("Col3");
+            dataTable.Columns.Add("Col4");
+
+            DataRow row = dataTable.NewRow();
+            row["Col1"] = "abc";
+            row["Col2"] = 123;
+            row["Col3"] = "def";
+            row["Col4"] = 456;
+            dataTable.Rows.Add(row);
+
+            DataRow row2 = dataTable.NewRow();
+            row2["Col1"] = "hjk";
+            row2["Col2"] = 789;
+            row2["Col3"] = "lmn";
+            row2["Col4"] = DBNull.Value;
+            dataTable.Rows.Add(row2);
+
+            var keyValues = new Dictionary<string, string> {
+                { "Col1", "Prop1"},
+                { "Col2", "Prop2"},
+                { "Col3", "Prop3"},
+                { "Col4", "Prop4"},
+            };
+
+            var list = dataTable.ToList<List_Test>(keyValues);
+            Assert.AreEqual(2, list.Count);
+            Assert.AreEqual("abc", list[0].Prop1);
+            Assert.AreEqual(123, list[0].Prop2);
+            Assert.AreEqual("def", list[0].Prop3);
+            Assert.AreEqual(456, list[0].Prop4);
+
+            Assert.AreEqual("hjk", list[1].Prop1);
+            Assert.AreEqual(789, list[1].Prop2);
+            Assert.AreEqual("lmn", list[1].Prop3);
+            Assert.AreEqual(null, list[1].Prop4);
+        }
+
         [Test]
         public void DataTable_ToHtmlString_Test()
         {

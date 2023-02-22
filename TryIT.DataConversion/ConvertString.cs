@@ -114,8 +114,9 @@ namespace TryIT.DataConversion
         /// try convert string value to decimal value, return null if input value is empty or convert failed, 1% will convert to 0.01
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="numberStyles">default to <see cref="NumberStyles.Any"/> for avoid failure for scientific value, e.g. if data from excel 0.0000159515001096899 will become 1.59515001096899E-05</param>
         /// <returns></returns>
-        public static decimal? ToDecimal(this string value)
+        public static decimal? ToDecimal(this string value, NumberStyles numberStyles = NumberStyles.Any)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -125,7 +126,7 @@ namespace TryIT.DataConversion
             if (value.EndsWith("%"))
             {
                 decimal output;
-                if (decimal.TryParse(value.TrimEnd('%'), out output))
+                if (decimal.TryParse(value.TrimEnd('%'), numberStyles, null, out output))
                 {
                     return output / 100;
                 }
@@ -134,7 +135,7 @@ namespace TryIT.DataConversion
             else
             {
                 decimal output;
-                if(decimal.TryParse(value, out output))
+                if(decimal.TryParse(value, numberStyles, null, out output))
                 {
                     return output;
                 }
