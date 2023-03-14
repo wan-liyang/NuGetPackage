@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TryIT.FileService
 {
@@ -375,6 +377,26 @@ namespace TryIT.FileService
                     CopyDirectory(subDir.FullName, newDestinationDir, true);
                 }
             }
+        }
+
+        /// <summary>
+        /// get file from path based on Regex pattern
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="regex"></param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <returns></returns>
+        public static List<string> GetFileByRegex(string path, string regex)
+        {            
+            // Get information about the source directory
+            var dir = new DirectoryInfo(path);
+
+            // Check if the source directory exists
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+            Regex reg = new Regex(regex);
+            return Directory.GetFiles(path).Where(p => reg.IsMatch(Path.GetFileName(p))).ToList();
         }
     }
 }
