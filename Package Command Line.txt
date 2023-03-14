@@ -10,7 +10,7 @@ dotnet pack ./TryIT.DataConversion/TryIT.DataConversion.csproj --output nupkgs -
 dotnet pack ./TryIT.EmailService/TryIT.EmailService.csproj --output nupkgs -p:PackageVersion=1.0.4
 dotnet pack ./TryIT.ExcelService/TryIT.ExcelService.csproj --output nupkgs -p:PackageVersion=1.0.3
 dotnet pack ./TryIT.FileService.Zip/TryIT.FileService.Zip.csproj --output nupkgs -p:PackageVersion=1.0.2
-dotnet pack ./TryIT.FileService/TryIT.FileService.csproj --output nupkgs -p:PackageVersion=1.0.9
+dotnet pack ./TryIT.FileService/TryIT.FileService.csproj --output nupkgs -p:PackageVersion=1.1.0
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.5
 dotnet pack ./TryIT.Impersonation.Win/TryIT.Impersonation.Win.csproj --output nupkgs -p:PackageVersion=1.0.2

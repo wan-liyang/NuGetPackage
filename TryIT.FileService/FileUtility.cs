@@ -395,7 +395,7 @@ namespace TryIT.FileService
             if (!dir.Exists)
                 throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
 
-            Regex reg = new Regex(regex);
+            Regex reg = new Regex(regex, RegexOptions.IgnoreCase);
             return Directory.GetFiles(path).Where(p => reg.IsMatch(Path.GetFileName(p))).ToList();
         }
     }
