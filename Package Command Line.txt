@@ -22,4 +22,4 @@ dotnet pack ./TryIT.RestApiService/TryIT.RestApiService.csproj --output nupkgs -
 dotnet pack ./TryIT.SFTPService/TryIT.SFTPService.csproj --output nupkgs -p:PackageVersion=1.0.6
 dotnet pack ./TryIT.SqlAdoService/TryIT.SqlAdoService.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.WindowService/TryIT.WindowService.csproj --output nupkgs -p:PackageVersion=1.0.2
-dotnet pack ./TryIT.TableauApi/TryIT.TableauApi.csproj --output nupkgs -p:PackageVersion=1.1.1
+dotnet pack ./TryIT.TableauApi/TryIT.TableauApi.csproj --output nupkgs -p:PackageVersion=1.1.5

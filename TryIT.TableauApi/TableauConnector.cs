@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using TryIT.TableauApi.ApiResponse;
 using TryIT.TableauApi.Model;
+using TryIT.TableauApi.SiteModel;
 
 namespace TryIT.TableauApi
 {
+    /// <summary>
+    /// Tableau Connector
+    /// </summary>
     public class TableauConnector : IDisposable
     {
         string siteId;
@@ -17,25 +22,81 @@ namespace TryIT.TableauApi
 
         HttpClient httpClient;
 
-        /// <summary>
-        /// init connection to tableau server with personal token generated via Tableau Server
-        /// </summary>
-        /// <param name="hostUrl">https://xxx</param>
-        /// <param name="apiVersion">api version for specific tableau server, refer to https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm</param>
-        /// <param name="tokenName"></param>
-        /// <param name="tokenSecret"></param>
-        /// <param name="sitename"></param>
-        public TableauConnector(string hostUrl, string apiVersion, string tokenName, string tokenSecret, string sitename)
+        private static WebProxy GetProxy(string url, string username = "", string password = "")
         {
-            this.apiVersion = apiVersion;
+            WebProxy proxy = null;
 
-            httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(hostUrl);
+            if (!string.IsNullOrEmpty(url))
+            {
+                proxy = new WebProxy(url);
+
+                if (!string.IsNullOrEmpty(username))
+                {
+                    proxy.UseDefaultCredentials = false;
+                    proxy.Credentials = new NetworkCredential(username, password);
+                }
+                proxy.BypassProxyOnLocal = true;
+            }
+
+            return proxy;
+        }
+
+        private static void ValidateInfo(ApiRequestModel requestModel)
+        {
+            if (requestModel == null)
+            {
+                throw new ArgumentNullException(nameof(requestModel));
+            }
+            if (string.IsNullOrEmpty(requestModel.HostUrl))
+            {
+                throw new ArgumentNullException(nameof(requestModel.HostUrl));
+            }
+            if (string.IsNullOrEmpty(requestModel.Sitename))
+            {
+                throw new ArgumentNullException(nameof(requestModel.Sitename));
+            }
+            if (string.IsNullOrEmpty(requestModel.ApiVersion))
+            {
+                throw new ArgumentNullException(nameof(requestModel.ApiVersion));
+            }
+            if (string.IsNullOrEmpty(requestModel.TokenName))
+            {
+                throw new ArgumentNullException(nameof(requestModel.TokenName));
+            }
+            if (string.IsNullOrEmpty(requestModel.TokenSecret))
+            {
+                throw new ArgumentNullException(nameof(requestModel.TokenSecret));
+            }
+        }
+
+        /// <summary>
+        /// init Tableau Connector
+        /// </summary>
+        /// <param name="requestModel"></param>
+        public TableauConnector(ApiRequestModel requestModel)
+        {
+            ValidateInfo(requestModel);
+
+            this.apiVersion = requestModel.ApiVersion;
+
+            WebProxy proxy = GetProxy(requestModel.Proxy.Url, requestModel.Proxy.Username, requestModel.Proxy.Password);
+            HttpClientHandler clientHandler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = true,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            };
+            if (proxy != null)
+            {
+                clientHandler.Proxy = proxy;
+            }
+
+            httpClient = new HttpClient(clientHandler);
+            httpClient.BaseAddress = new Uri(requestModel.HostUrl);
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             string url = $"/api/{apiVersion}/auth/signin";
-            string request = $"<tsRequest><credentials personalAccessTokenName=\"{tokenName}\" personalAccessTokenSecret=\"{tokenSecret}\"><site contentUrl=\"{sitename}\"/></credentials></tsRequest>";
+            string request = $"<tsRequest><credentials personalAccessTokenName=\"{requestModel.TokenName}\" personalAccessTokenSecret=\"{requestModel.TokenSecret}\"><site contentUrl=\"{requestModel.Sitename}\"/></credentials></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
             var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
@@ -334,7 +395,6 @@ namespace TryIT.TableauApi
         }
         #endregion
 
-
         #region Project method
         /// <summary>
         /// get project by name and parent project id, if <paramref name="parentProjectId"/> is null or empty, means get top level project
@@ -405,7 +465,7 @@ namespace TryIT.TableauApi
         public SiteModel.Project UpdateProject(string projectId, string newParentProjectId, string newProjectName, string newProjectDescription, ProjectContentPermission newProjectContentPermission = ProjectContentPermission.ManagedByOwner)
         {
             string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}";
-            string request = $"<tsRequest><project parentProjectId=\"{newParentProjectId}\" name=\"{newProjectName}\" description=\"{newProjectDescription}\"/>contentPermissions=\"{newProjectContentPermission}\"</tsRequest>";
+            string request = $"<tsRequest><project parentProjectId=\"{newParentProjectId}\" name=\"{newProjectName}\" description=\"{newProjectDescription}\" contentPermissions=\"{newProjectContentPermission}\" /></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
             var responseMessage = httpClient.PutAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
@@ -456,6 +516,11 @@ namespace TryIT.TableauApi
         /// <returns></returns>
         public SiteModel.Permission AddProjectGroupPermission(string projectId, string groupId, DefaultPermissionTypeEnum defaultPermissionType, List<Capability> capabilities)
         {
+            if (capabilities == null || capabilities.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(capabilities), "no capability provided");
+            }
+
             string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/permissions";
             if (!defaultPermissionType.Equals(DefaultPermissionTypeEnum.project))
             {

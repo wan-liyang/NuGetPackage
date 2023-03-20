@@ -9,15 +9,26 @@ namespace NUnitTest02.TryIT_TableauApi
         [Test]
         public void GetUser_Test()
         {
-            string hostUrl = "";
-            string apiVersion = "";
-            string tokenName = "";
-            string tokenSecret = "";
-            string sitename = "";
-            using(TableauConnector connector = new TableauConnector(hostUrl, apiVersion, tokenName, tokenSecret, sitename))
+            using(TableauConnector connector = new TableauConnector(GetRequestModel()))
             {
                 connector.GetUsers();
             }
+        }
+
+        private TryIT.TableauApi.SiteModel.ApiRequestModel GetRequestModel()
+        {
+            return new TryIT.TableauApi.SiteModel.ApiRequestModel
+            {
+                HostUrl = "",
+                ApiVersion = "",
+                Sitename = "",
+                TokenName = "",
+                TokenSecret = "",
+                Proxy = new TryIT.TableauApi.SiteModel.WebProxyModel
+                {
+                    Url = ""
+                }
+            };
         }
     }
 }
