@@ -22,18 +22,18 @@ namespace TryIT.TableauApi
 
         HttpClient httpClient;
 
-        private static WebProxy GetProxy(string url, string username = "", string password = "")
+        private static WebProxy GetProxy(WebProxyModel proxyModel)
         {
             WebProxy proxy = null;
 
-            if (!string.IsNullOrEmpty(url))
+            if (proxyModel != null && !string.IsNullOrEmpty(proxyModel.Url))
             {
-                proxy = new WebProxy(url);
+                proxy = new WebProxy(proxyModel.Url);
 
-                if (!string.IsNullOrEmpty(username))
+                if (!string.IsNullOrEmpty(proxyModel.Username))
                 {
                     proxy.UseDefaultCredentials = false;
-                    proxy.Credentials = new NetworkCredential(username, password);
+                    proxy.Credentials = new NetworkCredential(proxyModel.Username, proxyModel.Password);
                 }
                 proxy.BypassProxyOnLocal = true;
             }
@@ -79,7 +79,7 @@ namespace TryIT.TableauApi
 
             this.apiVersion = requestModel.ApiVersion;
 
-            WebProxy proxy = GetProxy(requestModel.Proxy.Url, requestModel.Proxy.Username, requestModel.Proxy.Password);
+            WebProxy proxy = GetProxy(requestModel.Proxy);
             HttpClientHandler clientHandler = new HttpClientHandler()
             {
                 AllowAutoRedirect = true,
