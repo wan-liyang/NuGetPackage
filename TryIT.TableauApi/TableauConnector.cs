@@ -437,7 +437,7 @@ namespace TryIT.TableauApi
         public SiteModel.Project CreateProject(string parentProjectId, string projectName, string projectDescription, ProjectContentPermission projectContentPermission = ProjectContentPermission.ManagedByOwner)
         {
             string url = $"/api/{apiVersion}/sites/{siteId}/projects";
-            string request = $"<tsRequest><project parentProjectId=\"{parentProjectId}\" name=\"{projectName}\" description=\"{projectDescription}\"/>contentPermissions=\"{projectContentPermission}\"</tsRequest>";
+            string request = $"<tsRequest><project parentProjectId=\"{parentProjectId}\" name=\"{projectName}\" description=\"{projectDescription}\" contentPermissions=\"{projectContentPermission}\" /></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
             var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
             CheckResponseStatus(responseMessage);
