@@ -56,7 +56,8 @@ namespace TryIT.ExcelService
                 case 38:
                 case 39:
                 case 40:
-                case 48: return true;
+                case 48: 
+                case 170: return true;
                 default:
                     return false;
             }
@@ -90,6 +91,7 @@ namespace TryIT.ExcelService
             47 => "mmss.0",
             48 => "##0.0",
             49 => "@",
+            170 => _-* #,##0.0_-;\-* #,##0.0_-;_-* "-"??_-;_-@_-
             _ => string.Empty,
              */
         }
@@ -153,7 +155,7 @@ namespace TryIT.ExcelService
                         // if cell is number format, get actual value, e.g. cell.Value is 3.1415926, cell.Text is 3.14
                         if (IsNumberFormat(cell))
                         {
-                            dtRow[newDRColIndex] = cell.RichText.Value.ToString();
+                            dtRow[newDRColIndex] = cell.Value.ToString();
                         }
                         else
                         {
