@@ -88,7 +88,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                     subject = message.Subject,
                     body = new Body
                     {
-                        contentType = "Text",
+                        contentType = message.BodyContentType.ToString(),
                         content = message.Body
                     }
                 }
