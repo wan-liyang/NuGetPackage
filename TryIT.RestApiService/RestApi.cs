@@ -56,6 +56,11 @@ namespace TryIT.RestApiService
             }
             HttpClient client = new HttpClient(clientHandler);
 
+            if (request.TimeoutSecond > 0)
+            {
+                client.Timeout = TimeSpan.FromSeconds(request.TimeoutSecond);
+            }
+
             client.BaseAddress = new Uri(url);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
