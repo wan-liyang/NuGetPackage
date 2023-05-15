@@ -39,17 +39,17 @@
     <Folder Include="TryIT_PGP\" />
     <Folder Include="TryIT_TableauApi\" />
     <Folder Include="TryIT_DataConversion\" />
-    <Folder Include="TryIT_JWT\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TryIT.JWT\TryIT.JWT.csproj" />
+    <ProjectReference Include="..\TryIT.Jwt\TryIT.Jwt.csproj" />
     <ProjectReference Include="..\TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj" />
     <ProjectReference Include="..\TryIT.ObjectExtension\TryIT.ObjectExtension.csproj" />
-    <ProjectReference Include="..\TryIT.SqlAdoService\TryIT.SqlAdoService.csproj" />
-    <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
     <ProjectReference Include="..\TryIT.CryptoService\TryIT.CryptoService.csproj" />
-    <ProjectReference Include="..\TryIT.PGP\TryIT.PGP.csproj" />
-    <ProjectReference Include="..\TryIT.TableauApi\TryIT.TableauApi.csproj" />
     <ProjectReference Include="..\TryIT.DataConversion\TryIT.DataConversion.csproj" />
-    <ProjectReference Include="..\TryIT.JWT\TryIT.JWT.csproj" />
+    <ProjectReference Include="..\TryIT.SqlAdoService\TryIT.SqlAdoService.csproj" />
+    <ProjectReference Include="..\TryIT.TableauApi\TryIT.TableauApi.csproj" />
+    <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
+    <ProjectReference Include="..\TryIT.PGP\TryIT.PGP.csproj" />
   </ItemGroup>
 </Project>

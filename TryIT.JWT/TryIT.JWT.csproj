@@ -2,27 +2,41 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Jwt method</Description>
+    <PackageId>TryIT.Jwt</PackageId>
+    <PackageTags>Jwt</PackageTags>
+    <Configurations>Release;Debug</Configurations>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile>bin\Debug\netstandard2.0\TryIT.JWT.xml</DocumentationFile>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\net7.0\TryIT.Jwt.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Azure\" />
-    <None Remove="Helper\" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Azure\" />
-    <Folder Include="Helper\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="README.md">
+    <None Include="README.md">
       <Pack>true</Pack>
       <PackagePath>\</PackagePath>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
   </ItemGroup>
 </Project>
