@@ -12,6 +12,23 @@ namespace TryIT.Jwt
         private JwtParameter _parameter;
         public Jwt(JwtParameter parameter)
 		{
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
+            if (string.IsNullOrEmpty(parameter.Issuer))
+            {
+                throw new ArgumentNullException(nameof(parameter.Issuer));
+            }
+            if (string.IsNullOrEmpty(parameter.Audience))
+            {
+                throw new ArgumentNullException(nameof(parameter.Audience));
+            }
+            if (parameter.TokenSecret == null || parameter.TokenSecret.Length == 0)
+            {
+                throw new ArgumentNullException(nameof(parameter.TokenSecret));
+            }
+
             _parameter = parameter;
 		}
 

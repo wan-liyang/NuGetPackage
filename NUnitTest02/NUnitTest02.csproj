@@ -50,5 +50,6 @@
     <ProjectReference Include="..\TryIT.TableauApi\TryIT.TableauApi.csproj" />
     <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
     <ProjectReference Include="..\TryIT.PGP\TryIT.PGP.csproj" />
+    <ProjectReference Include="..\TryIT.Azure.JWT\TryIT.Azure.JWT.csproj" />
   </ItemGroup>
 </Project>

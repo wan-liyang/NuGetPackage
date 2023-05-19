@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using TryIT.Jwt;
+using TryIT.JWT.Azure;
 
 namespace NUnitTest02.TryIT_JWT
 {
@@ -36,25 +37,25 @@ namespace NUnitTest02.TryIT_JWT
             Console.WriteLine(token);
         }
 
-        //[Test]
-        //public void AzureJwt_Test()
-        //{
-        //    RequestModel request = new RequestModel
-        //    {
-        //        TenantId = "213055c2-9576-46cf-824c-38abe5799cc8",
-        //        ClientId = "cf740a76-e484-4d0a-a240-c627e03bb114",
-        //        ClientSecret = "VyX8Q~sToO1X4vzNfOKLF9BE2zI5suRY3HmuhcxQ"
-        //    };
+        [Test]
+        public void AzureJwt_Test()
+        {
+            RequestModel request = new RequestModel
+            {
+                TenantId = "213055c2-9576-46cf-824c-38abe5799cc8",
+                ClientId = "66212106-3838-4908-ba69-4b2d0e93ddcc",
+                ClientSecret = "aU28Q~jr14NzT4_7v9On5l_6PYXF0NK_TeQNoa~0"
+            };
 
-        //    AzureJwt jwt = new AzureJwt(request);
-        //    var token = jwt.GetToken();
+            AzureJwt jwt = new AzureJwt(request);
+            var token = jwt.GetToken();
 
-        //    Console.Write(token);
+            Console.Write(token);
 
-        //    Validate3(token.access_token);
+            jwt.Validate5(token.access_token);
 
-        //    //jwt.Validate(token.access_token);
-        //}
+            //jwt.Validate(token.access_token);
+        }
 
         //public void Validate3(string tokenStr)
         //{
