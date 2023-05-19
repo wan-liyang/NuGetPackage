@@ -1,1 +1,0 @@
-### generate self-signed Jwt (Json Web Token) and validate it
