@@ -1,13 +1,14 @@
-# generate self-signed Jwt (Json Web Token) and validate it
+﻿## How to use this library
 
-### example code
+### access https://docs.microsoft.com/en-us/graph/auth-v2-user to understand more ###
+
 ```
 using TryIT.Jwt;
 
 Jwt jwt = new Jwt(new JwtParameter
 {
-    Issuer = "issuer",
-    Audience = "audience",
+    Issuer = "testaa",
+    Audience = "testdd",
     TokenSecret = Encoding.UTF8.GetBytes("You_Need_To_Provide_A_Longer_Secret_Key_Here"),
     CustomClaims = new List<CustomClaim>
     {
@@ -19,11 +20,10 @@ Jwt jwt = new Jwt(new JwtParameter
 });
 
 var token = jwt.GenerateToken();
-
 var result = jwt.ValidateToken(token);
 
 var claim1 = jwt.GetClaim(token, "userid");
-var claim2 = jwt.GetClaim(token, "is18");
+var claim2 = jwt.GetClaim(token, "is19");
 
 Console.WriteLine(token);
 ```
