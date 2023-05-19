@@ -1,7 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
+
 namespace TryIT.Jwt
 {
-	public class JwtParameter
+    public class JwtParameter
 	{
         public JwtParameter()
         {

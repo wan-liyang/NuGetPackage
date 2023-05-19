@@ -14,8 +14,8 @@ namespace NUnitTest02.TryIT_JWT
         {
             Jwt jwt = new Jwt(new JwtParameter
             {
-                Issuer = "test",
-                Audience = "test",
+                Issuer = "testaa",
+                Audience = "testdd",
                 TokenSecret = Encoding.UTF8.GetBytes("You_Need_To_Provide_A_Longer_Secret_Key_Here"),
                 CustomClaims = new List<CustomClaim>
                 {

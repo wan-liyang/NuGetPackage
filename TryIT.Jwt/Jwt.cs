@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace TryIT.Jwt
 {
-	public class Jwt
+    public class Jwt
     {
         private JwtParameter _parameter;
         public Jwt(JwtParameter parameter)
@@ -32,7 +30,7 @@ namespace TryIT.Jwt
                 new Claim(JwtRegisteredClaimNames.Aud, _parameter.Audience)
             };
 
-            if (_parameter.CustomClaims != null && _parameter.CustomClaims.Count > 0)
+            if (_parameter.CustomClaims != null && _parameter.CustomClaims.Count() > 0)
             {
                 foreach (var claimPair in _parameter.CustomClaims)
                 {
@@ -54,7 +52,7 @@ namespace TryIT.Jwt
                             break;
                     }
 
-                    var claim = new Claim(claimPair.Key, claimPair.Value.ToString()!, valueType);
+                    var claim = new Claim(claimPair.Key, claimPair.Value.ToString(), valueType);
                     claims.Add(claim);
                 }
             }
@@ -63,8 +61,6 @@ namespace TryIT.Jwt
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.Add(TimeSpan.FromSeconds(_parameter.TokenLifetimeSecond)),
-                Issuer = _parameter.Issuer,
-                Audience = _parameter.Audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_parameter.TokenSecret), SecurityAlgorithms.HmacSha256)
             };
 
@@ -113,7 +109,7 @@ namespace TryIT.Jwt
         /// <param name="token"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public string? GetClaim(string token, string name)
+        public string GetClaim(string token, string name)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.ReadToken(token) as JwtSecurityToken;

@@ -28,7 +28,7 @@
     <None Remove="TryIT_PGP\" />
     <None Remove="TryIT_TableauApi\" />
     <None Remove="TryIT_DataConversion\" />
-    <None Remove="TryIT_JWT\" />
+    <None Remove="TryIT_Jwt\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="TryIT_ActiveDirectory\" />
@@ -41,7 +41,6 @@
     <Folder Include="TryIT_DataConversion\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TryIT.JWT\TryIT.JWT.csproj" />
     <ProjectReference Include="..\TryIT.Jwt\TryIT.Jwt.csproj" />
     <ProjectReference Include="..\TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj" />
     <ProjectReference Include="..\TryIT.ObjectExtension\TryIT.ObjectExtension.csproj" />
