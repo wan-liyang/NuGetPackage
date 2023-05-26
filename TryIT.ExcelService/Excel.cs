@@ -41,6 +41,12 @@ namespace TryIT.ExcelService
         /// <returns></returns>
         public bool IsNumberFormat(ExcelRangeBase cell)
         {
+            // when talk about format codes, # is only used for number formats. It is not used for text, date, time, or other formats.
+            if(cell.Style.Numberformat.Format.Contains("#"))
+            {
+                return true;
+            }
+
             int numId = cell.Style.Numberformat.NumFmtID;
 
             switch (numId)
