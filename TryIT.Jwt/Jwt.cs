@@ -100,6 +100,7 @@ namespace TryIT.Jwt
                     ValidIssuer = _parameter.Issuer,
                     ValidAudience = _parameter.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(_parameter.TokenSecret),
+                    
 
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -126,10 +127,10 @@ namespace TryIT.Jwt
         /// <param name="token"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public string GetClaim(string token, string name)
+        public static string GetClaimValue(string token, string name)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var securityToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            var securityToken = tokenHandler.ReadJwtToken(token);
 
             if (securityToken != null)
             {

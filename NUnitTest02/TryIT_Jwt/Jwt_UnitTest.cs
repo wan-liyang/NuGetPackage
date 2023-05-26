@@ -31,8 +31,8 @@ namespace NUnitTest02.TryIT_JWT
 
             var result = jwt.ValidateToken(token);
 
-            var claim1 = jwt.GetClaim(token, "userid");
-            var claim2 = jwt.GetClaim(token, "is19");
+            var claim1 = Jwt.GetClaimValue(token, "userid");
+            var claim2 = Jwt.GetClaimValue(token, "is19");
 
             Console.WriteLine(token);
         }
