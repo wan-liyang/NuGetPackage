@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.IO;
+using System.Collections.Generic;
 
 namespace TryIT.ExcelService
 {
@@ -135,11 +136,23 @@ namespace TryIT.ExcelService
                 }
             }
 
-            // adding column to table
+            /*
+                adding column to table, if same column name appear in excel, the next column will be rename with index number
+                ColumnName => ColumnName
+                ColumnName => ColumnName2            
+            */
+            List<string> columns = new List<string>();
             for (int i = 1; i <= maxColumnIndex; i++)
             {
-                var headerCell = worksheet.Cells[1, i];
-                dt.Columns.Add(headerCell.Text);
+                var columnName = worksheet.Cells[1, i].Text;
+                int index = 2;
+                while (columns.Contains(columnName))
+                {
+                    columnName = $"{columnName}{index}";
+                    index++;
+                }
+                dt.Columns.Add(columnName);
+                columns.Add(columnName);
             }
 
             for (int i = 2; i <= worksheet.Dimension.End.Row; i++)
