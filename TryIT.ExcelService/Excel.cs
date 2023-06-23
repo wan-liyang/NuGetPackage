@@ -121,6 +121,10 @@ namespace TryIT.ExcelService
             int maxColumnIndex = 0;
             for (int i = worksheet.Dimension.End.Column; i >= 1; i--)
             {
+                // if the empty column has format applied, it will be included in worksheet.Dimension.End.Column, use this to skip that column
+                if(string.IsNullOrEmpty(worksheet.Cells[1, i].Text))
+			        continue;
+
                 for (int j = 1; j <= worksheet.Dimension.End.Row; j++)
                 {
                     var cell = worksheet.Cells[j, i];
