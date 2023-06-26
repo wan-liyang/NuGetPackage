@@ -8,6 +8,18 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
     internal class BaseHelper
     {
+        /// <summary>
+        /// add request header to HttpClient, to avoid duplicate header add into client
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="headerKey"></param>
+        /// <param name="headerValue"></param>
+        protected void AddDefaultRequestHeaders(HttpClient client, string headerKey, string headerValue)
+        {
+            client.DefaultRequestHeaders.Remove(headerKey);
+            client.DefaultRequestHeaders.Add(headerKey, headerValue);
+        }
+
         protected void CheckStatusCode(HttpResponseMessage responseMessage)
         {
             if (!responseMessage.IsSuccessStatusCode)
