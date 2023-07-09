@@ -3,6 +3,7 @@ using TryIT.MicrosoftGraphService.Model;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TryIT.MicrosoftGraphService.Model.User;
 
 namespace TryIT.MicrosoftGraphService
 {
@@ -385,58 +386,6 @@ namespace TryIT.MicrosoftGraphService
 
                 MsGraphSharePointHelper helper = new MsGraphSharePointHelper(_config);
                 return helper.MoveItem(hostName, siteName, moveItem);
-            }
-        }
-
-        public class User
-        {
-            private MsGraphApiConfig _config;
-            public User(MsGraphApiConfig config)
-            {
-                _config = config;
-            }
-
-            /// <summary>
-            /// get user info, if <paramref name="userEmail"/> is empty, get me
-            /// </summary>
-            /// <param name="emailAddress"></param>
-            /// <returns></returns>
-            public UserModel GetUser(string emailAddress = "")
-            {
-                MsGraphUserHelper helper = new MsGraphUserHelper(_config);
-
-                return helper.GetUserInfo(emailAddress);
-            }
-        }
-
-        public class Team
-        {
-            private MsGraphApiConfig _config;
-            public Team(MsGraphApiConfig config)
-            {
-                _config = config;
-            }
-            /// <summary>
-            /// get list members of team, the <paramref name="userEmail"/> need be in the team, so that have permission to get the list
-            /// </summary>
-            /// <param name="teamName"></param>
-            /// <param name="userEmail"></param>
-            /// <returns></returns>
-            public List<TeamModel.Member> GetMembers(string teamName, string userEmail)
-            {
-                MsGraphTeamHelper helper = new MsGraphTeamHelper(_config);
-                return helper.GetMembers(teamName, userEmail);
-            }
-
-            public void AddMember(string teamName, string userEmail)
-            {
-                MsGraphTeamHelper helper = new MsGraphTeamHelper(_config);
-                helper.AddMember(teamName, userEmail);
-            }
-            public void RemoveMember(string teamName, string userEmail, string membershipId)
-            {
-                MsGraphTeamHelper helper = new MsGraphTeamHelper(_config);
-                helper.RemoveMember(teamName, userEmail, membershipId);
             }
         }
 

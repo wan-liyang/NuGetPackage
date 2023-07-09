@@ -1,9 +1,8 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30517.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
 EndProject
@@ -25,31 +24,33 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.CryptoService", "TryI
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ObjectExtension", "TryIT.ObjectExtension\TryIT.ObjectExtension.csproj", "{82B18564-17D7-4FCC-A73B-A4EC0324495E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.WindowService", "TryIT.WindowService\TryIT.WindowService.csproj", "{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.WindowService", "TryIT.WindowService\TryIT.WindowService.csproj", "{CFA858A7-BB8D-413E-BE33-FEF19C99F62C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileService", "TryIT.FileService\TryIT.FileService.csproj", "{D3AC6458-D284-4D63-83AA-33E75F53C416}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileService.Zip", "TryIT.FileService.Zip\TryIT.FileService.Zip.csproj", "{93E8F39F-994B-416F-BB5A-EB7790E4D279}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.RestApiService", "TryIT.RestApiService\TryIT.RestApiService.csproj", "{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.RestApiService", "TryIT.RestApiService\TryIT.RestApiService.csproj", "{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Impersonation.Win", "TryIT.Impersonation.Win\TryIT.Impersonation.Win.csproj", "{BFE27B6F-D79A-437D-A7BE-B59D638D299F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Impersonation.Win", "TryIT.Impersonation.Win\TryIT.Impersonation.Win.csproj", "{BFE27B6F-D79A-437D-A7BE-B59D638D299F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest02", "NUnitTest02\NUnitTest02.csproj", "{A78155D3-C073-4896-BF8A-10E9DB05D3AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest02", "NUnitTest02\NUnitTest02.csproj", "{A78155D3-C073-4896-BF8A-10E9DB05D3AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.EmailService", "TryIT.EmailService\TryIT.EmailService.csproj", "{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.EmailService", "TryIT.EmailService\TryIT.EmailService.csproj", "{6C5DF0A6-CE18-48C2-8944-4C033FFA1964}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Azure", "TryIT.Azure\TryIT.Azure.csproj", "{AF957991-06A2-4AEB-84FC-071DAE41A31C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Azure", "TryIT.Azure\TryIT.Azure.csproj", "{AF957991-06A2-4AEB-84FC-071DAE41A31C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.OracleDbConnector", "TryIT.OracleDbConnector\TryIT.OracleDbConnector.csproj", "{77094D31-EF72-45FF-AD43-68261E041967}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.OracleDbConnector", "TryIT.OracleDbConnector\TryIT.OracleDbConnector.csproj", "{77094D31-EF72-45FF-AD43-68261E041967}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.PGP", "TryIT.PGP\TryIT.PGP.csproj", "{F680A5D4-AEE7-45A9-950E-20E0AD205539}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.PGP", "TryIT.PGP\TryIT.PGP.csproj", "{F680A5D4-AEE7-45A9-950E-20E0AD205539}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.TableauApi", "TryIT.TableauApi\TryIT.TableauApi.csproj", "{BE22921C-FC6B-4C2E-BCF2-24E143F885CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.TableauApi", "TryIT.TableauApi\TryIT.TableauApi.csproj", "{BE22921C-FC6B-4C2E-BCF2-24E143F885CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Azure.JWT", "TryIT.Azure.JWT\TryIT.Azure.JWT.csproj", "{9585569B-A3F2-4CEA-9726-71930847758C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Azure.JWT", "TryIT.Azure.JWT\TryIT.Azure.JWT.csproj", "{9585569B-A3F2-4CEA-9726-71930847758C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Jwt", "TryIT.Jwt\TryIT.Jwt.csproj", "{4172D262-5D6E-4749-9C26-3F2CBD1426ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Jwt", "TryIT.Jwt\TryIT.Jwt.csproj", "{4172D262-5D6E-4749-9C26-3F2CBD1426ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.SqlAdo.MicrosoftSqlClient", "TryIT.SqlAdo.MicrosoftSqlClient\TryIT.SqlAdo.MicrosoftSqlClient.csproj", "{2BC6144D-7B20-4C69-B4E0-A5B7D077E68E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,6 +154,10 @@ Global
 		{4172D262-5D6E-4749-9C26-3F2CBD1426ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4172D262-5D6E-4749-9C26-3F2CBD1426ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4172D262-5D6E-4749-9C26-3F2CBD1426ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BC6144D-7B20-4C69-B4E0-A5B7D077E68E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BC6144D-7B20-4C69-B4E0-A5B7D077E68E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BC6144D-7B20-4C69-B4E0-A5B7D077E68E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BC6144D-7B20-4C69-B4E0-A5B7D077E68E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,4 @@
-﻿using TryIT.MicrosoftGraphService.Model;
+﻿using TryIT.MicrosoftGraphService.Model.User;
 
 namespace TryIT.MicrosoftGraphService.ApiModel
 {

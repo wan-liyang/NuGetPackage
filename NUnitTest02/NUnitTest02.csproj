@@ -17,6 +17,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
     <PackageReference Include="coverlet.collector" Version="3.1.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +48,7 @@
     <ProjectReference Include="..\TryIT.ObjectExtension\TryIT.ObjectExtension.csproj" />
     <ProjectReference Include="..\TryIT.CryptoService\TryIT.CryptoService.csproj" />
     <ProjectReference Include="..\TryIT.DataConversion\TryIT.DataConversion.csproj" />
+    <ProjectReference Include="..\TryIT.SqlAdo.MicrosoftSqlClient\TryIT.SqlAdo.MicrosoftSqlClient.csproj" />
     <ProjectReference Include="..\TryIT.SqlAdoService\TryIT.SqlAdoService.csproj" />
     <ProjectReference Include="..\TryIT.TableauApi\TryIT.TableauApi.csproj" />
     <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
