@@ -337,6 +337,41 @@ namespace TryIT.FileService
         }
 
         /// <summary>
+        /// copy source file as destination file, if destination directory not exists will create it.
+        /// </summary>
+        /// <param name="sourceFileNameAndPath">source file name with full path</param>
+        /// <param name="destinationFileNameAndPath">destination file name with full path</param>
+        /// <param name="isOverwrite">indicate whether overwrite destination file if same name exists, default false</param>
+        public static void Copy(string sourceFileNameAndPath, string destinationFileNameAndPath, bool isOverwrite = false)
+        {
+            string destinationFolder = Path.GetDirectoryName(destinationFileNameAndPath);
+            if (!Directory.Exists(destinationFolder))
+            {
+                Directory.CreateDirectory(destinationFolder);
+            }
+
+            File.Copy(sourceFileNameAndPath, destinationFileNameAndPath, isOverwrite);
+        }
+
+        /// <summary>
+        /// copy source file to destination directory, if destination directory not exists will create it.
+        /// </summary>
+        /// <param name="sourceFileNameAndPath">source file name with full path</param>
+        /// <param name="destinationDir">destination directory</param>
+        /// <param name="isOverwrite">indicate whether overwrite destination file if same name exists, default false</param>
+        public static void CopyInto(string sourceFileNameAndPath, string destinationDir, bool isOverwrite = false)
+        {
+            if (!Directory.Exists(destinationDir))
+            {
+                Directory.CreateDirectory(destinationDir);
+            }
+
+            string destinationFileName = Path.GetFileName(sourceFileNameAndPath);
+            string destinationFileNameAndPath = Path.Combine(destinationDir, destinationFileName);
+            File.Copy(sourceFileNameAndPath, destinationFileNameAndPath, isOverwrite);
+        }
+
+        /// <summary>
         /// copy <paramref name="sourceDir"/> to <paramref name="destinationDir"/>, refer to https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
         /// </summary>
         /// <param name="sourceDir"></param>
@@ -397,6 +432,26 @@ namespace TryIT.FileService
 
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase);
             return Directory.GetFiles(path).Where(p => reg.IsMatch(Path.GetFileName(p))).ToList();
+        }
+
+        /// <summary>
+        /// get file detail info from path based on Regex pattern
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="regex"></param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfoByRegex(string path, string regex)
+        {
+            // Get information about the source directory
+            var dir = new DirectoryInfo(path);
+
+            // Check if the source directory exists
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+            Regex reg = new Regex(regex, RegexOptions.IgnoreCase);
+            return Directory.GetFiles(path).Where(p => reg.IsMatch(Path.GetFileName(p))).Select(p => new FileInfo(p)).ToList();
         }
     }
 }
