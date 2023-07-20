@@ -1,12 +1,12 @@
-﻿using TryIT.MicrosoftGraphService.ExtensionHelper;
-using TryIT.MicrosoftGraphService.ApiModel;
-using System;
+﻿using System;
 using System.Net.Http;
+using System.Xml.Linq;
 using TryIT.MicrosoftGraphService.ApiModel.User;
+using TryIT.MicrosoftGraphService.ExtensionHelper;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
-    internal class UserHelper
+    internal class UserHelper : BaseHelper
     {
         private HttpClient _httpClient;
 
@@ -19,15 +19,15 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
         }
 
         /// <summary>
-        /// get user info, if <paramref name="userEmail"/> is empty, get me
+        /// get user info, if <paramref name="userPrincipalName"/> is empty, get me
         /// </summary>
-        /// <param name="userEmail"></param>
+        /// <param name="userPrincipalName"></param>
         /// <returns></returns>
-        public GetUserResponse.Response GetUserInfo(string userEmail)
+        public GetUserResponse.User GetUserInfo(string userPrincipalName)
         {
-            string url = $"https://graph.microsoft.com/v1.0/users/{userEmail}";
+            string url = $"https://graph.microsoft.com/v1.0/users/{userPrincipalName}";
 
-            if (string.IsNullOrEmpty(userEmail))
+            if (string.IsNullOrEmpty(userPrincipalName))
             {
                 url = $"https://graph.microsoft.com/v1.0/me";
             }
@@ -35,10 +35,38 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             try
             {
                 var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-
+                CheckStatusCode(response);
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                return content.JsonToObject<GetUserResponse.Response>();
+                return content.JsonToObject<GetUserResponse.User>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// get user info, if <paramref name="userEmail"/> is empty, get me
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public GetUserResponse.User GetUserByMail(string userEmail)
+        {
+            string url = $"https://graph.microsoft.com/v1.0/users?$filter=mail eq '{userEmail}'";
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                throw new ArgumentNullException(nameof(userEmail));
+            }
+
+            try
+            {
+                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                return content.JsonToObject<GetUserResponse.Response>()?.value[0];
             }
             catch
             {

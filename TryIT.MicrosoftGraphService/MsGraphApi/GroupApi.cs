@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TryIT.MicrosoftGraphService.ApiModel;
 using TryIT.MicrosoftGraphService.Helper;
 using TryIT.MicrosoftGraphService.HttpClientHelper;
@@ -43,7 +44,7 @@ namespace TryIT.MicrosoftGraphService.MsGraphApi
         {
             var members = _helper.GetMembers(groupDisplayName);
 
-            return members.ToGroupModels();
+            return members.Select(p => p.ToGroupModel()).ToList();
         }
 
         /// <summary>

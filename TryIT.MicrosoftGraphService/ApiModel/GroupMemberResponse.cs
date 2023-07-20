@@ -13,12 +13,15 @@ namespace TryIT.MicrosoftGraphService.ApiModel
             [JsonProperty("@odata.context")]
             public string odatacontext { get; set; }
 
+            [JsonProperty("@odata.nextLink")]
+            public string odatanextLink { get; set; }
+
             [JsonProperty("@odata.count")]
             public int odatacount { get; set; }
-            public List<Value> value { get; set; }
+            public List<Member> value { get; set; }
         }
 
-        public class Value
+        public class Member
         {
             [JsonProperty("@odata.type")]
             public string odatatype { get; set; }

@@ -1,32 +1,24 @@
-﻿using System.Collections.Generic;
-using TryIT.MicrosoftGraphService.Model;
+﻿using TryIT.MicrosoftGraphService.Model;
 using static TryIT.MicrosoftGraphService.ApiModel.GroupMemberResponse;
 
 namespace TryIT.MicrosoftGraphService.ApiModel
 {
     internal static class GroupMemberResponseExt
     {
-        public static List<GroupMemberModel> ToGroupModels(this GetGroupMemberResponse response)
+        public static GroupMemberModel ToGroupModel(this Member response)
         {
-            if (response == null || response.value == null || response.value.Count == 0)
+            if (response == null)
             {
                 return null;
             }
 
-            List<GroupMemberModel> models = new List<GroupMemberModel>();
-
-            response.value.ForEach(x =>
+            return new GroupMemberModel
             {
-                models.Add(new GroupMemberModel
-                {
-                    Id = x.id,
-                    DisplayName = x.displayName,
-                    Mail = x.mail,
-                    UserPrincipalName = x.userPrincipalName
-                });
-            });
-
-            return models;
+                Id = response.id,
+                DisplayName = response.displayName,
+                Mail = response.mail,
+                UserPrincipalName = response.userPrincipalName
+            };
         }
     }
 }

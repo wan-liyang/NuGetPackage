@@ -21,13 +21,25 @@ namespace TryIT.MicrosoftGraphService.MsGraphApi
         }
 
         /// <summary>
-        /// get user by email address
+        /// get user by user principal name 
+        /// </summary>
+        /// <param name="userPrincipalName"></param>
+        /// <returns></returns>
+        public UserModel GetUser(string userPrincipalName)
+        {
+            var response = _helper.GetUserInfo(userPrincipalName);
+
+            return response.ToUserModel();
+        }
+
+        /// <summary>
+        /// get user by email address (email may different with principal name)
         /// </summary>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public UserModel GetUser(string userEmail)
+        public UserModel GetUserByMail(string userEmail)
         {
-            var response = _helper.GetUserInfo(userEmail);
+            var response = _helper.GetUserByMail(userEmail);
 
             return response.ToUserModel();
         }

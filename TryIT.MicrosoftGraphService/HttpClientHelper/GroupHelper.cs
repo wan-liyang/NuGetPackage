@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using TryIT.MicrosoftGraphService.ApiModel;
+using TryIT.MicrosoftGraphService.ApiModel.Team;
 using TryIT.MicrosoftGraphService.ExtensionHelper;
 using static TryIT.MicrosoftGraphService.ApiModel.GroupMemberResponse;
 using static TryIT.MicrosoftGraphService.ApiModel.GroupResponse;
@@ -46,12 +49,13 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             }
         }
 
+        private List<Member> GroupMembers;
         /// <summary>
         /// get group members
         /// </summary>
         /// <param name="groupDisplayName">group display name</param>
         /// <returns></returns>
-        public GetGroupMemberResponse GetMembers(string groupDisplayName)
+        public List<Member> GetMembers(string groupDisplayName)
         {
             var group = GetGroup(groupDisplayName);
 
@@ -71,7 +75,47 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 CheckStatusCode(response);
 
-                return content.JsonToObject<GetGroupMemberResponse>();
+                var getMembersResponse = content.JsonToObject<GetGroupMemberResponse>();
+
+                GroupMembers = new List<Member>();
+                GroupMembers.AddRange(getMembersResponse.value);
+
+                if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
+                {
+                    GetMembersNextLink(getMembersResponse.odatanextLink);
+                }
+
+                return GroupMembers;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// get group members
+        /// </summary>
+        /// <param name="nextLink">next link url</param>
+        /// <returns></returns>
+        private void GetMembersNextLink(string nextLink)
+        {
+            try
+            {
+                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
+
+                var response = _httpClient.GetAsync(nextLink).GetAwaiter().GetResult();
+
+                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                var getMembersResponse = content.JsonToObject<GetGroupMemberResponse>();
+                GroupMembers.AddRange(getMembersResponse.value);
+
+                if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
+                {
+                    GetMembersNextLink(getMembersResponse.odatanextLink);
+                }
             }
             catch
             {
@@ -97,7 +141,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             }
 
             UserHelper userHelper = new UserHelper(_httpClient);
-            var user = userHelper.GetUserInfo(userEmail);
+            var user = userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
                 throw new Exception($"user '{userEmail}' not found");
@@ -138,7 +182,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             }
 
             UserHelper userHelper = new UserHelper(_httpClient);
-            var user = userHelper.GetUserInfo(userEmail);
+            var user = userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
                 throw new Exception($"user '{userEmail}' not found");
@@ -187,7 +231,7 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             }
 
             UserHelper userHelper = new UserHelper(_httpClient);
-            var user = userHelper.GetUserInfo(userEmail);
+            var user = userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
                 throw new Exception($"user '{userEmail}' not found");

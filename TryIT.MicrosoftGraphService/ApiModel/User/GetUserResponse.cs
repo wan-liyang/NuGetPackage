@@ -1,23 +1,27 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using TryIT.MicrosoftGraphService.Model.User;
 
 namespace TryIT.MicrosoftGraphService.ApiModel.User
 {
     internal class GetUserResponse
     {
+        // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
         public class Response
         {
             [JsonProperty("@odata.context")]
-            public string OdataContext { get; set; }
-            public List<object> businessPhones { get; set; }
+            public string odatacontext { get; set; }
+            public List<User> value { get; set; }
+        }
+
+        public class User
+        {
+            public List<string> businessPhones { get; set; }
             public string displayName { get; set; }
             public string givenName { get; set; }
             public string jobTitle { get; set; }
             public string mail { get; set; }
-            public string mobilePhone { get; set; }
+            public object mobilePhone { get; set; }
             public string officeLocation { get; set; }
             public object preferredLanguage { get; set; }
             public string surname { get; set; }
@@ -26,18 +30,18 @@ namespace TryIT.MicrosoftGraphService.ApiModel.User
         }
     }
 
-        internal static class Extension
+    internal static class Extension
+    {
+        public static UserModel ToUserModel(this GetUserResponse.User user)
         {
-            public static UserModel ToUserModel(this GetUserResponse.Response user)
+            UserModel module = new UserModel();
+            if (user != null)
             {
-                UserModel module = new UserModel();
-                if (user != null)
-                {
-                    module.Id = user.id;
-                    module.EmailAddress = user.mail;
-                    module.Name = user.displayName;
-                }
-                return module;
+                module.Id = user.id;
+                module.EmailAddress = user.mail;
+                module.Name = user.displayName;
             }
+            return module;
         }
+    }
 }
