@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Provide method to communicate with Microsoft Graph API service, Outlook, Teams, Users etc</Description>
+    <PackageId>TryIT.MicrosoftGraphApi</PackageId>
+    <PackageTags>GraphAPI MicrosoftGraphAPI</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Release;Debug</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>

@@ -44,6 +44,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TryIT.Jwt\TryIT.Jwt.csproj" />
     <ProjectReference Include="..\TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj" />
+    <ProjectReference Include="..\TryIT.MicrosoftGraphApi\TryIT.MicrosoftGraphApi.csproj" />
     <ProjectReference Include="..\TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj" />
     <ProjectReference Include="..\TryIT.ObjectExtension\TryIT.ObjectExtension.csproj" />
     <ProjectReference Include="..\TryIT.CryptoService\TryIT.CryptoService.csproj" />

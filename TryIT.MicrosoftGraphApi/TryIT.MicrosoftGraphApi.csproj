@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Microsoft Graph Api, Outlook, Teams, Users, Sharepoint etc</Description>
+    <PackageId>TryIT.MicrosoftGraphApi</PackageId>
+    <PackageTags>GraphApi MicrosoftGraphApi</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Release;Debug</Configurations>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.MsGraphApi;
+
+namespace NUnitTest02.TryIT_MicrosoftGraphApi
+{
+    internal class User_UnitTest
+    {
+        [Test]
+        public void Group_Test()
+        {
+            MsGraphApiConfig config = new MsGraphApiConfig
+            {
+                Token = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IlA5TUllSndxVVFFSUstLWd0ckNlYnpPcHpPN2ZZQkhGWEdxTDJYU2E2NmMiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9jYTkwZDhmNS04OTYzLTRiNmUtYmNhOS05YWM0NjhiY2M3YTgvIiwiaWF0IjoxNjkwMDc3ODI3LCJuYmYiOjE2OTAwNzc4MjcsImV4cCI6MTY5MDA4MzA1NywiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFWUUFxLzhVQUFBQVlSYnQrRDBmdEF0VEc5cE1ZZzdIRWJxSDF4a1pNbGVGdHBJb05YbEY1d0h5RERHQjg4RzI3b1VhZWhobzlseko2bllQY3JWZDJrUWNsZEZiL3hMbEZteVhsUC9mLzI4MUt0YXpYWmpvS3BBPSIsImFtciI6WyJ3aWEiLCJtZmEiXSwiYXBwX2Rpc3BsYXluYW1lIjoibmNzaXQtZXRsLXByZC1hcHAiLCJhcHBpZCI6IjQ5NzEwODNlLWRmMjktNDE4ZS1iNjAzLWM5ZmZhNTg3ZmQ2NyIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiTkNTSVQiLCJnaXZlbl9uYW1lIjoiRVRMIiwiaWR0eXAiOiJ1c2VyIiwiaW5fY29ycCI6InRydWUiLCJpcGFkZHIiOiIyMDMuMTI2LjEzNC4yMiIsIm5hbWUiOiJFVEwgTkNTSVQgKE5DUykiLCJvaWQiOiI0NmZiZmNmMy0xNjVjLTQ1YjktOGE2My1hMjZjNDM3MWY4MzEiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTI4ODAzMjk1LTMyNjk4MTE0My0zNTc0NTkyOTYtMzUzNzc0IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDAyMzUwNUVFMDgiLCJyaCI6IjAuQVZZQTlkaVF5bU9KYmt1OHFackVhTHpIcUFNQUFBQUFBQUFBd0FBQUFBQUFBQUJXQUZFLiIsInNjcCI6IkFwcGxpY2F0aW9uLlJlYWQuQWxsIGVtYWlsIEZpbGVzLlJlYWRXcml0ZSBGaWxlcy5SZWFkV3JpdGUuQWxsIEdyb3VwTWVtYmVyLlJlYWRXcml0ZS5BbGwgTWFpbC5SZWFkIE1haWwuU2VuZCBvcGVuaWQgcHJvZmlsZSBTaXRlcy5SZWFkLkFsbCBTaXRlcy5SZWFkV3JpdGUuQWxsIFVzZXIuUmVhZCBVc2VyLlJlYWQuQWxsIiwic2lnbmluX3N0YXRlIjpbImlua25vd25udHdrIl0sInN1YiI6InZMekdYRDBlMEhfckJzMzVMZXBkeFpUcnF2M2FSUU9YUFZ4clVYNFZYWGMiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiJjYTkwZDhmNS04OTYzLTRiNmUtYmNhOS05YWM0NjhiY2M3YTgiLCJ1bmlxdWVfbmFtZSI6ImV0bC5pbnRlZ3JhdGlvbi5uY3NpdEBuY3MuY29tLnNnIiwidXBuIjoiZXRsLmludGVncmF0aW9uLm5jc2l0QG5jcy5jb20uc2ciLCJ1dGkiOiI0cm8xWVNUY25rZWg2LTA3R3lVSUFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyJiNzlmYmY0ZC0zZWY5LTQ2ODktODE0My03NmIxOTRlODU1MDkiXSwieG1zX3N0Ijp7InN1YiI6IjN0dmVZeC1LcTRkXzlEYjUwZWMxT1FwZkUwNE93OWJhSFN5S25sZlFScWMifSwieG1zX3RjZHQiOjE0NzQ4NzQ0MjZ9.SmH8dXZK_FVk1bQ6RWdm1MBr7EiChkiZqlvupePrsigxwU3OtzycVTNSL7z99yV-5WbkOt1mom_Y77jPDBdD9vCnbr8Q-xlLeuLDgj89gTozP0oN82mdq8nxp6BdroFhGCArXev9G1OgdUbxjY6csNbxzY80bjKzWIvsywLoWCUOcSPOds__Zc5GesrIH18993fMQXnvIzEYZ12_4CWMPTSULDW8fXkGuoZxTp9B4DJa9Hyjj5o87OYHQV62Z88abYOocGC8uc8sg-Ym_eWIk7wrkdmwp3iCH6fZBFR7WI7UcT0jEnHIafgV9aOPjQeWJxJA2X7Zt6AIMv_SB21oJg",
+            };
+
+            UserApi api = new UserApi(config);
+
+            var result = api.GetUserByMail("liyang.wan2@ncs.co");
+            var result2 = api.GetUserByAttribute("employeeId", "1207563");
+            var result3 = api.GetUserByMailWithAdditionalAttribute("liyang.wan2@ncs.co", "employeeId");
+
+            Assert.True(1 == 1);
+        }
+    }
+}
