@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Request.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
+using static TryIT.MicrosoftGraphApi.Response.Sharepoint.GetDriveItemResponse;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
@@ -225,6 +226,23 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
+        public byte[] GetFileContent(string graphdownloadUrl)
+        {
+            try
+            {
+                var response = _httpClient.GetAsync(graphdownloadUrl).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+
+                return content;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public GetDriveItemResponse.Item CreateFolder(string folderAbsoluteUrl, string subFolderName)
         {
             CreateFolderRequest.Body model = new CreateFolderRequest.Body
@@ -301,7 +319,33 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw;
             }
         }
+        public bool DeleteItem(string folderUrl, string itemName)
+        {
+            var folder = GetFolder(folderUrl);
+            var children = GetChildren(folderUrl).Where(p => p.name.IsEquals(itemName)).FirstOrDefault();
 
+            if (children == null)
+            {
+                throw new Exception($"'{itemName}' not found");
+            }
+
+            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{children.id}";
+
+            try
+            {
+                var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return true;
+                }
+                CheckStatusCode(response);
+                return false;
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
         private string Base64EncodeUrl(string url)
         {
