@@ -8,6 +8,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using static TryIT.MicrosoftGraphService.ApiModel.SharePointResponse;
+using static TryIT.MicrosoftGraphService.Model.SharepointModel;
+using System.Runtime.InteropServices.ComTypes;
+using System.IO;
+using TryIT.MicrosoftGraphService.ApiModel.Sharepoint;
 
 namespace TryIT.MicrosoftGraphService.HttpClientHelper
 {
@@ -190,6 +194,159 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
             }
         }
 
+        public GetDriveItemResponse UploadFile(string folderAbsoluteUrl, string fileName, byte[] fileContent)
+        {
+            var sharepointFolder = GetFolderByUrl(folderAbsoluteUrl);
+
+            // if file size < 4 MB, use normal upload, otherwise use upload session
+            if (fileContent.Length < 4 * 1024 * 1024)
+            {
+                string siteId = GetSiteId(folderAbsoluteUrl);
+                UploadSmallFileModel smallFileModel = new UploadSmallFileModel
+                {
+                    SiteId = siteId,
+                    ItemId = sharepointFolder.id,
+                    FileName = fileName,
+                    FileContent = fileContent
+                };
+
+                return UploadSmallFile(smallFileModel);
+            }
+            else
+            {
+                UploadLargeFileModel largeFileModel = new UploadLargeFileModel
+                {
+                    DriveId = sharepointFolder.parentReference.driveId,
+                    ItemId = sharepointFolder.id,
+                    FileName = fileName,
+                    FileContent = fileContent
+                };
+
+                return UploadLargeFile(largeFileModel);
+            }
+        }
+
+        private string GetSiteId(string folderAbsoluteUrl)
+        {
+            folderAbsoluteUrl = folderAbsoluteUrl.Replace("https://", "");
+            string host = folderAbsoluteUrl.Substring(0, folderAbsoluteUrl.IndexOf('/'));
+
+            folderAbsoluteUrl = folderAbsoluteUrl.Replace($"{host}/sites/", "");
+            string site = folderAbsoluteUrl.Substring(0, folderAbsoluteUrl.IndexOf('/'));
+
+
+            string url = $"https://graph.microsoft.com/v1.0/sites/{host}:/sites/{site}";
+            try
+            {
+                HttpResponseMessage response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var result = content.JsonToObject<GetSiteResponse>();
+                return result.id;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private GetDriveItemResponse UploadSmallFile(UploadSmallFileModel fileModel)
+        {
+            string siteId = fileModel.SiteId;
+            string itemId = fileModel.ItemId;
+            string fileName = CleanFileName(fileModel.FileName);
+            byte[] fileContent = fileModel.FileContent;
+
+            var file = GetFileByName(siteId, itemId, fileName);
+
+            /*
+                upload new: /sites/{siteId}/drive/items/{driveItemId}:/{fileName}:/content
+                replace existing: /sites/{siteId}/drive/items/{driveItemId}/content
+             */
+            string url = $"https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items";
+
+            if (file != null && !string.IsNullOrEmpty(file.id))
+            {
+                url += $"/{file.id}/content";
+            }
+            else
+            {
+                url += $"/{itemId}:/{fileName}:/content";
+            }
+
+            try
+            {
+                HttpContent httpContent = new ByteArrayContent(fileContent);
+                string contentType = MIMEType.GetContentType(fileName);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
+
+                // catch error to response with detail file information
+                try
+                {
+                    CheckStatusCode(response);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Upload failed, fileName: {fileName}, Url: {url}", ex);
+                }
+                string content = response.Content.ReadAsStringAsync().Result;
+
+                return content.JsonToObject<GetDriveItemResponse>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private GetDriveItemResponse UploadLargeFile(UploadLargeFileModel fileModel)
+        {
+            CreateUploadSessionResponse uploadSession = null;
+            string url = $"https://graph.microsoft.com/v1.0/drives/{fileModel.DriveId}/items/{fileModel.ItemId}:/{fileModel.FileName}:/createUploadSession";
+            try
+            {
+                CreateUploadSessionRequestBody requestBody = new CreateUploadSessionRequestBody
+                {
+                    ConflictBehavior = ConflictBehavior.replace.ToString(),
+                    Name = fileModel.FileName
+                };
+
+                HttpContent httpContent = this.GetJsonHttpContent(requestBody);
+                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                uploadSession = content.JsonToObject<CreateUploadSessionResponse>();
+            }
+            catch
+            {
+                throw;
+            }
+
+
+            url = uploadSession.uploadUrl;
+            try
+            {
+                HttpContent httpContent = new ByteArrayContent(fileModel.FileContent);
+                string contentType = MIMEType.GetContentType(CleanFileName(fileModel.FileName));
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+                httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModel.FileContent.Length - 1, fileModel.FileContent.Length);
+
+                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                return content.JsonToObject<GetDriveItemResponse>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         /// <summary>
         /// upload file into sharepoint
         /// <para>https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&amp;tabs=http</para>
@@ -268,6 +425,16 @@ namespace TryIT.MicrosoftGraphService.HttpClientHelper
 
             return UploadFileWithUploadSession(response, fileModule);
         }
+
+        /// <summary>
+        /// https://github.com/OneDrive/onedrive-api-docs/issues/1236
+        /// 
+        /// /drives/{drive}/items/{itemId}:/{fileName}:/createUploadSession
+        /// </summary>
+        /// <param name="siteId"></param>
+        /// <param name="driveItemId"></param>
+        /// <param name="requestBody"></param>
+        /// <returns></returns>
         private CreateUploadSessionResponse CreateUploadSession(string siteId, string driveItemId, CreateUploadSessionRequestBody requestBody)
         {
             string url = $"https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{driveItemId}:/{requestBody.Name}:/createUploadSession";
