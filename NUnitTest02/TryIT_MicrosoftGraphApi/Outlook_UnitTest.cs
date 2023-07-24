@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Model.Outlook;
 using TryIT.MicrosoftGraphApi.MsGraphApi;
 
 namespace NUnitTest02.TryIT_MicrosoftGraphApi
 {
-    internal class User_UnitTest
+    internal class Outlook_UnitTest
     {
         [Test]
         public void Group_Test()
@@ -19,11 +20,17 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
                 Token = "",
             };
 
-            UserApi api = new UserApi(config);
+            OutlookApi api = new OutlookApi(config);
 
-            var result = api.GetUserByMail("liyang.wan2@ncs.co");
-            var result2 = api.GetUserByAttribute("employeeId", "1207563");
-            var result3 = api.GetUserByMailWithAdditionalAttribute("liyang.wan2@ncs.co", "employeeId");
+            api.SendMessage(new SendMessageModel
+            {
+                Subject = $"Test Email {DateTime.Now}",
+                Body = "Test",
+                BodyContentType = BodyContentType.Html,
+                ToRecipients = "liyang.wan2@ncs.co".Split(','),
+                CcRecipients = null,
+                Attachments = null
+            }); ;
 
             Assert.True(1 == 1);
         }

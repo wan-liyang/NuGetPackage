@@ -7,6 +7,7 @@ namespace TryIT.MicrosoftGraphApi.Model.Outlook
         public SendMessageModel()
         {
             this.BodyContentType = BodyContentType.Text;
+            this.SaveToSentItems = true;
         }
 
         public string Subject { get; set; }
@@ -19,6 +20,11 @@ namespace TryIT.MicrosoftGraphApi.Model.Outlook
         public string[] CcRecipients { get; set; }
         public string[] BccRecipients { get; set; }
         public List<Attachment> Attachments { get; set; }
+
+        /// <summary>
+        /// Indicates whether to save the message in Sent Items. Specify it only if the parameter is false; default is true. Optional. 
+        /// </summary>
+        public bool SaveToSentItems { get; set; }
     }
     public enum BodyContentType
     {

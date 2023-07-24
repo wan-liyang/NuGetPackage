@@ -5,15 +5,14 @@ namespace TryIT.MicrosoftGraphApi.Request.Outlook
 {
     internal class SendMessageRequest
     {
-        public class Body
+        public class Request
         {
-            public string contentType { get; set; }
-            public string content { get; set; }
-        }
+            public Message message { get; set; }
 
-        public class EmailAddress
-        {
-            public string address { get; set; }
+            /// <summary>
+            /// Indicates whether to save the message in Sent Items. Specify it only if the parameter is false; default is true. Optional. 
+            /// </summary>
+            public bool saveToSentItems { get; set; }
         }
 
         public class Message
@@ -26,15 +25,20 @@ namespace TryIT.MicrosoftGraphApi.Request.Outlook
             public List<Attachment> attachments { get; set; }
         }
 
-        public class Request
+        public class Body
         {
-            public Message message { get; set; }
-            public string saveToSentItems { get; set; }
+            public string contentType { get; set; }
+            public string content { get; set; }
         }
 
         public class Recipient
         {
             public EmailAddress emailAddress { get; set; }
+        }
+
+        public class EmailAddress
+        {
+            public string address { get; set; }
         }
         public class Attachment
         {

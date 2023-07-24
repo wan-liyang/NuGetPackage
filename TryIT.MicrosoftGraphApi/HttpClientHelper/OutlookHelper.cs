@@ -63,7 +63,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                         contentType = message.BodyContentType.ToString(),
                         content = message.Body
                     }
-                }
+                },
+                saveToSentItems = message.SaveToSentItems
             };
 
             model.message.toRecipients = new List<SendMessageRequest.Recipient>();
