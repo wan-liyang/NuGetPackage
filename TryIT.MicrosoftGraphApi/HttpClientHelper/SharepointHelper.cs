@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Request.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
-using static TryIT.MicrosoftGraphApi.Response.Sharepoint.GetDriveItemResponse;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
@@ -23,9 +22,35 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             _httpClient = httpClient;
         }
 
-        public GetDriveItemResponse.Item GetFolder(string folderAbsoluteUrl)
+        public GetSiteResponse.Site GetSite(string folderUrl)
         {
-            string encodedUrl = Base64EncodeUrl(folderAbsoluteUrl);
+            folderUrl = folderUrl.Replace("https://", "");
+            string host = folderUrl.Substring(0, folderUrl.IndexOf('/'));
+
+            folderUrl = folderUrl.Replace($"{host}/sites/", "");
+            string site = folderUrl.Substring(0, folderUrl.IndexOf('/'));
+
+            string url = $"{GraphApiRootUrl}/sites/{host}:/sites/{site}";
+
+            try
+            {
+                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                return content.JsonToObject<GetSiteResponse.Site>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public GetDriveItemResponse.Item GetFolder(string folderUrl)
+        {
+            string encodedUrl = Base64EncodeUrl(folderUrl);
+
+            GetDriveItemResponse.Item item = null;
 
             string url = $"https://graph.microsoft.com/v1.0/shares/{encodedUrl}/driveItem";
 
@@ -35,12 +60,26 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetDriveItemResponse.Item>();
+                item = content.JsonToObject<GetDriveItemResponse.Item>();
             }
             catch
             {
                 throw;
             }
+
+            if (item == null)
+            {
+                throw new Exception($"item not found: {folderUrl}");
+            }
+
+            if (string.IsNullOrEmpty(item.parentReference.siteId))
+            {
+                var site = GetSite(folderUrl);
+
+                item.parentReference.siteId = site.id;
+            }
+
+            return item;
         }
 
         public GetDriveItemResponse.Item UploadFile(string folderAbsoluteUrl, string fileName, byte[] fileContent)
@@ -57,11 +96,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
                 UploadSmallFileModel smallFileModel = new UploadSmallFileModel
                 {
-                    SiteId = siteId,
-                    ItemId = sharepointFolder.id,
+                    DriveId = sharepointFolder.parentReference.driveId,
+                    ParentId = sharepointFolder.id,
+                    ItemId = fileId,
                     FileName = fileName,
-                    FileContent = fileContent,
-                    FileId = fileId
+                    FileContent = fileContent
                 };
 
                 return UploadSmallFile(smallFileModel);
@@ -82,24 +121,26 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         private GetDriveItemResponse.Item UploadSmallFile(UploadSmallFileModel fileModel)
         {
-            string siteId = fileModel.SiteId;
-            string itemId = fileModel.ItemId;
             string fileName = CleanFileName(fileModel.FileName);
             byte[] fileContent = fileModel.FileContent;
 
             /*
-                upload new: /sites/{siteId}/drive/items/{driveItemId}:/{fileName}:/content
-                replace existing: /sites/{siteId}/drive/items/{driveItemId}/content
-             */
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/drive/items";
+                //upload new: /sites/{siteId}/drive/items/{driveItemId}:/{fileName}:/content
+                //replace existing: /sites/{siteId}/drive/items/{driveItemId}/content
 
-            if (!string.IsNullOrEmpty(fileModel.FileId))
+                replace: PUT /drives/{drive-id}/items/{item-id}/content
+                new: PUT /drives/{drive-id}/items/{parent-id}:/{filename}:/content
+                
+             */
+            string url = $"{GraphApiRootUrl}/drives/{fileModel.DriveId}/items";
+
+            if (!string.IsNullOrEmpty(fileModel.ItemId))
             {
-                url += $"/{fileModel.FileId}/content";
+                url += $"/{fileModel.ItemId}/content";
             }
             else
             {
-                url += $"/{itemId}:/{fileName}:/content";
+                url += $"/{fileModel.ParentId}:/{fileName}:/content";
             }
 
             try
