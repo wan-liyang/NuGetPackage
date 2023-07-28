@@ -28,7 +28,7 @@ namespace TryIT.MicrosoftGraphApi.Response.Sharepoint
             public string name { get; set; }
             public string webUrl { get; set; }
             public string cTag { get; set; }
-            public int size { get; set; }
+            public Int64 size { get; set; }
             public User createdBy { get; set; }
             public User lastModifiedBy { get; set; }
             public ParentReference parentReference { get; set; }
