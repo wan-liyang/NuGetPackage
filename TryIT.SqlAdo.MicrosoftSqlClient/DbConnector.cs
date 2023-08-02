@@ -352,7 +352,21 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 SqlTransaction transaction = null;
                 try
                 {
-                    transaction = sqlConnection.BeginTransaction();
+                    // create a Guid that doesn't contain any numbers and dash
+                    // before: 51e3aaa4-6ff6-475a-8f0f-78cac597b6c3
+                    // after: FBVDRRREGWWGEHFRIWAWHITRTFJHSGTD
+                    string transName = string.Concat(Guid.NewGuid().ToString("N").Select(c => (char)(c + 17))).ToUpper();
+
+                    // put unique transaction name to avoid any conflict
+                    transaction = sqlConnection.BeginTransaction(transName);
+
+                    if (!string.IsNullOrEmpty(copyDataModel.PreScript))
+                    {
+                        using (SqlCommand cmd = new SqlCommand(copyDataModel.PreScript, sqlConnection, transaction))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
 
                     if (copyDataModel.CopyMode == CopyMode.TRUNCATE_INSERT)
                     {
@@ -395,6 +409,14 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
 
                         sqlBulkCopy.WriteToServer(copyDataModel.SourceData);
+                    }
+
+                    if (!string.IsNullOrEmpty(copyDataModel.PostScript))
+                    {
+                        using (SqlCommand cmd = new SqlCommand(copyDataModel.PostScript, sqlConnection, transaction))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
                     }
                     transaction.Commit();
                 }

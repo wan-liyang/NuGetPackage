@@ -30,6 +30,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
         /// sql condition to delete record from target table, e.g. WHERE Column1 &lt;= 1, this is mandatory when <see cref="CopyDataModel.CopyMode"/> is <see cref="CopyMode.DELETE_INSERT"/>
         /// </summary>
         public string DeleteCondition { get; set; }
+
+        /// <summary>
+        /// pre execute script before copy data, within the transaction, it will be execute by ExecuteNonQuery
+        /// </summary>
+        public string PreScript { get; set; }
+
+        /// <summary>
+        /// post execute script after copy data, within the transaction, it will be execute by ExecuteNonQuery
+        /// </summary>
+        public string PostScript { get; set; }
     }
 
     /// <summary>
