@@ -393,7 +393,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     }
 
                     // load data into table
-                    var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers;
+                    var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
                     using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
                     {
                         // set timeout to 30 mins, in case large data
