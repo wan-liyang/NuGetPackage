@@ -33,7 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="TryIT_ActiveDirectory\" />
-    <Folder Include="TryIT_ObjectExtension\" />
     <Folder Include="TryIT_SqlAdoService\" />
     <Folder Include="TryIT_WindowService\" />
     <Folder Include="TryIT_CryptoService\" />

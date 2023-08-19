@@ -1,6 +1,9 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TryIT.ObjectExtension
 {
@@ -157,7 +160,66 @@ namespace TryIT.ObjectExtension
         public static string ObjectToJson(this object obj)
         {
             return JsonConvert.SerializeObject(obj);
-        } 
+        }
+
+        /// <summary>
+        /// get value from Json string and convert to specific type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="jsonString"></param>
+        /// <param name="keyPath">key name or key path
+        /// <para>keyPath = key1, this return value of key1</para>
+        /// <para>keyPath = key1:key2, this look for key2 under key1, then return value of key2</para>
+        /// <para>keyPath = key1:key2[1]:key3, this look for second object under key2, then return value of key3</para>
+        /// </param>
+        /// <returns></returns>
+        public static T GetJsonValue<T>(this string jsonString, string keyPath)
+        {
+            T defaultValue = default(T);
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                return defaultValue;
+            }
+
+            if (string.IsNullOrEmpty(keyPath))
+            {
+                return defaultValue;
+            }
+
+            JObject jObject = JObject.Parse(jsonString);
+            if (jObject == null)
+            {
+                return defaultValue;
+            }
+
+            string[] jsonKeys = keyPath.Split(":");
+
+            JToken jToken = jObject;
+            foreach (string jsonKey in jsonKeys)
+            {
+                Regex reg = new Regex(".*(\\[\\d*\\])");
+                var match = reg.Match(jsonKey);
+                if (match.Success)
+                {
+                    string key = match.Groups[0].Value.Replace(match.Groups[1].Value, "");
+                    int index = Convert.ToInt32(match.Groups[1].Value.TrimStart('[').TrimEnd(']'));
+
+                    jToken = ((JObject)jToken).GetValue(key, StringComparison.CurrentCultureIgnoreCase)?[index];
+                }
+                else
+                {
+                    jToken = ((JObject)jToken).GetValue(jsonKey, StringComparison.CurrentCultureIgnoreCase);
+                }
+
+                if (jToken == null)
+                {
+                    return defaultValue;
+                }
+            }
+
+            return jToken.Value<T>();
+        }
+
         #endregion
     }
 }
