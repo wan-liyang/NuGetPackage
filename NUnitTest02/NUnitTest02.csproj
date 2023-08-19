@@ -49,6 +49,7 @@
     <ProjectReference Include="..\TryIT.ObjectExtension\TryIT.ObjectExtension.csproj" />
     <ProjectReference Include="..\TryIT.CryptoService\TryIT.CryptoService.csproj" />
     <ProjectReference Include="..\TryIT.DataConversion\TryIT.DataConversion.csproj" />
+    <ProjectReference Include="..\TryIT.RestApi\TryIT.RestApi.csproj" />
     <ProjectReference Include="..\TryIT.SqlAdo.MicrosoftSqlClient\TryIT.SqlAdo.MicrosoftSqlClient.csproj" />
     <ProjectReference Include="..\TryIT.SqlAdoService\TryIT.SqlAdoService.csproj" />
     <ProjectReference Include="..\TryIT.TableauApi\TryIT.TableauApi.csproj" />
