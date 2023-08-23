@@ -364,6 +364,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     {
                         using (SqlCommand cmd = new SqlCommand(copyDataModel.PreScript, sqlConnection, transaction))
                         {
+                            cmd.CommandTimeout = _config.TimeoutSecond;
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -374,6 +375,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         string cmdText = $"TRUNCATE TABLE {copyDataModel.TargetTable};";
                         using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
                         {
+                            cmd.CommandTimeout = _config.TimeoutSecond;
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -388,6 +390,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         string cmdText = $"DELETE FROM {copyDataModel.TargetTable} {copyDataModel.DeleteCondition};";
                         using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
                         {
+                            cmd.CommandTimeout = _config.TimeoutSecond;
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -415,6 +418,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     {
                         using (SqlCommand cmd = new SqlCommand(copyDataModel.PostScript, sqlConnection, transaction))
                         {
+                            cmd.CommandTimeout = _config.TimeoutSecond;
                             cmd.ExecuteNonQuery();
                         }
                     }
