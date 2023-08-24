@@ -92,6 +92,23 @@ namespace TryIT.DataConversion
         }
 
         /// <summary>
+        /// convert string value to int, return 0 if convert failed
+        /// <para>item1: indicator whether convert success, item2: value after convert</para>
+        /// <para>if value is "0", it will be 0 as well</para>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Tuple<bool, int?> TryToInt(this string value)
+        {
+            int result = 0;
+            if (int.TryParse(value, out result))
+            {
+                return new Tuple<bool, int?>(true, result);
+            }            
+            return new Tuple<bool, int?>(false, null);
+        }
+
+        /// <summary>
         /// convert string value to Enum item, return defaultEnum if convert failed
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -140,6 +157,41 @@ namespace TryIT.DataConversion
                     return output;
                 }
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// try convert string value to decimal value, return Tuple
+        /// <para>item1: indicator whether convert success, item2: value after convert</para>
+        /// <para>1% will convert to 0.01</para>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="numberStyles">default to <see cref="NumberStyles.Any"/> for avoid failure for scientific value, e.g. if data from excel 0.0000159515001096899 will become 1.59515001096899E-05</param>
+        /// <returns></returns>
+        public static Tuple<bool, decimal?> TryToDecimal(this string value, NumberStyles numberStyles = NumberStyles.Any)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return new Tuple<bool, decimal?>(true, null);
+            }
+
+            if (value.EndsWith("%"))
+            {
+                decimal output;
+                if (decimal.TryParse(value.TrimEnd('%'), numberStyles, null, out output))
+                {
+                    return new Tuple<bool, decimal?>(true, output / 100);
+                }
+                return new Tuple<bool, decimal?>(false, null);
+            }
+            else
+            {
+                decimal output;
+                if(decimal.TryParse(value, numberStyles, null, out output))
+                {
+                    return new Tuple<bool, decimal?>(true, output);
+                }
+                return new Tuple<bool, decimal?>(false, null);
             }
         }
     }
