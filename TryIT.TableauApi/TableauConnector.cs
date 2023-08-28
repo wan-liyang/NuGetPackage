@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using TryIT.TableauApi.ApiResponse;
+using TryIT.TableauApi.ApiResponse.Datasource;
 using TryIT.TableauApi.Model;
 using TryIT.TableauApi.SiteModel;
 
@@ -620,6 +621,46 @@ namespace TryIT.TableauApi
                 }
             }
         }
+        #endregion
+
+        #region Datasource method
+
+        public GetDataSourceResponse.Datasource GetDatasource(string name)
+        {
+            string url = $"/api/{apiVersion}/sites/{siteId}/datasources?filter=name:eq:{name}";
+
+            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
+
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<GetDataSourceResponse.TsResponse>();
+            if (result.Datasources.Datasource == null)
+            {
+                return null;
+            }
+            return result.Datasources.Datasource.First();
+        }
+
+        public RefreshDatasourceResponse.Job RefreshDatasource(string name)
+        {
+            var datasource = GetDatasource(name);
+
+            string url = $"/api/{apiVersion}/sites/{siteId}/datasources/{datasource.Id}/refresh";
+
+            string request = $"<tsRequest></tsRequest>";
+            StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
+            var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
+            CheckResponseStatus(responseMessage);
+
+            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var result = content.JsonToObject<RefreshDatasourceResponse.TsResponse>();
+            if (result.Job == null)
+            {
+                return null;
+            }
+            return result.Job;
+        }
+
         #endregion
 
         public void Dispose()

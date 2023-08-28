@@ -30,7 +30,6 @@
     <None Remove="SiteModel\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ApiResponse\" />
     <Folder Include="Model\" />
     <Folder Include="SiteModel\" />
   </ItemGroup>
