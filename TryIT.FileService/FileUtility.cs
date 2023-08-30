@@ -377,8 +377,9 @@ namespace TryIT.FileService
         /// <param name="sourceDir"></param>
         /// <param name="destinationDir"></param>
         /// <param name="recursive"></param>
+        /// <param name="overwrite">indicator whether overwrite target file if same file name exists</param>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive, bool overwrite)
         {
             // Get information about the source directory
             var dir = new DirectoryInfo(sourceDir);
@@ -400,7 +401,7 @@ namespace TryIT.FileService
             foreach (FileInfo file in dir.GetFiles())
             {
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
-                file.CopyTo(targetFilePath);
+                file.CopyTo(targetFilePath, overwrite);
             }
 
             // If recursive and copying subdirectories, recursively call this method
@@ -409,7 +410,7 @@ namespace TryIT.FileService
                 foreach (DirectoryInfo subDir in dirs)
                 {
                     string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                    CopyDirectory(subDir.FullName, newDestinationDir, true);
+                    CopyDirectory(subDir.FullName, newDestinationDir, true, overwrite);
                 }
             }
         }
