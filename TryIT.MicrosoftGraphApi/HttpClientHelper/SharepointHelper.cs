@@ -84,6 +84,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         public GetDriveItemResponse.Item UploadFile(string folderAbsoluteUrl, string fileName, byte[] fileContent)
         {
+            fileName = CleanFileName(fileName);
+
             var sharepointFolder = GetFolder(folderAbsoluteUrl);
 
             // if file size < 4 MB, use normal upload, otherwise use upload session
@@ -172,7 +174,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         private GetDriveItemResponse.Item UploadLargeFile(UploadLargeFileModel fileModel)
         {
-            CreateUploadSessionResponse.Response uploadSession = null;
+            CreateUploadSessionResponse.Response uploadSession = CreateUploadSession(fileModel);
+
+            string url = uploadSession.uploadUrl;
+            try
+            {
+                HttpContent httpContent = new ByteArrayContent(fileModel.FileContent);
+                string contentType = MIMEType.GetContentType(CleanFileName(fileModel.FileName));
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+                httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModel.FileContent.Length - 1, fileModel.FileContent.Length);
+
+                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                return content.JsonToObject<GetDriveItemResponse.Item>();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Uploaded large file failed, file: '{fileModel.FileName}' ", ex);
+            }
+        }
+
+        private CreateUploadSessionResponse.Response CreateUploadSession(UploadLargeFileModel fileModel)
+        {
             string url = $"{GraphApiRootUrl}/drives/{fileModel.DriveId}/items/{fileModel.ItemId}:/{fileModel.FileName}:/createUploadSession";
             try
             {
@@ -187,31 +212,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().Result;
-                uploadSession = content.JsonToObject<CreateUploadSessionResponse.Response>();
+                return content.JsonToObject<CreateUploadSessionResponse.Response>();
             }
-            catch
+            catch(Exception ex)
             {
-                throw;
-            }
-
-
-            url = uploadSession.uploadUrl;
-            try
-            {
-                HttpContent httpContent = new ByteArrayContent(fileModel.FileContent);
-                string contentType = MIMEType.GetContentType(CleanFileName(fileModel.FileName));
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-                httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModel.FileContent.Length - 1, fileModel.FileContent.Length);
-
-                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetDriveItemResponse.Item>();
-            }
-            catch
-            {
-                throw;
+                throw new Exception($"Create Upload Session faild, file '{fileModel.FileName}' ", ex);
             }
         }
 
@@ -397,7 +402,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         private string CleanFileName(string filename)
         {
-            return filename.Replace("#", "_");
+            return filename.Replace("#", "_").Replace("%", "_");
         }
     }
 }

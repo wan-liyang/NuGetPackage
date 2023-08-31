@@ -134,4 +134,4 @@ OutlookApi.GetMessages();
 
 ### Note
 
-```SharepointApi``` Upload file method will replace `#` to `_` in file name
+```SharepointApi``` Upload file method will replace `#, %` to `_` in file name
