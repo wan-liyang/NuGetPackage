@@ -217,8 +217,8 @@ namespace TryIT.ObjectExtension
                 style = new DataTableExtension.ToHtmlString_TableStyle
                 {
                     Table = "border-collapse: collapse;border: 1px solid;",
-                    Th = "border: 1px solid;",
-                    Td = "border: 1px solid;"
+                    Th = "border: 1px solid;padding: 5px;",
+                    Td = "border: 1px solid;padding: 5px;"
                 };
             }
 
