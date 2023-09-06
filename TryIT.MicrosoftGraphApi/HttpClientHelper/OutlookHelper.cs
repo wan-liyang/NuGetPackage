@@ -51,8 +51,6 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="message"></param>
         public void SendMessage(SendMessageModel message)
         {
-            string url = $"{GraphApiRootUrl}/me/sendMail";
-
             var model = new SendMessageRequest.Request
             {
                 message = new SendMessageRequest.Message
@@ -147,6 +145,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
+                string url = $"{GraphApiRootUrl}/me/sendMail";
+                if (!string.IsNullOrEmpty(message.From))
+                {
+                    url = $"{GraphApiRootUrl}/users/{message.From}/sendMail";
+                }
+
                 string jsonContent = model.ObjectToJson();
 
                 HttpContent httpContent = new StringContent(jsonContent);

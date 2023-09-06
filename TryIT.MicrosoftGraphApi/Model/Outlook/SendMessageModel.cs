@@ -10,6 +10,10 @@ namespace TryIT.MicrosoftGraphApi.Model.Outlook
             this.SaveToSentItems = true;
         }
 
+        /// <summary>
+        /// indicator the from address, leave empty if send as current user
+        /// </summary>
+        public string From { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
         /// <summary>
