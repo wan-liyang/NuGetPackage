@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Linq;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 {
-    internal class UtilityHelper
+    /// <summary>
+    /// helper for convert value
+    /// </summary>
+    public static class UtilityHelper
     {
         /// <summary>
         /// Convert object value to specific type value
@@ -74,6 +78,98 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                 }
             }
             return value;
+        }
+
+        /// <summary>
+        /// convert value to <see cref="DBNull.Value"/> if <paramref name="value"/> is NULL or Empty
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="nullIfEmpty">indicate return DBNull if <paramref name="value"/> is empty</param>
+        /// <returns></returns>
+        public static object ToDBNull(this string value, bool nullIfEmpty = false)
+        {
+            if (!nullIfEmpty)
+            {
+                if (value == string.Empty)
+                {
+                    return value;
+                }
+            }
+
+            if (string.IsNullOrEmpty(value))
+            {
+                return DBNull.Value;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// convert value to <see cref="DBNull.Value"/> if <paramref name="value"/> is NULL, Empty or exists in <paramref name="nullValues"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="nullValues"></param>
+        /// <returns></returns>
+        public static object ToDBNull(this string value, params string[] nullValues)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value))
+                {
+                    return value;
+                }
+            }
+            return DBNull.Value;
+        }
+
+
+        /// <summary>
+        /// convert value to <see cref="DBNull.Value"/> if <paramref name="value"/> is NULL or exists in <paramref name="nullValues"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="nullValues"></param>
+        /// <returns></returns>
+        public static object ToDBNull(this Nullable<int> value, params int[] nullValues)
+        {
+            if (value.HasValue)
+            {
+                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value))
+                {
+                    return value.Value;
+                }
+            }
+            return DBNull.Value;
+        }
+
+        /// <summary>
+        /// convert value to <see cref="DBNull.Value"/> if <paramref name="value"/> is NULL or exists in <paramref name="nullValues"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="nullValues"></param>
+        /// <returns></returns>
+        public static object ToDBNull(this Nullable<decimal> value, params decimal[] nullValues)
+        {
+            if (value.HasValue)
+            {
+                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value))
+                {
+                    return value.Value;
+                }
+            }
+            return DBNull.Value;
+        }
+
+        /// <summary>
+        /// return DBNull.Value if <paramref name="value"/> is NULL or year is 1900
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static object ToDBNull(this Nullable<DateTime> value)
+        {
+            if (value.HasValue && value.Value.Year != 1900)
+            {
+                return value.Value;
+            }
+            return DBNull.Value;
         }
     }
 }
