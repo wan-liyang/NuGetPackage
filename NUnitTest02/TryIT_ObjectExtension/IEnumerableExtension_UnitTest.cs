@@ -62,5 +62,21 @@ namespace NUnitTest02.TryIT_ObjectExtension
             Assert.AreEqual(item.Prop1, dt2.Rows[0][0]);
             Assert.AreEqual(item.Prop1, dt2.Rows[0]["Prop1"]);
         }
+
+        [Test]
+        public void ToDataTable_Test2()
+        {
+            List<string> list = new List<string>
+            {
+                "a",
+                "b",
+                "c",
+                "d"
+            };
+
+            DataTable dt = list.ToDataTable();
+
+            Assert.IsTrue(dt.Rows.Count == 4);
+        }
     }
 }

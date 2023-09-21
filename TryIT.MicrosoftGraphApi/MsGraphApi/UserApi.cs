@@ -1,6 +1,7 @@
 ﻿using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Model.User;
 using TryIT.MicrosoftGraphApi.Response.User;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
@@ -58,6 +59,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public GetUserResponse.User GetUserByMailWithAdditionalAttribute(string userEmail, params string[] additionalAttribute)
         {
             return _helper.GetUserByMail(userEmail, additionalAttribute);
+        }
+
+        /// <summary>
+        /// Use this API to create a new invitation. Invitation adds an external user to the organization
+        /// </summary>
+        /// <param name="invitationModel"></param>
+        /// <returns></returns>
+        public CreateInvitationResponse.Response CreateInvitation(CreateInvitationModel invitationModel)
+        {
+            return _helper.CreateInvitation(invitationModel);
         }
     }
 }

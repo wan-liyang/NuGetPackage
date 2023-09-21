@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model.User;
+using TryIT.MicrosoftGraphApi.Request.User;
 using TryIT.MicrosoftGraphApi.Response.User;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
@@ -167,6 +170,41 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 return content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// post invitation
+        /// <para>https://graph.microsoft.com/v1.0/invitations</para>
+        /// </summary>
+        /// <param name="invitationModel"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public CreateInvitationResponse.Response CreateInvitation(CreateInvitationModel invitationModel)
+        {
+            string url = $"{GraphApiRootUrl}/invitations";
+            try
+            {
+                CreateInvitationRequest.Body request = new CreateInvitationRequest.Body
+                {
+                    invitedUserDisplayName = invitationModel.UserDisplayName,
+                    invitedUserEmailAddress= invitationModel.UserEmailAddress,
+                    inviteRedirectUrl = invitationModel.RedirectUrl,
+                    sendInvitationMessage = invitationModel.SendInvitationMessage
+                };
+
+                HttpContent httpContent = new StringContent(request.ObjectToJson());
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                return content.JsonToObject<CreateInvitationResponse.Response>();
             }
             catch
             {

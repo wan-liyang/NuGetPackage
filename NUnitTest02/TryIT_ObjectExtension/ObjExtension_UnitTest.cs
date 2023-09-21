@@ -53,5 +53,11 @@ namespace NUnitTest02.TryIT_ObjectExtension
             result_int = json.GetJsonValue<int>("KEY2[0]:Key3");
             Assert.That(result_int, Is.EqualTo(123));
         }
+
+        [Test]
+        public void ToDataTable()
+        {
+
+        }
     }
 }
