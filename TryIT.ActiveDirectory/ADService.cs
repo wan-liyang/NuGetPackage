@@ -151,15 +151,17 @@ namespace TryIT.ActiveDirectory
             public static List<AdUserGroup> FindUserGroup(string userDistinguishedName)
             {
                 AdUserHelper adUserHelper = new AdUserHelper();
-                AdUserModel model = adUserHelper.FindUserManager(userDistinguishedName);
+
+                var userGroupInfo = adUserHelper.FindUserGroup(userDistinguishedName);
+
                 List<AdUserGroup> groups = null;
-                if (model != null)
+                if (userGroupInfo != null)
                 {
                     groups = new List<AdUserGroup>();
 
-                    if (model.MemberOf_Group != null && model.MemberOf_Group.Count > 0)
+                    if (userGroupInfo.MemberOf_Group != null && userGroupInfo.MemberOf_Group.Count > 0)
                     {
-                        model.MemberOf_Group.ForEach(p => {
+                        userGroupInfo.MemberOf_Group.ForEach(p => {
                             groups.Add(new AdUserGroup
                             {
                                 DistinguishedName = p.DistinguishedName,

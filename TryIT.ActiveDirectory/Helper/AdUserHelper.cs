@@ -58,22 +58,22 @@ namespace TryIT.ActiveDirectory.Helper
 
 		public AdUserModel FindUserManager(string userDistinguishedName)
 		{
-			var user = FindUserByDistinuishdName(userDistinguishedName, AttributeMap.User.UserManagerMap);
+			var user = GetUserInfoByDistinuishdName(userDistinguishedName, AttributeMap.User.UserManagerMap);
 
-			return FindUserByDistinuishdName(user.Manager_DistinguishedName, AttributeMap.User.ManagerMap);			
+			return GetUserInfoByDistinuishdName(user.Manager_DistinguishedName, AttributeMap.User.ManagerMap);			
 		}
 
 		public AdUserModel FindUserGroup(string userDistinguishedName)
 		{
-			return FindUserByDistinuishdName(userDistinguishedName, AttributeMap.User.UserGroupMap);
+			return GetUserInfoByDistinuishdName(userDistinguishedName, AttributeMap.User.UserGroupMap);
 		}
 
 		private AdUserModel FindManagerByDistinuishdName(string distinguishedName)
 		{
-			return FindUserByDistinuishdName(distinguishedName, AttributeMap.User.ManagerMap);
+			return GetUserInfoByDistinuishdName(distinguishedName, AttributeMap.User.ManagerMap);
 		}
 
-		private AdUserModel FindUserByDistinuishdName(string distinguishedName, Dictionary<string, string> attributeMap = null)
+		private AdUserModel GetUserInfoByDistinuishdName(string distinguishedName, Dictionary<string, string> attributeMap = null)
 		{
 			string attr = AttributeMap.User.DetailMap.TryGetValue(AttributeMap.User.DistinguishedName);
 			string filter = $"(&(objectClass=user)(objectCategory=person)({attr}={distinguishedName}))";
