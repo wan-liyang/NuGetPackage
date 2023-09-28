@@ -14,6 +14,7 @@
     <Description>Provide method to operate Active Directory, e.g. find user, find group</Description>
     <PackageId>TryIT.ActiveDirectory</PackageId>
     <PackageTags>AD ActiveDirectory</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Product>TryIT.ActiveDirectory</Product>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
@@ -27,6 +28,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.DirectoryServices" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
