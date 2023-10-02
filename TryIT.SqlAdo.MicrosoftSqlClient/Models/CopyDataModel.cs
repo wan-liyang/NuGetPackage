@@ -17,7 +17,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
         /// </summary>
         public string TargetTable { get; set; }
         /// <summary>
-        /// column mappings between soource data table and target table, if this property is null or empty, will assume source data table and target table has same ColumnName and OrdinalPosition
+        /// column mappings between source data table and target table, case-sensitive on source column and destination column, if this property is null or empty, will assume source data table and target table has same ColumnName and OrdinalPosition
         /// </summary>
         public Dictionary<string, string> ColumnMappings { get; set; }
 

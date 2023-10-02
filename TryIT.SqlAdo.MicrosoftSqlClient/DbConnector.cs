@@ -326,6 +326,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
         /// <summary>
         /// copy data from <see cref="CopyDataModel.SourceData"/> into <see cref="CopyDataModel.TargetTable"/>
+        /// <para>the column map is case-sensitive on source column and destination column</para>
         /// </summary>
         /// <param name="copyDataModel"></param>
         /// <exception cref="ArgumentNullException"></exception>
