@@ -15,12 +15,16 @@ namespace NUnitTest02
         {
             var apiRequest = new TryIT.RestApi.RequestModel
             {
-
+                Url = "http://localhost:18080"
             };
 
-            TryIT.RestApi.ApiRequest.Post(apiRequest);
 
-            ApiRequest.Post(apiRequest);
+            ApiRequest api = new ApiRequest();
+            var result = api.GetAsync(apiRequest).GetAwaiter().GetResult();
+
+            var result2 = api.PostAsync(apiRequest).GetAwaiter().GetResult();
+
+            api.RetryLog.Count();
         }
     }
 }

@@ -1,11 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Security;
 
 namespace TryIT.RestApi
 {
     public class RequestModel
     {
+        public RequestModel()
+        {
+        }
+
         /// <summary>
         /// request Url contains parameter if parameter pass via Url
         /// </summary>
@@ -13,31 +18,11 @@ namespace TryIT.RestApi
 
         public BasicAuth BasicAuth { get; set; }
         public Dictionary<string, string> Headers { get; set; }
-        public string Body { get; set; }
-
-        public WebProxyInfo WebProxy { get; set; }
 
         /// <summary>
-        /// determine request timeout second, default is 100 seconds, https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.timeout?view=net-7.0
+        /// new StringContent(bodyString, System.Text.Encoding.UTF8, "application/json");
         /// </summary>
-        public double TimeoutSecond { get; set; }
-    }
-
-    public class WebProxyInfo
-    {
-        /// <summary>
-        /// Url for proxy server
-        /// </summary>
-        public string Url { get; set; }
-
-        /// <summary>
-        /// Username for connect to proxy, if empty will set <see cref="WebProxy.UseDefaultCredentials"/> to true
-        /// </summary>
-        public string Username { get; set; }
-        /// <summary>
-        /// Password for connect to proxy
-        /// </summary>
-        public string Password { get; set; }
+        public HttpContent HttpContent { get; set; }
     }
 
     public class BasicAuth
