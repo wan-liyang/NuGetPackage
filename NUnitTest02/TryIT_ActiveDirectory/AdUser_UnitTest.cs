@@ -12,8 +12,10 @@ namespace NUnitTest02.TryIT_ActiveDirectory
         [Test]
         public void GetUserByKeyword()
         {
-            var user = ADService.User.FindUser("p1207563");
+            var user = ADService.User.FindUser("P0510688");
             var group = ADService.User.FindUserGroup(user.DistinguishedName);
+
+            var manager = ADService.User.FindUserManager(user.DistinguishedName);
 
             Assert.NotNull(user);
 

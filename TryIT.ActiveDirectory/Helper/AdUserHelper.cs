@@ -73,8 +73,19 @@ namespace TryIT.ActiveDirectory.Helper
 			return GetUserInfoByDistinuishdName(distinguishedName, AttributeMap.User.ManagerMap);
 		}
 
-		private AdUserModel GetUserInfoByDistinuishdName(string distinguishedName, Dictionary<string, string> attributeMap = null)
+        /// <summary>
+        /// get user information by DistinuishdName, return null if <paramref name="distinguishedName"/> is null or empty
+        /// </summary>
+        /// <param name="distinguishedName"></param>
+        /// <param name="attributeMap"></param>
+        /// <returns></returns>
+        private AdUserModel GetUserInfoByDistinuishdName(string distinguishedName, Dictionary<string, string> attributeMap = null)
 		{
+			if (string.IsNullOrEmpty(distinguishedName))
+			{
+				return null;
+			}
+
 			string attr = AttributeMap.User.DetailMap.TryGetValue(AttributeMap.User.DistinguishedName);
 			string filter = $"(&(objectClass=user)(objectCategory=person)({attr}={distinguishedName}))";
 			return _FindUser(filter, attributeMap);
