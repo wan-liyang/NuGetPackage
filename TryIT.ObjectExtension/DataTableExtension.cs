@@ -383,7 +383,7 @@ namespace TryIT.ObjectExtension
         /// <param name="dtSource"></param>
         /// <param name="separator"></param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException"><paramref name="columns"/> cannot be null</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="dtSource"/> cannot be null</exception>
         public static string ToString(this DataTable dtSource, string separator)
         {
             if (dtSource == null)
@@ -419,6 +419,67 @@ namespace TryIT.ObjectExtension
             }
 
             return stringBuilder.ToString();
+        }
+
+        /// <summary>
+        /// group by source table, return new table with Group By column and Count column
+        /// </summary>
+        /// <param name="dtSource"></param>
+        /// <param name="groupByColumns">columns to group by the rows</param>
+        /// <param name="countColumnName">column name for count indicator of each group, if <paramref name="groupByColumns"/> has same name, need give different name here </param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static DataTable GroupBy(this DataTable dtSource, string[] groupByColumns, string countColumnName = "Count")
+        {
+            if (dtSource == null)
+            {
+                throw new ArgumentNullException(nameof(dtSource), "Source table cannot be null");
+            }
+
+            if (groupByColumns.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(groupByColumns), "Columns to groupBy cannot be null");
+            }
+
+            // prepare new table, with count column
+            DataTable dtNew = new DataTable();
+            foreach (var item in groupByColumns)
+            {
+                dtNew.Columns.Add(item);
+            }
+            dtNew.Columns.Add(countColumnName, typeof(int));
+
+
+            for (int i = 0; i < dtSource.Rows.Count; i++)
+            {
+                // prepare new group row
+                DataRow row = dtNew.NewRow();
+                row[countColumnName] = 1;
+
+                string filter = string.Empty;
+                foreach (var item in groupByColumns)
+                {
+                    row[item] = dtSource.Rows[i][item];
+
+                    filter += $"{item} = '{dtSource.Rows[i][item]}' AND ";
+                }
+                filter = filter.TrimEnd(" AND ".ToCharArray());
+
+                // check wheter filter condition exists in dtNew, if exists, increase count, otherwise its new group row
+                DataRow dr = dtNew.Select(filter).FirstOrDefault();
+                if (dr != null)
+                {
+                    // existing group, increase Count column
+                    dr[countColumnName] = Convert.ToInt32(dr[countColumnName]) + 1;
+                }
+                else
+                {
+                    // new group, add group row into table
+                    dtNew.Rows.Add(row);
+                }                
+            }
+
+            return dtNew;
         }
     }
 }

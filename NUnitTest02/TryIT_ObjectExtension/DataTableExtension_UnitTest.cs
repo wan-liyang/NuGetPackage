@@ -183,5 +183,33 @@ namespace NUnitTest02.TryIT_ObjectExtension
             Assert.That(dataTable.Columns["Col4"].DataType, Is.EqualTo(typeof(string)));
             Assert.That(dataTable.Columns["Col5"].DataType, Is.EqualTo(typeof(string)));
         }
+
+        [Test]
+        public void GroupBy_Test()
+        {
+            DataTable dt = CreateSampleTable();
+
+            var result = dt.GroupBy(new string[] { "Column1", "Column2" });
+            
+            Assert.True(result == null);
+        }
+        DataTable CreateSampleTable()
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("Column1", typeof(string));
+            table.Columns.Add("Column2", typeof(int));
+            table.Columns.Add("Column3", typeof(double));
+
+            table.Rows.Add("Value1", 1, 1.1);
+            table.Rows.Add("Value1", DBNull.Value, 1.1);
+            table.Rows.Add("Value2", 2, 2.2);
+            table.Rows.Add("Value2", 2, 2.2);
+            table.Rows.Add("Value3", 1, 1.1);
+            table.Rows.Add("Value3", 1, 1.1);
+            table.Rows.Add("Value4", 3, 3.3);
+            table.Rows.Add("Value5", 2, 2.2);
+
+            return table;
+        }
     }
 }
