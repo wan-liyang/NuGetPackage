@@ -490,7 +490,7 @@ namespace TryIT.ObjectExtension
                 {
                     row[i] = item.Key.ElementAt(i);
                 }
-                row["Count"] = item.DataRows.Count;
+                row[countColumnName] = item.DataRows.Count;
 
                 dtNew.Rows.Add(row);
             }
