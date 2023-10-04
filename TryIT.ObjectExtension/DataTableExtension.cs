@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -426,7 +427,7 @@ namespace TryIT.ObjectExtension
         /// </summary>
         /// <param name="dtSource"></param>
         /// <param name="groupByColumns">columns to group by the rows</param>
-        /// <param name="countColumnName">column name for count indicator of each group, if <paramref name="groupByColumns"/> has same name, need give different name here </param>
+        /// <param name="countColumnName">column name for count indicator of each group, if <paramref name="groupByColumns"/> has same name as 'Count', need give different name here </param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static DataTable GroupBy(this DataTable dtSource, string[] groupByColumns, string countColumnName = "Count")
@@ -449,37 +450,59 @@ namespace TryIT.ObjectExtension
             }
             dtNew.Columns.Add(countColumnName, typeof(int));
 
+            // use list string for better performance, use to compare whether exists this group
+            List<string> groupByKeys = new List<string>();
+            
+            // list to store all unique group by key, and DataRows for this key
+            List<GroupByDataRow> groupByRows = new List<GroupByDataRow>();
 
-            for (int i = 0; i < dtSource.Rows.Count; i++)
+            dtSource.AsEnumerable()
+                .GroupBy(row => groupByColumns.Select(col => row[col]))
+                .ToList()
+                .ForEach(group =>
+                 {
+                     string keystring = string.Join("-", group.Key);
+                     if (groupByKeys.IsContains(keystring))
+                     {
+                         groupByRows.First(p => p.CombinedKey.IsEquals(keystring)).DataRows.Add(group.First());
+                     }
+                     else
+                     {
+                         groupByRows.Add(new GroupByDataRow
+                         {
+                             CombinedKey = keystring,
+                             Key = group.Key,
+                             DataRows = new List<DataRow>
+                             {
+                                 group.First()
+                             }
+                         });
+                         groupByKeys.Add(keystring);
+                     }
+                 });
+
+            // add DataRows into new table
+            foreach (var item in groupByRows)
             {
-                // prepare new group row
                 DataRow row = dtNew.NewRow();
-                row[countColumnName] = 1;
 
-                string filter = string.Empty;
-                foreach (var item in groupByColumns)
+                for (int i = 0; i < groupByColumns.Length; i++)
                 {
-                    row[item] = dtSource.Rows[i][item];
-
-                    filter += $"{item} = '{dtSource.Rows[i][item]}' AND ";
+                    row[i] = item.Key.ElementAt(i);
                 }
-                filter = filter.TrimEnd(" AND ".ToCharArray());
+                row["Count"] = item.DataRows.Count;
 
-                // check wheter filter condition exists in dtNew, if exists, increase count, otherwise its new group row
-                DataRow dr = dtNew.Select(filter).FirstOrDefault();
-                if (dr != null)
-                {
-                    // existing group, increase Count column
-                    dr[countColumnName] = Convert.ToInt32(dr[countColumnName]) + 1;
-                }
-                else
-                {
-                    // new group, add group row into table
-                    dtNew.Rows.Add(row);
-                }                
+                dtNew.Rows.Add(row);
             }
 
             return dtNew;
+        }
+
+        private class GroupByDataRow
+        {
+            public string CombinedKey { get; set; }
+            public IEnumerable<object> Key { get; set; }
+            public List<DataRow> DataRows { get; set; }
         }
     }
 }

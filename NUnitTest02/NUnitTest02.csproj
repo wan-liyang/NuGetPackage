@@ -41,6 +41,8 @@
     <Folder Include="TryIT_DataConversion\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TryIT.Csv\TryIT.Csv.csproj" />
+    <ProjectReference Include="..\TryIT.ExcelService\TryIT.ExcelService.csproj" />
     <ProjectReference Include="..\TryIT.Jwt\TryIT.Jwt.csproj" />
     <ProjectReference Include="..\TryIT.ActiveDirectory\TryIT.ActiveDirectory.csproj" />
     <ProjectReference Include="..\TryIT.MicrosoftGraphApi\TryIT.MicrosoftGraphApi.csproj" />

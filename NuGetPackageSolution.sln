@@ -56,7 +56,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphApi", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.RestApi", "TryIT.RestApi\TryIT.RestApi.csproj", "{3912BC79-726F-4AE2-BC3C-8E2223275448}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.FileExplorer", "TryIT.FileExplorer\TryIT.FileExplorer.csproj", "{F311BF4F-60CB-433D-8894-593CA5DE938F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileExplorer", "TryIT.FileExplorer\TryIT.FileExplorer.csproj", "{F311BF4F-60CB-433D-8894-593CA5DE938F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Csv", "TryIT.Csv\TryIT.Csv.csproj", "{212D0899-9BF1-432B-91E9-902FD91E0455}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -176,6 +178,10 @@ Global
 		{F311BF4F-60CB-433D-8894-593CA5DE938F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F311BF4F-60CB-433D-8894-593CA5DE938F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F311BF4F-60CB-433D-8894-593CA5DE938F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{212D0899-9BF1-432B-91E9-902FD91E0455}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{212D0899-9BF1-432B-91E9-902FD91E0455}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{212D0899-9BF1-432B-91E9-902FD91E0455}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{212D0899-9BF1-432B-91E9-902FD91E0455}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

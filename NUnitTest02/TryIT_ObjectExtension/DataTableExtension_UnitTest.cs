@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Data;
+using TryIT.ExcelService;
 
 namespace NUnitTest02.TryIT_ObjectExtension
 {
@@ -187,10 +188,19 @@ namespace NUnitTest02.TryIT_ObjectExtension
         [Test]
         public void GroupBy_Test()
         {
-            DataTable dt = CreateSampleTable();
+            //DataTable dt = CreateSampleTable();
 
-            var result = dt.GroupBy(new string[] { "Column1", "Column2" });
-            
+            var csvReaderConfig = new TryIT.Csv.CsvReaderConfig
+            {
+                FilePath = @"",
+                Delimiter = "|",
+                HasHeaderRecord = true,
+                SkipFooterRows = 1
+            };
+            DataTable dt2 = TryIT.Csv.Csv.ReadAsDataTable(csvReaderConfig);
+
+            var result = dt2.GroupBy(new string[] { "WBSELEMENT", "DOCNO", "DOCITEMNO", "DOCTYPE" });
+
             Assert.True(result == null);
         }
         DataTable CreateSampleTable()

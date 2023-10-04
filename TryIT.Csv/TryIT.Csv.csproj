@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Deterministic>true</Deterministic>
@@ -11,27 +11,30 @@
     <Authors>TryIT</Authors>
     <Company>TryIT</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Description>the extension method for various type, String, Array, DataTable, Dictionary, etc</Description>
-    <PackageId>TryIT.ObjectExtension</PackageId>
-    <PackageTags>ObjectExtension ExtensionMethod Extension</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Provide method to convert data</Description>
+    <PackageId>TryIT.Csv</PackageId>
+    <PackageTags>Csv</PackageTags>
     <Configurations>Release;Debug</Configurations>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>TryIT.ObjectExtension.xml</DocumentationFile>
+    <DocumentationFile>TryIT.Csv.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile>bin\Debug\netstandard2.0\TryIT.ObjectExtension.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.0\TryIT.Csv.xml</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-  </ItemGroup>
   
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Update="README.md">
+      <PackagePath>\</PackagePath>
+      <Pack>true</Pack>
+    </None>
   </ItemGroup>
 
 </Project>
