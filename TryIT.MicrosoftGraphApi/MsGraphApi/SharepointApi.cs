@@ -4,6 +4,7 @@ using System.Linq;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Model.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
@@ -125,6 +126,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.DeleteItem(folderUrl, itemName);
         }
 
+
         List<string> _listFiles;
         #region Download sharepoint folder to local
         /// <summary>
@@ -190,15 +192,19 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         #endregion
 
         #region Upload local folder to sharepoint
+
+        List<FileUploadResult> _uploadFolderStatus;
+
         /// <summary>
         /// upload local folder to sharepoint
         /// </summary>
         /// <param name="folderAbsUrl"></param>
         /// <param name="localRootFolder"></param>
-        /// <returns></returns>
+        /// <param name="allowPartialSuccess">indicator allow partial upload success, true(default): if one file failed, will continue rest, false: if one file failed, will stop and throw exception</param>
+        /// <returns>upload status for each file, either success or failure with exception</returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public List<string> UploadFolder(string folderAbsUrl, string localRootFolder)
+        public List<FileUploadResult> UploadFolder(string folderAbsUrl, string localRootFolder, bool allowPartialSuccess = true)
         {
             if (string.IsNullOrEmpty(localRootFolder))
             {
@@ -210,12 +216,12 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 throw new DirectoryNotFoundException($"Source directory not found: {localRootFolder}");
             }
 
-            _listFiles = new List<string>();
+            _uploadFolderStatus = new List<FileUploadResult>();
 
-            _UploadFile(localRootFolder, folderAbsUrl);
-            return _listFiles;
+            _UploadFile(localRootFolder, folderAbsUrl, allowPartialSuccess);
+            return _uploadFolderStatus;
         }
-        private void _UploadFile(string sourceDir, string sharepointFolderUrl)
+        private void _UploadFile(string sourceDir, string sharepointFolderUrl, bool allowPartialSuccess)
         {
             var dir = new DirectoryInfo(sourceDir);
 
@@ -223,8 +229,31 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
             foreach (FileInfo file in dir.GetFiles())
             {
-                UploadFile(sharepointFolderUrl, file.Name, File.ReadAllBytes(file.FullName));
-                _listFiles.Add(Path.Combine(sourceDir, file.FullName));
+                try
+                {
+                    UploadFile(sharepointFolderUrl, file.Name, File.ReadAllBytes(file.FullName));
+                    _uploadFolderStatus.Add(new FileUploadResult
+                    {
+                        FileName = file.Name,
+                        FileFullName = file.FullName,
+                        Success = true
+                    });
+                }
+                catch (System.Exception ex)
+                {
+                    _uploadFolderStatus.Add(new FileUploadResult
+                    {
+                        FileName = file.Name,
+                        FileFullName = file.FullName,
+                        Success = false,
+                        Exception = ex
+                    });
+
+                    if (!allowPartialSuccess)
+                    {
+                        throw;
+                    }
+                }
             }
 
             foreach (DirectoryInfo subDir in dirs)
@@ -241,7 +270,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 {
                     subFolderUrl = subfolder.webUrl;
                 }
-                _UploadFile(subDir.FullName, subFolderUrl);
+                _UploadFile(subDir.FullName, subFolderUrl, allowPartialSuccess);
             }
         }
         #endregion
