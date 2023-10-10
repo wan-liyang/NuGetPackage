@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace TryIT.ObjectExtension
 {
     /// <summary>
@@ -232,6 +234,26 @@ namespace TryIT.ObjectExtension
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// get first day in month of <paramref name="dt"/>, default time to 12:00:00 am
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime FirstDay(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, 1);
+        }
+
+        /// <summary>
+        /// get last day in month of <paramref name="dt"/>, default time to 12:00:00 am
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime LastDay(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, 1).AddMonths(1).AddDays(-1);
         }
     }
 }
