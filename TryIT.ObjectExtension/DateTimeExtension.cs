@@ -14,6 +14,17 @@ namespace TryIT.ObjectExtension
         public DateTime FY_EndDate { get; set; }
     }
 
+    public enum DatePart
+    {
+        None = 0,
+        Year = 1,
+        Month = 2,
+        Day = 3,
+        Hour = 4,
+        Minute = 5,
+        Second = 6,
+    }
+
     /// <summary>
     /// <see cref="DateTime"/> extension method
     /// </summary>
@@ -73,6 +84,154 @@ namespace TryIT.ObjectExtension
                 FY_StartDate = _fy_start,
                 FY_EndDate = _fy_end
             };
+        }
+
+        /// <summary>
+        /// Compare to datetime, return number of datepart between t1 and t2, t1 - t2
+        /// </summary>
+        /// <param name="t1">first datetime</param>
+        /// <param name="t2">second datetime</param>
+        /// <param name="datepart">Year, Month, Day, compare which datepart, default compart whole date</param>
+        /// <returns></returns>
+        public static double Diff(this DateTime t1, DateTime t2, DatePart datepart)
+        {
+            double value = 0;
+            DateTime dt1 = DateTime.MinValue;
+            DateTime dt2 = DateTime.MinValue;
+            switch (datepart)
+            {
+                case DatePart.None:
+                    value = DateTime.Compare(t1, t2);
+                    break;
+                case DatePart.Year:
+                    value = t1.Year - t2.Year;
+                    break;
+                case DatePart.Month:
+                    value = ((t1.Year - t2.Year) * 12) + t1.Month - t2.Month;
+                    break;
+                case DatePart.Day:
+                    dt1 = new DateTime(t1.Year, t1.Month, t1.Day);
+                    dt2 = new DateTime(t2.Year, t2.Month, t2.Day);
+                    value = (dt1 - dt2).TotalDays;
+                    break;
+                case DatePart.Hour:
+                    dt1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0);
+                    dt2 = new DateTime(t2.Year, t2.Month, t2.Day, t2.Hour, 0, 0);
+                    value = (dt1 - dt2).TotalHours;
+                    break;
+                case DatePart.Minute:
+                    dt1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0);
+                    dt2 = new DateTime(t2.Year, t2.Month, t2.Day, t2.Hour, t2.Minute, 0);
+                    value = (dt1 - dt2).TotalMinutes;
+                    break;
+                case DatePart.Second:
+                    dt1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second);
+                    dt2 = new DateTime(t2.Year, t2.Month, t2.Day, t2.Hour, t2.Minute, t2.Second);
+                    value = (dt1 - dt2).TotalSeconds;
+                    break;
+                default:
+                    value = DateTime.Compare(t1, t2);
+                    break;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// check whether the <paramref name="dt1"/> is after <paramref name="dt2"/>
+        /// </summary>
+        /// <param name="dt1"></param>
+        /// <param name="dt2"></param>
+        /// <param name="datepart"></param>
+        /// <returns></returns>
+        public static bool IsAfter(this DateTime dt1, DateTime dt2, DatePart datepart)
+        {
+            double dtDiff = Diff(dt1, dt2, datepart);
+            return dtDiff > 0;
+        }
+        /// <summary>
+        /// check whether the <paramref name="dtSource"/> is same as <paramref name="dtValue"/>
+        /// </summary>
+        /// <param name="dtSource"></param>
+        /// <param name="dtValue"></param>
+        /// <param name="datepart"></param>
+        /// <returns></returns>
+        public static bool IsSame(this DateTime dtSource, DateTime dtValue, DatePart datepart)
+        {
+            double dtDiff = Diff(dtSource, dtValue, datepart);
+            return dtDiff == 0;
+        }
+
+        /// <summary>
+        /// indicator whether <paramref name="dt"/> is between <paramref name="dtStart"/> and <paramref name="dtEnd"/> for specific <paramref name="datepart"/>
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="dtStart"></param>
+        /// <param name="dtEnd"></param>
+        /// <param name="datepart"></param>
+        /// <returns></returns>
+        public static bool IsBetween(this DateTime dt, DateTime dtStart, DateTime dtEnd, DatePart datepart)
+        {
+            bool result = false;
+            if (datepart == DatePart.None)
+            {
+                if (dt.Ticks >= dtStart.Ticks && dt.Ticks <= dtEnd.Ticks)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                }
+            }
+            else
+            {
+                int startValue = 0;
+                int endValue = 0;
+                int tmpValue = -1;
+                switch (datepart)
+                {
+                    case DatePart.None:
+                        break;
+                    case DatePart.Year:
+                        startValue = dtStart.Year;
+                        endValue = dtEnd.Year;
+                        tmpValue = dt.Year;
+                        if (tmpValue >= startValue && tmpValue <= endValue)
+                        {
+                            result = true;
+                        }
+                        break;
+                    case DatePart.Month:
+                        startValue = dtStart.Year * 100 + dtStart.Month;
+                        endValue = dtEnd.Year * 100 + dtEnd.Month;
+                        tmpValue = dt.Year * 100 + dt.Month;
+                        if (tmpValue >= startValue && tmpValue <= endValue)
+                        {
+                            result = true;
+                        }
+                        break;
+                    case DatePart.Day:
+                        startValue = dtStart.Year * 10000 + dtStart.Month * 100 + dtStart.Day;
+                        endValue = dtEnd.Year * 10000 + dtEnd.Month * 100 + dtEnd.Day;
+                        tmpValue = dt.Year * 10000 + dt.Month * 100 + dt.Day;
+                        if (tmpValue >= startValue && tmpValue <= endValue)
+                        {
+                            result = true;
+                        }
+                        break;
+                    case DatePart.Second:
+                        TimeSpan timeStart = dt - dtStart;
+                        TimeSpan timeEnd = dt - dtEnd;
+                        if (timeStart.TotalSeconds >= 0 && timeEnd.TotalSeconds <= 0)
+                        {
+                            result = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return result;
         }
     }
 }
