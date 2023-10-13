@@ -12,14 +12,19 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SharepointHelper : BaseHelper
     {
-        private HttpClient _httpClient;
+        private TryIT.RestApi.Api api;
 
         public SharepointHelper(HttpClient httpClient)
         {
             if (null == httpClient)
                 throw new ArgumentNullException(nameof(httpClient));
 
-            _httpClient = httpClient;
+            // use RestApi library and enable retry
+            api = new RestApi.Api(new RestApi.ApiConfig
+            {
+                HttpClient = httpClient,
+                EnableRetry = true,
+            });
         }
 
         public GetSiteResponse.Site GetSite(string folderUrl)
@@ -34,8 +39,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<GetSiteResponse.Site>();
@@ -56,8 +61,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 item = content.JsonToObject<GetDriveItemResponse.Item>();
@@ -151,12 +156,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 string contentType = MIMEType.GetContentType(fileName);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
-                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
 
                 // catch error to response with detail file information
                 try
                 {
-                    CheckStatusCode(response);
+                    CheckStatusCode(response, api.RetryResults);
                 }
                 catch (Exception ex)
                 {
@@ -184,8 +189,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
                 httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModel.FileContent.Length - 1, fileModel.FileContent.Length);
 
-                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<GetDriveItemResponse.Item>();
@@ -208,8 +213,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 };
 
                 HttpContent httpContent = this.GetJsonHttpContent(requestBody);
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<CreateUploadSessionResponse.Response>();
@@ -228,8 +233,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<GetDriveItemResponse.Response>().value;
@@ -259,8 +264,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 // for resolve "The underlying connection was closed: An unexpected error occurred on a send" error
                 // ServicePointManager.SecurityProtocol = GetSecurityProtocol();
 
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
 
@@ -276,8 +281,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             try
             {
-                var response = _httpClient.GetAsync(graphdownloadUrl).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.GetAsync(graphdownloadUrl).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
 
@@ -308,8 +313,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 HttpContent httpContent = new StringContent(jsonContent);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 var item = content.JsonToObject<GetDriveItemResponse.Item>();
@@ -350,14 +355,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 HttpContent httpContent = new StringContent(jsonContent);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = _httpClient.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
 
                 if (response.StatusCode == HttpStatusCode.NoContent)
                 {
                     return true;
                 }
 
-                CheckStatusCode(response);
+                CheckStatusCode(response, api.RetryResults);
                 return false;
             }
             catch
@@ -379,12 +384,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
+                var response = api.DeleteAsync(url).GetAwaiter().GetResult();
                 if (response.StatusCode == HttpStatusCode.NoContent)
                 {
                     return true;
                 }
-                CheckStatusCode(response);
+                CheckStatusCode(response, api.RetryResults);
                 return false;
             }
             catch

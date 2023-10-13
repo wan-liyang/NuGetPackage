@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -20,6 +21,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             client.DefaultRequestHeaders.Remove(headerKey);
             client.DefaultRequestHeaders.Add(headerKey, headerValue);
+        }
+
+        protected void CheckStatusCode(HttpResponseMessage responseMessage, List<TryIT.RestApi.RetryResult> retryResults)
+        {
+            if (!responseMessage.IsSuccessStatusCode)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine("Invalid Request");
+
+                stringBuilder.Append("StatusCode: ");
+                stringBuilder.AppendLine(responseMessage.StatusCode.ToString());
+
+                stringBuilder.Append("Response Content: ");
+                stringBuilder.AppendLine(responseMessage.Content.ReadAsStringAsync().Result);
+
+                if (retryResults != null && retryResults.Count > 0)
+                {
+                    stringBuilder.Append("Retry Result: ");
+                    string json = retryResults.ObjectToJson();
+                    stringBuilder.Append(json);
+                }
+
+                throw new Exception(stringBuilder.ToString());
+            }
         }
 
         protected void CheckStatusCode(HttpResponseMessage responseMessage)

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TryIT.RestApi;
 
-namespace NUnitTest02
+namespace NUnitTest02.TryIT_RestApi
 {
     internal class TryIT_RestApi_UnitTest
     {
@@ -13,7 +13,7 @@ namespace NUnitTest02
         [Test]
         public void Test1()
         {
-            var apiRequest = new TryIT.RestApi.RequestModel
+            var apiRequest = new RequestModel
             {
                 Url = "http://localhost:18080"
             };
@@ -25,6 +25,24 @@ namespace NUnitTest02
             var result2 = api.PostAsync(apiRequest).GetAwaiter().GetResult();
 
             api.RetryLog.Count();
+        }
+
+        [Test]
+        public async Task Test2()
+        {
+            Api api = new Api(new ApiConfig
+            {
+                HttpClient = new HttpClient()
+                {
+                    Timeout = TimeSpan.FromSeconds(10)
+                },
+                EnableRetry = true
+            });
+
+
+            var response = await api.GetAsync("https://localhost:7279/weatherforecast");
+
+            var a = response;
         }
     }
 }
