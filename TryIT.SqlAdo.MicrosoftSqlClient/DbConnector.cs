@@ -1,5 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.AlwaysEncrypted.AzureKeyVaultProvider;
+using Polly;
+using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,7 +17,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
     /// </summary>
     public class DbConnector
     {
+        private readonly ResiliencePipeline _pipeline;
         private ConnectorConfig _config;
+
+        /// <summary>
+        /// retry results
+        /// </summary>
+        public List<RetryResult> RetryResults = new List<RetryResult>();
 
         /// <summary>
         /// initial database connector
@@ -34,6 +42,36 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(config.ConnectionString));
             }
             _config = config;
+
+            if (config.EnableRetry)
+            {
+
+                _pipeline = new ResiliencePipelineBuilder()
+                           .AddRetry(new RetryStrategyOptions
+                           {
+                               ShouldHandle = new PredicateBuilder()
+                                    .Handle<SqlException>(result => result.Number == -2), // handle sql timeout
+
+                               Delay = TimeSpan.FromSeconds(1),
+                               MaxRetryAttempts = 3,
+                               BackoffType = DelayBackoffType.Constant,
+                               OnRetry = args =>
+                               {
+                                   RetryResults.Add(new RetryResult
+                                   {
+                                       AttemptNumber = args.AttemptNumber,
+                                       Exception = args.Outcome.Exception
+                                   });
+
+                                   return default;
+                               }
+                           })
+                           .Build();
+            }
+            else
+            {
+                _pipeline = new ResiliencePipelineBuilder().Build();
+            }
         }
 
         /// <summary>
@@ -257,23 +295,26 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(commandText));
             }
 
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            return _pipeline.Execute(exec =>
             {
-                sqlConnection.Open();
-                using (SqlCommand cmd = sqlConnection.CreateCommand())
+                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
-                    cmd.CommandTimeout = _config.TimeoutSecond;
-
-                    cmd.CommandText = commandText;
-                    cmd.CommandType = commandType;
-                    if (null != parameters && parameters.Count() > 0)
+                    sqlConnection.Open();
+                    using (SqlCommand cmd = sqlConnection.CreateCommand())
                     {
-                        cmd.Parameters.AddRange(parameters);
-                    }
+                        cmd.CommandTimeout = _config.TimeoutSecond;
 
-                    return cmd.ExecuteNonQuery();
+                        cmd.CommandText = commandText;
+                        cmd.CommandType = commandType;
+                        if (null != parameters && parameters.Count() > 0)
+                        {
+                            cmd.Parameters.AddRange(parameters);
+                        }
+
+                        return cmd.ExecuteNonQuery();
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>

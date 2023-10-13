@@ -91,7 +91,6 @@ namespace TryIT.RestApi
                                    Exception = args.Outcome.Exception
                                });
 
-                               var result = args.Outcome;
                                return default;
                            }
                        })

@@ -29,5 +29,10 @@
                 second = value;
             }
         }
+
+        /// <summary>
+        /// indicator to enable retry for timeout exception
+        /// </summary>
+        public bool EnableRetry { get; set; }
     }
 }
