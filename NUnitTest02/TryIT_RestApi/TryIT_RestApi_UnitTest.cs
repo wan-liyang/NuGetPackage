@@ -44,5 +44,19 @@ namespace NUnitTest02.TryIT_RestApi
 
             var a = response;
         }
+
+        [Test]
+        public async Task Test3()
+        {
+            //Api api = new Api(new HttpClientConfig
+            //{
+            //    TimeoutSecond = 10 * 60
+            //});
+
+
+            //var response = await api.GetAsync("https://localhost:7279/weatherforecast");
+
+            //var a = response;
+        }
     }
 }

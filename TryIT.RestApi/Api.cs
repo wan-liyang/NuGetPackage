@@ -4,55 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using TryIT.RestApi.Models;
+using TryIT.RestApi.Utilities;
 
 namespace TryIT.RestApi
 {
-    /// <summary>
-    /// configuration
-    /// </summary>
-    public class ApiConfig
-    {
-        /// <summary>
-        /// the ready HttpClient with necessary information e.g. Proxy, Auth, Header
-        /// </summary>
-        public HttpClient HttpClient { get; set; }
-
-        /// <summary>
-        /// indicator whether enable retry (max 3 times) if respons status code is 
-        /// <see cref="HttpStatusCode.GatewayTimeout"/>
-        /// <see cref="HttpStatusCode.BadGateway"/>
-        /// <see cref="HttpStatusCode.BadRequest"/>
-        /// or timeout exception happen
-        /// </summary>
-        public bool EnableRetry { get; set; }
-    }
-
-    /// <summary>
-    /// retry result
-    /// </summary>
-    public class RetryResult
-    {
-        /// <summary>
-        /// number of retry
-        /// </summary>
-        public int AttemptNumber { get; set; }
-        /// <summary>
-        /// response message for each retry
-        /// </summary>
-        public HttpResponseMessage Result { get; set; }
-        /// <summary>
-        /// exception for each retry
-        /// </summary>
-        public Exception Exception { get; set; }
-    }
-
     /// <summary>
     /// make a api call with retry
     /// </summary>
     public class Api
     {
-        private readonly ResiliencePipeline<HttpResponseMessage> _pipeline;
+        private ResiliencePipeline<HttpResponseMessage> _pipeline;
         private HttpClient _httpClient;
 
         /// <summary>
@@ -61,14 +25,84 @@ namespace TryIT.RestApi
         public List<RetryResult> RetryResults = new List<RetryResult>();
 
         /// <summary>
-        /// init Api instance with HttpClient
+        /// init Api instance with HttpClient instance
         /// </summary>
         /// <param name="apiConfig"></param>
         public Api(ApiConfig apiConfig)
         {
             _httpClient = apiConfig.HttpClient;
 
-            if (apiConfig.EnableRetry)
+            EnableRetry(apiConfig.EnableRetry);
+        }
+
+        /// <summary>
+        /// init api instance with HttpClient configuration
+        /// </summary>
+        /// <param name="clientConfig"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public Api(HttpClientConfig clientConfig)
+        {
+            if (clientConfig == null)
+            {
+                throw new ArgumentNullException(nameof(clientConfig));
+            }
+
+            HttpClientHandler clientHandler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = true,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            };
+
+            if (clientConfig.Proxy != null)
+            {
+                var proxy = UtliFunction.GetWebProxy(clientConfig.Proxy);
+                if (proxy != null)
+                {
+                    clientHandler.Proxy = proxy;
+                }
+            }
+            HttpClient client = new HttpClient(clientHandler);
+
+            if (clientConfig.TimeoutSecond > 0)
+            {
+                client.Timeout = TimeSpan.FromSeconds(clientConfig.TimeoutSecond);
+            }
+
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            ServicePointManager.SecurityProtocol = clientConfig.securityProtocolType;
+
+            if (clientConfig.BasicAuth != null)
+            {
+                if (!string.IsNullOrEmpty(clientConfig.BasicAuth.Username) || !string.IsNullOrEmpty(clientConfig.BasicAuth.Password))
+                {
+                    string basicToken = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{clientConfig.BasicAuth.Username}:{clientConfig.BasicAuth.Password}"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicToken);
+                }
+            }
+
+            if (clientConfig.Headers != null && clientConfig.Headers.Count > 0)
+            {
+                foreach (var item in clientConfig.Headers)
+                {
+                    client.DefaultRequestHeaders.Remove(item.Key);
+                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
+                }
+            }
+
+            _httpClient = client;
+
+            EnableRetry(clientConfig.EnableRetry);
+        }
+
+        /// <summary>
+        /// init retry pipeline
+        /// </summary>
+        /// <param name="isEnable"></param>
+        private void EnableRetry(bool isEnable)
+        {
+            if (isEnable)
             {
                 _pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
                        .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
