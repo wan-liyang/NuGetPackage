@@ -23,7 +23,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             client.DefaultRequestHeaders.Add(headerKey, headerValue);
         }
 
-        protected void CheckStatusCode(HttpResponseMessage responseMessage, List<TryIT.RestApi.RetryResult> retryResults)
+        protected void CheckStatusCode(HttpResponseMessage responseMessage, List<TryIT.RestApi.Models.RetryResult> retryResults)
         {
             if (!responseMessage.IsSuccessStatusCode)
             {

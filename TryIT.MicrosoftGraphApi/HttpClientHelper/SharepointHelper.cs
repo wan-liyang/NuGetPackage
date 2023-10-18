@@ -20,7 +20,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(httpClient));
 
             // use RestApi library and enable retry
-            api = new RestApi.Api(new RestApi.ApiConfig
+            api = new RestApi.Api(new RestApi.Models.ApiConfig
             {
                 HttpClient = httpClient,
                 EnableRetry = true,
