@@ -454,5 +454,22 @@ namespace TryIT.FileExplorer
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase);
             return Directory.GetFiles(path).Where(p => reg.IsMatch(Path.GetFileName(p))).Select(p => new FileInfo(p)).ToList();
         }
+
+
+        /// <summary>
+        /// rename a file by append a string to end of file name, e.g. abc.txt to abc_yyyyMMdd.txt
+        /// </summary>
+        /// <param name="fileNameAndPath"></param>
+        /// <param name="appendString"></param>
+        public static void Rename(string fileNameAndPath, string appendString)
+        {
+            string path = Path.GetDirectoryName(fileNameAndPath);
+            string name = Path.GetFileNameWithoutExtension(fileNameAndPath);
+            string extension = Path.GetExtension(fileNameAndPath);
+
+            string newname = $"{name}{appendString}{extension}";
+
+            File.Move(fileNameAndPath, Path.Combine(path, newname));
+        }
     }
 }
