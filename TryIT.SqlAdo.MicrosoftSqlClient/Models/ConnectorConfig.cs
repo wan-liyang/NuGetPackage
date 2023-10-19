@@ -1,4 +1,6 @@
-﻿namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
+﻿using Microsoft.Data.SqlClient;
+
+namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
 {
     /// <summary>
     /// database connector configuration
@@ -34,5 +36,7 @@
         /// indicator to enable retry for timeout exception
         /// </summary>
         public bool EnableRetry { get; set; }
+
+        public AzureKeyVaultProvider AzureKeyVaultProvider { get; set; }
     }
 }
