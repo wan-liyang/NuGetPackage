@@ -37,6 +37,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
         /// </summary>
         public bool EnableRetry { get; set; }
 
+        /// <summary>
+        /// (optional) key store provider from Azure, if empty will not register this
+        /// </summary>
         public AzureKeyVaultProvider AzureKeyVaultProvider { get; set; }
     }
 }
