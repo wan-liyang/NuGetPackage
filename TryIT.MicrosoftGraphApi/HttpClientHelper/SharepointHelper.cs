@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -398,6 +399,50 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
+
+        /// <summary>
+        /// rename sharepoint item
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="itemOldName"></param>
+        /// <param name="itemNewName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public GetDriveItemResponse.Item Rename(string folderUrl, string itemOldName, string itemNewName)
+        {
+            var folder = GetFolder(folderUrl);
+            var children = GetChildren(folderUrl).Where(p => p.name.IsEquals(itemOldName)).FirstOrDefault();
+            if (children == null)
+            {
+                throw new Exception($"'{itemOldName}' not found");
+            }
+
+            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{children.id}";
+
+            try
+            {
+                RenameItemRequest.Body requestBody = new RenameItemRequest.Body
+                {
+                    Name = itemNewName
+                };
+                string jsonContent = requestBody.ObjectToJson();
+                HttpContent httpContent = new StringContent(jsonContent);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var item = content.JsonToObject<GetDriveItemResponse.Item>();
+
+                return item;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         private string Base64EncodeUrl(string url)
         {
             string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url));
@@ -405,6 +450,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return encodedUrl;
         }
 
+
+        /// <summary>
+        /// https://support.microsoft.com/en-gb/office/restrictions-and-limitations-in-onedrive-and-sharepoint-64883a5d-228e-48f5-b3d2-eb39e07630fa#invalidcharacters
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         private string CleanFileName(string filename)
         {
             return filename.Replace("#", "_").Replace("%", "_");

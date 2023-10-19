@@ -126,6 +126,17 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.DeleteItem(folderUrl, itemName);
         }
 
+        /// <summary>
+        /// rename sharepoint item under <paramref name="folderUrl"/>
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="itemOldName"></param>
+        /// <param name="itemNewName"></param>
+        /// <returns></returns>
+        public GetDriveItemResponse.Item RenameItem(string folderUrl, string itemOldName, string itemNewName)
+        {
+            return _helper.Rename(folderUrl, itemOldName, itemNewName);
+        }
 
         List<string> _listFiles;
         #region Download sharepoint folder to local
