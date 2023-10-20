@@ -18,3 +18,15 @@ public void GetData()
     dbConnector.FetchDataTable("commandText", System.Data.CommandType.Text);
 }
 ```
+
+if the database has AlwaysEncrypted enabled, and you need query encrypted column, and the key store provider is Azure Key Vault, do below at Startup.cs or call this during program starting, PLEASE CALL ONCE ONLY
+
+```
+DbConnector.RegisterColumnEncryptionKeyStore_AKV(new AzureKeyVaultProvider
+{
+    TenantId = "",
+    ClientId = "",
+    ClientSecret = "",
+    ProxyUrl = ""
+});
+```

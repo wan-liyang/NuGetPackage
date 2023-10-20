@@ -17,6 +17,14 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
         [SetUp]
         public void Setup()
         {
+            DbConnector.RegisterColumnEncryptionKeyStore_AKV(new AzureKeyVaultProvider
+            {
+                TenantId = "",
+                ClientId = "",
+                ClientSecret = "",
+                ProxyUrl = ""
+            });
+
             ConnectorConfig config = new ConnectorConfig
             {
                 ConnectionString = "",

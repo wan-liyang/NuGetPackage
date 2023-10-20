@@ -98,7 +98,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// move item into another folder
+        /// move item into another folder, if source file not exists, no action will be perform
         /// </summary>
         /// <param name="sourceFolderUrl"></param>
         /// <param name="sourceFileName"></param>
@@ -107,7 +107,12 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <returns></returns>
         public bool MoveFile(string sourceFolderUrl, string sourceFileName, string targetFolderUrl, string targetFileName)
         {
-            var file = this.GetFiles(sourceFolderUrl).Where(p => p.name.IsEquals(sourceFileName)).First();
+            var file = this.GetFiles(sourceFolderUrl).Where(p => p.name.IsEquals(sourceFileName)).FirstOrDefault();
+            if (file == null)
+            {
+                return true;
+            }
+
             if (string.IsNullOrEmpty(targetFileName))
             {
                 targetFileName = sourceFileName;
