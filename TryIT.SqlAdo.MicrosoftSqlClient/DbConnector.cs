@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
@@ -361,25 +362,27 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         }
 
         /// <summary>
-        /// copy data from <see cref="CopyDataModel.SourceData"/> into <see cref="CopyDataModel.TargetTable"/>
+        /// copy data from <see cref="CopyModeBase.SourceData"/> into <see cref="CopyModeBase.TargetTable"/>
         /// <para>the column map is case-sensitive on source column and destination column</para>
         /// </summary>
-        /// <param name="copyDataModel"></param>
+        /// <param name="copyMode"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public void CopyData(CopyDataModel copyDataModel)
+        public void CopyData(ICopyMode copyMode)
         {
-            if (copyDataModel == null)
+            CopyModeBase _copyMode = copyMode as CopyModeBase;
+
+            if (_copyMode == null)
             {
-                throw new ArgumentNullException(nameof(copyDataModel));
+                throw new ArgumentNullException(nameof(_copyMode));
             }
-            if (string.IsNullOrEmpty(copyDataModel.TargetTable))
+            if (string.IsNullOrEmpty(_copyMode.TargetTable))
             {
-                throw new ArgumentNullException(nameof(copyDataModel.TargetTable));
+                throw new ArgumentNullException(nameof(_copyMode.TargetTable));
             }
-            if (copyDataModel.TargetTable.Split('.').Length != 2)
+            if (_copyMode.TargetTable.Split('.').Length != 2)
             {
-                throw new InvalidOperationException($"TargetTable '{copyDataModel.TargetTable}' must contains schema and table, e.g schema.table or [schema].[table]");
+                throw new InvalidOperationException($"TargetTable '{_copyMode.TargetTable}' must contains schema and table, e.g schema.table or [schema].[table]");
             }
 
             using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
@@ -389,71 +392,78 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 SqlTransaction transaction = null;
                 try
                 {
-                    // create a Guid that doesn't contain any numbers and dash
-                    // before: 51e3aaa4-6ff6-475a-8f0f-78cac597b6c3
-                    // after: FBVDRRREGWWGEHFRIWAWHITRTFJHSGTD
-                    string transName = string.Concat(Guid.NewGuid().ToString("N").Select(c => (char)(c + 17))).ToUpper();
+                    string transName = GetGuid();
 
                     // put unique transaction name to avoid any conflict
                     transaction = sqlConnection.BeginTransaction(transName);
 
-                    if (!string.IsNullOrEmpty(copyDataModel.PreScript))
+                    if (!string.IsNullOrEmpty(_copyMode.PreScript))
                     {
-                        using (SqlCommand cmd = new SqlCommand(copyDataModel.PreScript, sqlConnection, transaction))
+                        using (SqlCommand cmd = new SqlCommand(_copyMode.PreScript, sqlConnection, transaction))
                         {
                             cmd.CommandTimeout = _config.TimeoutSecond;
                             cmd.ExecuteNonQuery();
                         }
                     }
 
-                    if (copyDataModel.CopyMode == CopyMode.TRUNCATE_INSERT)
+                    if (copyMode is CopyMode_InsertUpdate)
                     {
-                        // truncate table before load
-                        string cmdText = $"TRUNCATE TABLE {copyDataModel.TargetTable};";
-                        using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
-                        {
-                            cmd.CommandTimeout = _config.TimeoutSecond;
-                            cmd.ExecuteNonQuery();
-                        }
+                        Upsert(copyMode as CopyMode_InsertUpdate, sqlConnection, transaction);
                     }
-                    else if (copyDataModel.CopyMode == CopyMode.DELETE_INSERT)
+                    else
                     {
-                        if (string.IsNullOrEmpty(copyDataModel.DeleteCondition))
+                        if (copyMode is CopyMode_TruncateInsert)
                         {
-                            throw new ArgumentNullException(nameof(copyDataModel.DeleteCondition), $"The {copyDataModel.DeleteCondition} cannot be empty when Copy Mode is {CopyMode.DELETE_INSERT}");
-                        }
-
-                        // delete table before load
-                        string cmdText = $"DELETE FROM {copyDataModel.TargetTable} {copyDataModel.DeleteCondition};";
-                        using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
-                        {
-                            cmd.CommandTimeout = _config.TimeoutSecond;
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-
-                    // load data into table
-                    var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
-                    using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
-                    {
-                        // set timeout to 30 mins, in case large data
-                        sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                        sqlBulkCopy.DestinationTableName = copyDataModel.TargetTable;
-
-                        if (copyDataModel.ColumnMappings != null && copyDataModel.ColumnMappings.Count > 0)
-                        {
-                            foreach (var item in copyDataModel.ColumnMappings)
+                            var mode = (CopyMode_TruncateInsert)copyMode;
+                            // truncate table before load
+                            string cmdText = $"TRUNCATE TABLE {mode.TargetTable};";
+                            using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
                             {
-                                sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        else if (copyMode is CopyMode_DeleteInsert)
+                        {
+                            var mode = (CopyMode_DeleteInsert)copyMode;
+
+                            if (string.IsNullOrEmpty(mode.DeleteCondition))
+                            {
+                                throw new ArgumentNullException(nameof(mode.DeleteCondition), $"The {mode.DeleteCondition} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
+                            }
+
+                            // delete table before load
+                            string cmdText = $"DELETE FROM {mode.TargetTable} {mode.DeleteCondition};";
+                            using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.ExecuteNonQuery();
                             }
                         }
 
-                        sqlBulkCopy.WriteToServer(copyDataModel.SourceData);
+                        // load data into table
+                        var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+                        using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+                        {
+                            // set timeout to 30 mins, in case large data
+                            sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                            sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
+
+                            if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
+                            {
+                                foreach (var item in _copyMode.ColumnMappings)
+                                {
+                                    sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
+                                }
+                            }
+
+                            sqlBulkCopy.WriteToServer(_copyMode.SourceData);
+                        }
                     }
 
-                    if (!string.IsNullOrEmpty(copyDataModel.PostScript))
+                    if (!string.IsNullOrEmpty(_copyMode.PostScript))
                     {
-                        using (SqlCommand cmd = new SqlCommand(copyDataModel.PostScript, sqlConnection, transaction))
+                        using (SqlCommand cmd = new SqlCommand(_copyMode.PostScript, sqlConnection, transaction))
                         {
                             cmd.CommandTimeout = _config.TimeoutSecond;
                             cmd.ExecuteNonQuery();
@@ -471,6 +481,152 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw ex;
                 }
             }
+        }
+
+        private void Upsert(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
+        {
+            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
+            }
+
+            // create temp table
+            string tempTable = $"#temp_{GetGuid()}";
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append($"CREATE TABLE {tempTable}(");
+
+            var dataTable = copyMode.SourceData;
+            int columnCount = dataTable.Columns.Count;
+            for (int i = 0; i < columnCount; i++)
+            {
+                string dataType = dataTable.Columns[i].DataType == Type.GetType("System.String") ? "NVARCHAR(MAX) " : dataTable.Columns[i].DataType.ToString();
+                string colum = $"{dataTable.Columns[i].ColumnName} {dataType}";
+
+                stringBuilder.Append($"{colum}");
+                if (i != columnCount - 1)
+                {
+                    stringBuilder.Append(", ");
+                }
+            }
+            stringBuilder.Append(");");
+
+            string sql_create = stringBuilder.ToString();
+            using (SqlCommand cmd = new SqlCommand(sql_create, sqlConnection, transaction))
+            {
+                cmd.CommandTimeout = _config.TimeoutSecond;
+                cmd.ExecuteNonQuery();
+            }
+
+            // insert data into temp table
+            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+            {
+                // set timeout to 30 mins, in case large data
+                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                sqlBulkCopy.DestinationTableName = tempTable;
+
+                if (copyMode.ColumnMappings != null && copyMode.ColumnMappings.Count > 0)
+                {
+                    foreach (var item in copyMode.ColumnMappings)
+                    {
+                        sqlBulkCopy.ColumnMappings.Add(item.Key, item.Key);
+                    }
+                }
+                sqlBulkCopy.WriteToServer(copyMode.SourceData);
+            }
+
+            // do update & insert to target table, and drop temp table
+
+            // build primary key sql
+            string sql_key = string.Empty;
+            int keys_count = copyMode.PrimaryKeys.Count;
+            for (int i = 0; i < keys_count; i++)
+            {
+                string s_col = copyMode.PrimaryKeys[i];
+                string t_col = copyMode.ColumnMappings.Values.Where(p => p.Equals(s_col)).First();
+                sql_key += $"S.{FormatColumn(s_col)} = T.{FormatColumn(t_col)}";
+
+                if (i != keys_count - 1)
+                {
+                    sql_key += " AND ";
+                }
+            }
+
+            // build update sql
+            string sql_update = string.Empty;
+            var tobeUpdateColumns = copyMode.ColumnMappings.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToDictionary(x => x.Key, x => x.Value);
+
+            foreach (var item in tobeUpdateColumns)
+            {
+                string s_col = item.Key;
+                string t_col = item.Value;
+
+                sql_update += $"T.{FormatColumn(t_col)} = S.{FormatColumn(s_col)},";
+            }
+            sql_update = sql_update.TrimEnd(',');
+
+            if (!string.IsNullOrEmpty(copyMode.TimestampColumn))
+            {
+                sql_update += $", {FormatColumn(copyMode.TimestampColumn)} = GETDATE()";
+            }
+
+            // build select & insert columns sql
+            string sql_source_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Keys));
+            string sql_target_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Values));
+
+            // build update and insert sql
+            string sql_upsert = $@"UPDATE T 
+                            SET {sql_update}
+                            FROM {copyMode.TargetTable} T
+                            INNER JOIN {tempTable} S ON {sql_key};
+
+                            DELETE S 
+                            FROM {tempTable} S
+                            INNER JOIN {copyMode.TargetTable} T ON {sql_key};
+
+                            INSERT INTO {copyMode.TargetTable} ({sql_target_col})
+                            SELECT {sql_source_col}
+                            FROM {tempTable} S;
+
+                            DROP TABLE {tempTable};
+                            ";
+
+            using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
+            {
+                cmd.CommandTimeout = _config.TimeoutSecond;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// get a Guid that doesn't contain any numbers and dash
+        /// </summary>
+        /// <returns></returns>
+        private string GetGuid()
+        {
+            // before: 51e3aaa4-6ff6-475a-8f0f-78cac597b6c3
+            // after: FBVDRRREGWWGEHFRIWAWHITRTFJHSGTD
+            return string.Concat(Guid.NewGuid().ToString("N").Select(c => (char)(c + 17))).ToUpper();
+        }
+
+        /// <summary>
+        /// format column, Column1 to [Column1]
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        private string FormatColumn(string column)
+        {
+            return column.StartsWith("[") ? column : $"[{column}]";
+        }
+        private List<string> FormatColumn(IEnumerable<string> columns)
+        {
+            List<string> strings = new List<string>();
+            foreach (var column in columns)
+            {
+                strings.Add(column.StartsWith("[") ? column : $"[{column}]");
+            }
+            return strings;
         }
     }
 }
