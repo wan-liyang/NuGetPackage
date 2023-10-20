@@ -73,20 +73,14 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 _pipeline = new ResiliencePipelineBuilder().Build();
             }
-
-            // Key store providers cannot be set more than once.
-            // so register for every instance
-            if (config.AzureKeyVaultProvider != null)
-            {
-                RegisterColumnEncryptionKeyStore_AKV(config.AzureKeyVaultProvider);
-            }
         }
 
         /// <summary>
         /// register Azure Key Vault column encryption key store provider
+        /// <para>IMPORTANT: please call this method once only during program starting, otherwise may encounter 'key store providers cannot be set more than once.' error</para>
         /// </summary>
         /// <param name="azureKeyVaultProvider"></param>
-        private void RegisterColumnEncryptionKeyStore_AKV(AzureKeyVaultProvider azureKeyVaultProvider)
+        public void RegisterColumnEncryptionKeyStore_AKV(AzureKeyVaultProvider azureKeyVaultProvider)
         {
             var credential = AzureHelper.GetClientSecretCredential(azureKeyVaultProvider);
             SqlColumnEncryptionAzureKeyVaultProvider akvProvider = new SqlColumnEncryptionAzureKeyVaultProvider(credential);
