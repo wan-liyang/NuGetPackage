@@ -80,7 +80,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <para>IMPORTANT: please call this method once only during program starting, otherwise may encounter 'key store providers cannot be set more than once.' error</para>
         /// </summary>
         /// <param name="azureKeyVaultProvider"></param>
-        public void RegisterColumnEncryptionKeyStore_AKV(AzureKeyVaultProvider azureKeyVaultProvider)
+        public static void RegisterColumnEncryptionKeyStore_AKV(AzureKeyVaultProvider azureKeyVaultProvider)
         {
             var credential = AzureHelper.GetClientSecretCredential(azureKeyVaultProvider);
             SqlColumnEncryptionAzureKeyVaultProvider akvProvider = new SqlColumnEncryptionAzureKeyVaultProvider(credential);
