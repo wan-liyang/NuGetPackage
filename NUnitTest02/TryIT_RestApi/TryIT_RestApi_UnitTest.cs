@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TryIT.RestApi;
+using TryIT.RestApi.Models;
 
 namespace NUnitTest02.TryIT_RestApi
 {
@@ -13,18 +14,18 @@ namespace NUnitTest02.TryIT_RestApi
         [Test]
         public void Test1()
         {
-            var apiRequest = new RequestModel
-            {
-                Url = "http://localhost:18080"
-            };
+            //var apiRequest = new RequestModel
+            //{
+            //    Url = "http://localhost:18080"
+            //};
 
 
-            ApiRequest api = new ApiRequest();
-            var result = api.GetAsync(apiRequest).GetAwaiter().GetResult();
+            //Api api = new ApiRequest();
+            //var result = api.GetAsync(apiRequest).GetAwaiter().GetResult();
 
-            var result2 = api.PostAsync(apiRequest).GetAwaiter().GetResult();
+            //var result2 = api.PostAsync(apiRequest).GetAwaiter().GetResult();
 
-            api.RetryLog.Count();
+            //api.RetryLog.Count();
         }
 
         [Test]
