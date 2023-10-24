@@ -507,7 +507,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             for (int i = 0; i < columnCount; i++)
             {
                 string s_col = dataTable.Columns[i].ColumnName;
-                Console.WriteLine(s_col);
                 string t_col = copyMode.ColumnMappings[s_col];
 
                 var structure = targetTableStructure.First(p => p.COLUMN_NAME.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
@@ -526,7 +525,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         break;
                 }
 
-                string colum = $"{s_col} {dataType}";
+                string colum = $"{FormatColumn(s_col)} {dataType}";
 
                 stringBuilder.Append($"{colum}");
                 if (i != columnCount - 1)
