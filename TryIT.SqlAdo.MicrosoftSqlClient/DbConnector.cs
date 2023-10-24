@@ -561,14 +561,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
 
             // do update & insert to target table, and drop temp table
-
             // build primary key sql
             string sql_key = string.Empty;
             int keys_count = copyMode.PrimaryKeys.Count;
             for (int i = 0; i < keys_count; i++)
             {
                 string s_col = copyMode.PrimaryKeys[i];
-                string t_col = copyMode.ColumnMappings.Values.Where(p => p.Equals(s_col)).First();
+                string t_col = copyMode.ColumnMappings.Values.Where(p => p.Equals(s_col, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+
+                if (string.IsNullOrEmpty(t_col))
+                {
+                    throw new Exception($"Configured primay key column [{s_col}] has no corresponding column in target table {copyMode.TargetTable}");
+                }
+
                 sql_key += $"S.{FormatColumn(s_col)} = T.{FormatColumn(t_col)}";
 
                 if (i != keys_count - 1)
