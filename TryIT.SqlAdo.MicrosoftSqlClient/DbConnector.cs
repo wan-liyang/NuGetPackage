@@ -435,23 +435,26 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                         }
 
-                        // load data into table
-                        var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
-                        using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+                        if (_copyMode.SourceData.Rows.Count > 0)
                         {
-                            // set timeout to 30 mins, in case large data
-                            sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                            sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
-
-                            if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
+                            // load data into table
+                            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+                            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
                             {
-                                foreach (var item in _copyMode.ColumnMappings)
-                                {
-                                    sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
-                                }
-                            }
+                                // set timeout to 30 mins, in case large data
+                                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                                sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
 
-                            sqlBulkCopy.WriteToServer(_copyMode.SourceData);
+                                if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
+                                {
+                                    foreach (var item in _copyMode.ColumnMappings)
+                                    {
+                                        sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
+                                    }
+                                }
+
+                                sqlBulkCopy.WriteToServer(_copyMode.SourceData);
+                            }
                         }
                     }
 
@@ -492,10 +495,38 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             var dataTable = copyMode.SourceData;
             int columnCount = dataTable.Columns.Count;
+
+            // no action if source data has no record
+            if (dataTable.Rows.Count == 0)
+            {
+                return;
+            }
+
+            var targetTableStructure = GetDbTableStructure(copyMode.TargetTable);
+
             for (int i = 0; i < columnCount; i++)
             {
-                string dataType = dataTable.Columns[i].DataType == Type.GetType("System.String") ? "NVARCHAR(MAX) " : dataTable.Columns[i].DataType.ToString();
-                string colum = $"{dataTable.Columns[i].ColumnName} {dataType}";
+                string s_col = dataTable.Columns[i].ColumnName;
+                Console.WriteLine(s_col);
+                string t_col = copyMode.ColumnMappings[s_col];
+
+                var structure = targetTableStructure.First(p => p.COLUMN_NAME.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
+
+                string dataType = "NVARCHAR(MAX)";
+                switch (structure.DATA_TYPE)
+                {
+                    case "datetime":
+                    case "date":
+                        dataType = "datetime";
+                        break;
+                    case "bit":
+                        dataType = "bit";
+                        break;
+                    default:
+                        break;
+                }
+
+                string colum = $"{s_col} {dataType}";
 
                 stringBuilder.Append($"{colum}");
                 if (i != columnCount - 1)
@@ -591,6 +622,34 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 cmd.CommandTimeout = _config.TimeoutSecond;
                 cmd.ExecuteNonQuery();
             }
+        }
+
+
+        private class DbTableStructure
+        {
+            public string COLUMN_NAME { get; set; }
+            public string DATA_TYPE { get; set; }
+            public string CHARACTER_MAXIMUM_LENGTH { get; set; }
+        }
+
+        private List<DbTableStructure> GetDbTableStructure(string tableName)
+        {
+            string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@tableName", tableName)
+            };
+
+            DataTable table = this.FetchDataTable(sql, CommandType.Text, parameters);
+
+            return table.Rows.OfType<DataRow>().Select(k =>
+                  new DbTableStructure
+                  {
+                      COLUMN_NAME = k[0].ToString(),
+                      DATA_TYPE = k[1].ToString(),
+                      CHARACTER_MAXIMUM_LENGTH = k[2].ToString()
+                  }).ToList();
         }
 
         /// <summary>
