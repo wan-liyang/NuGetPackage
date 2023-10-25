@@ -56,6 +56,15 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
+        /// get specific team
+        /// </summary>
+        /// <returns></returns>
+        public GetJoinedTeamResponse.Team GetTeam(string teamName)
+        {
+            return _helper.GetTeam(teamName);
+        }
+
+        /// <summary>
         /// add member to a team
         /// </summary>
         /// <param name="addMember"></param>
