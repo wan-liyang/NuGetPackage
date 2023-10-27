@@ -51,6 +51,49 @@ namespace TryIT.ObjectExtension
         }
 
         /// <summary>
+        /// convert datatable to object list, only load datatable columns matched with object property
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dtSource"></param>
+        /// <returns></returns>
+        public static List<T> ToList<T>(this DataTable dtSource) where T : class, new()
+        {
+            List<T> list = new List<T>();
+
+            var props = (new T()).GetType().GetProperties();
+
+            foreach (DataRow row in dtSource.Rows)
+            {
+                T obj = new T();
+                for (int i = 0; i < dtSource.Columns.Count; i++)
+                {
+                    string colName = dtSource.Columns[i].ColumnName;
+                    var prop = props.Where(p => p.Name.IsEquals(colName)).FirstOrDefault();
+                    if (prop != null)
+                    {
+                        if (row[colName] != DBNull.Value)
+                        {
+                            if (prop.PropertyType.IsGenericType && prop.PropertyType.Name.Contains("Nullable"))
+                            {
+                                if (!string.IsNullOrEmpty(row[colName].ToString()))
+                                {
+                                    prop.SetValue(obj, ConvertValueToType(row[colName], Nullable.GetUnderlyingType(prop.PropertyType)));
+                                }
+                            }
+                            else
+                            {
+                                prop.SetValue(obj, ConvertValueToType(row[colName], prop.PropertyType), null);
+                            }
+                        }
+                    }
+                }
+                list.Add(obj);
+            }
+
+            return list;
+        }
+
+        /// <summary>
         /// convert <paramref name="dtSource"/> to list of <typeparamref name="T"/>, based on <paramref name="keyValues"/> mapping,
         /// <para>Keys: is Source Column</para>
         /// <para>Values: is Target Entity Property</para>
@@ -107,6 +150,10 @@ namespace TryIT.ObjectExtension
             }
             return list;
         }
+
+
+
+
         private static object ConvertValueToType(object value, Type type)
         {
             try
