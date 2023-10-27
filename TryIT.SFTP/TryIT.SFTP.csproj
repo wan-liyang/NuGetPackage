@@ -12,20 +12,20 @@
     <Company>TryIT</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>Provide method to communicate with SFTP</Description>
-    <PackageId>TryIT.SFTPService</PackageId>
+    <PackageId>TryIT.SFTP</PackageId>
     <PackageTags>SFTP</PackageTags>
     <Configurations>Release;Debug</Configurations>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>SFTP.xml</DocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile>bin\Debug\netstandard2.0\TryIT.SFTPService.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.0\TryIT.SFTP.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SSH.NET" Version="2020.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

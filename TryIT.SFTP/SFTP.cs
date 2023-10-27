@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TryIT.SFTPService
+namespace TryIT.SFTP
 {
     /// <summary>
     /// operate with SFTP server
