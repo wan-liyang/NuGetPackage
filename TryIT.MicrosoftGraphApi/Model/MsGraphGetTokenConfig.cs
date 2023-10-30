@@ -28,7 +28,6 @@
         public string OAuth_Scope { get; set; }
 
 
-        public bool OAuth_IsProxyRequired { get; set; }
         public string Proxy_Url { get; set; }
         public string Proxy_Username { get; set; }
         public string Proxy_Password { get; set; }

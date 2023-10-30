@@ -37,14 +37,6 @@ namespace TryIT.MicrosoftGraphApi.Helper
                 throw new ArgumentNullException(nameof(config.OAuth_GetTokenUrl));
             }
 
-            if (config.OAuth_IsProxyRequired)
-            {
-                if (string.IsNullOrEmpty(config.Proxy_Url))
-                {
-                    throw new ArgumentNullException(nameof(config.Proxy_Url));
-                }
-            }
-
             _config = config;
         }
 
