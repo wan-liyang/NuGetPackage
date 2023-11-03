@@ -27,7 +27,7 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
 
             ConnectorConfig config = new ConnectorConfig
             {
-                ConnectionString = "Server=myserver,3030;Database=mydb;Trusted_Connection=True;TrustServerCertificate=True",
+                ConnectionString = "Server=myserver;Database=mydb;Trusted_Connection=True;TrustServerCertificate=True",
                 TimeoutSecond = 10 * 60 // 10 minute
             };
             dbConnector = new DbConnector(config);
@@ -47,12 +47,12 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
 
             DataRow dataRow = dataTable.NewRow();
             dataRow["Id"] = 1;
-            dataRow["Text_S"] = "Text 1";
+            dataRow["Text_S"] = "Text 111";
             dataTable.Rows.Add(dataRow);
 
             DataRow dataRow2 = dataTable.NewRow();
             dataRow2["Id"] = 2;
-            dataRow2["Text_S"] = "Text 2";
+            dataRow2["Text_S"] = "Text 222111";
             dataTable.Rows.Add(dataRow2);
 
             ICopyMode copyDataModel = new CopyMode_TruncateInsert
@@ -61,8 +61,8 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
                 TargetTable = "dbo.Test_20231020",
                 ColumnMappings = new Dictionary<string, string>
                 {
-                    {"Id", "Id" },
-                    {"Text_S", "Text" }
+                    {"id", "id" },
+                    {"text_s", "text" }
                 }
             };
             dbConnector.CopyData(copyDataModel);

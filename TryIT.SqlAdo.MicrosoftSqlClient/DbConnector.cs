@@ -462,10 +462,23 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                         if (_copyMode.SourceData.Rows.Count > 0)
                         {
-                            // load data into table
-                            // use insert instead, not use SqlBulkCopy because it is case sensitive for column map
+                            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+                            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+                            {
+                                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                                sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
 
-                            Insert(_copyMode, sqlConnection, transaction, targetTableStructure);
+                                if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
+                                {
+                                    foreach (var item in _copyMode.ColumnMappings)
+                                    {
+                                        string actualColumn = GetTargetColumn(targetTableStructure, item.Value);
+                                        sqlBulkCopy.ColumnMappings.Add(item.Key, actualColumn);
+                                    }
+                                }
+
+                                sqlBulkCopy.WriteToServer(_copyMode.SourceData);
+                            }
                         }
                     }
 
@@ -489,6 +502,17 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw ex;
                 }
             }
+        }
+
+        /// <summary>
+        /// get actual column name present in database, avoid case-sensitive issue
+        /// </summary>
+        /// <param name="tableStructures"></param>
+        /// <param name="mapValue"></param>
+        /// <returns></returns>
+        private string GetTargetColumn(List<DbTableStructure> tableStructures, string mapValue)
+        {
+            return tableStructures.First(p => p.COLUMN_NAME.Equals(mapValue, StringComparison.CurrentCultureIgnoreCase)).COLUMN_NAME;
         }
 
         /// <summary>
@@ -564,39 +588,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             FROM {tempTable} S
                             INNER JOIN {copyMode.TargetTable} T ON {sql_key};
 
-                            INSERT INTO {copyMode.TargetTable} ({sql_target_col})
-                            SELECT {sql_source_col}
-                            FROM {tempTable} S;
-
-                            DROP TABLE {tempTable};
-                            ";
-
-            using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
-            {
-                cmd.CommandTimeout = _config.TimeoutSecond;
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-        /// <summary>
-        /// perform insert action, 1) write data into temp table, 2) insert into target table from temp table, 3) delete temp table
-        /// </summary>
-        /// <param name="iCopyMode"></param>
-        /// <param name="sqlConnection"></param>
-        /// <param name="transaction"></param>
-        /// <param name="targetTableStructure"></param>
-        private void Insert(ICopyMode iCopyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
-        {
-            // write data into temp table
-            string tempTable = WriteDataIntoTempTable(iCopyMode, sqlConnection, transaction, targetTableStructure);
-
-            var copyMode = iCopyMode as CopyModeBase;
-            // build select & insert columns sql
-            string sql_source_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Keys));
-            string sql_target_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Values));
-
-            // build update and insert sql
-            string sql_upsert = $@"
                             INSERT INTO {copyMode.TargetTable} ({sql_target_col})
                             SELECT {sql_source_col}
                             FROM {tempTable} S;
