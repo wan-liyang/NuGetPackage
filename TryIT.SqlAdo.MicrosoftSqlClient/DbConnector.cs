@@ -512,7 +512,12 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         private string GetTargetColumn(List<DbTableStructure> tableStructures, string mapValue)
         {
-            return tableStructures.First(p => p.COLUMN_NAME.Equals(mapValue, StringComparison.CurrentCultureIgnoreCase)).COLUMN_NAME;
+            var table = tableStructures.FirstOrDefault(p => p.COLUMN_NAME.Equals(mapValue, StringComparison.CurrentCultureIgnoreCase));
+            if (table == null)
+            {
+                throw new Exception($"column '{mapValue}' not found in target table");
+            }
+            return table.COLUMN_NAME;
         }
 
         /// <summary>
@@ -634,10 +639,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 {
                     case "datetime":
                     case "date":
-                        dataType = "datetime";
-                        break;
                     case "bit":
-                        dataType = "bit";
+                    case "int":
+                        dataType = structure.DATA_TYPE;
                         break;
                     default:
                         break;
