@@ -17,17 +17,17 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
         [SetUp]
         public void Setup()
         {
-            DbConnector.RegisterColumnEncryptionKeyStore_AKV(new AzureKeyVaultProvider
-            {
-                TenantId = "",
-                ClientId = "",
-                ClientSecret = "",
-                ProxyUrl = ""
-            });
+            //DbConnector.RegisterColumnEncryptionKeyStore_AKV(new AzureKeyVaultProvider
+            //{
+            //    TenantId = "",
+            //    ClientId = "",
+            //    ClientSecret = "",
+            //    ProxyUrl = ""
+            //});
 
             ConnectorConfig config = new ConnectorConfig
             {
-                ConnectionString = "",
+                ConnectionString = "Server=myserver;Database=mydb;Trusted_Connection=True;TrustServerCertificate=True",
                 TimeoutSecond = 10 * 60 // 10 minute
             };
             dbConnector = new DbConnector(config);
@@ -55,7 +55,7 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
             dataRow2["Text_S"] = "Text 2";
             dataTable.Rows.Add(dataRow2);
 
-            ICopyMode copyDataModel = new CopyMode_InsertUpdate
+            ICopyMode copyDataModel = new CopyMode_Insert
             {
                 SourceData = dataTable,
                 TargetTable = "dbo.Test_20231020",
@@ -63,9 +63,7 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
                 {
                     {"Id", "Id" },
                     {"Text_S", "Text" }
-                },
-                PrimaryKeys = new List<string> { "Id" },
-                TimestampColumn = "JobRunDate"
+                }
             };
             dbConnector.CopyData(copyDataModel);
         }

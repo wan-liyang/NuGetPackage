@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Transactions;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
@@ -46,12 +47,14 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             if (config.EnableRetry)
             {
+                string networkErrorMessage = "A network-related or instance-specific error occurred while establishing a connection to SQL Server";
 
                 _pipeline = new ResiliencePipelineBuilder()
                            .AddRetry(new RetryStrategyOptions
                            {
                                ShouldHandle = new PredicateBuilder()
-                                    .Handle<SqlException>(result => result.Number == -2), // handle sql timeout
+                                    .Handle<SqlException>(result => result.Number == -2 // handle sql timeout
+                                            || result.Message.StartsWith(networkErrorMessage)), // handle network error
 
                                Delay = TimeSpan.FromSeconds(1),
                                MaxRetryAttempts = 3,
@@ -102,32 +105,36 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <exception cref="ArgumentNullException"></exception>
         public DataTable FetchDataTable(string commandText, CommandType commandType = CommandType.Text, SqlParameter[] parameters = null)
         {
+
             if (string.IsNullOrEmpty(commandText))
             {
                 throw new ArgumentNullException(nameof(commandText));
             }
 
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            return _pipeline.Execute(exec =>
             {
-                sqlConnection.Open();
-                using (SqlCommand sqlCommand = sqlConnection.CreateCommand())
+                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
-                    sqlCommand.CommandTimeout = _config.TimeoutSecond;
-                    sqlCommand.CommandText = commandText;
-                    sqlCommand.CommandType = commandType;
-                    if (parameters != null && parameters.Count() > 0)
+                    sqlConnection.Open();
+                    using (SqlCommand sqlCommand = sqlConnection.CreateCommand())
                     {
-                        sqlCommand.Parameters.AddRange(parameters);
-                    }
+                        sqlCommand.CommandTimeout = _config.TimeoutSecond;
+                        sqlCommand.CommandText = commandText;
+                        sqlCommand.CommandType = commandType;
+                        if (parameters != null && parameters.Count() > 0)
+                        {
+                            sqlCommand.Parameters.AddRange(parameters);
+                        }
 
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        DataTable dataTable = new DataTable();
-                        sqlDataAdapter.Fill(dataTable);
-                        return dataTable;
+                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                        {
+                            DataTable dataTable = new DataTable();
+                            sqlDataAdapter.Fill(dataTable);
+                            return dataTable;
+                        }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -145,26 +152,29 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(commandText));
             }
 
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            return _pipeline.Execute(exec =>
             {
-                sqlConnection.Open();
-                using (SqlCommand cmd = sqlConnection.CreateCommand())
+                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
-                    cmd.CommandTimeout = _config.TimeoutSecond;
-                    cmd.CommandText = commandText;
-                    cmd.CommandType = commandType;
-                    if (null != parameters && parameters.Count() > 0)
+                    sqlConnection.Open();
+                    using (SqlCommand cmd = sqlConnection.CreateCommand())
                     {
-                        cmd.Parameters.AddRange(parameters);
-                    }
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                    {
-                        DataSet ds = new DataSet();
-                        adapter.Fill(ds);
-                        return ds;
+                        cmd.CommandTimeout = _config.TimeoutSecond;
+                        cmd.CommandText = commandText;
+                        cmd.CommandType = commandType;
+                        if (null != parameters && parameters.Count() > 0)
+                        {
+                            cmd.Parameters.AddRange(parameters);
+                        }
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                        {
+                            DataSet ds = new DataSet();
+                            adapter.Fill(ds);
+                            return ds;
+                        }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -186,43 +196,46 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new InvalidOperationException($"Function '{function}' must contains schema and fucntionName, e.g schema.fucntionName or [schema].[fucntionName]");
             }
 
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            return _pipeline.Execute(exec =>
             {
-                sqlConnection.Open();
-                using (SqlCommand cmd = sqlConnection.CreateCommand())
+                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
-                    cmd.CommandTimeout = _config.TimeoutSecond;
-                    cmd.CommandType = CommandType.Text;
-
-                    StringBuilder strBuilder = new StringBuilder("SELECT ");
-                    strBuilder.Append(function);
-                    if (null != parameters && parameters.Count() > 0)
+                    sqlConnection.Open();
+                    using (SqlCommand cmd = sqlConnection.CreateCommand())
                     {
-                        cmd.Parameters.AddRange(parameters);
+                        cmd.CommandTimeout = _config.TimeoutSecond;
+                        cmd.CommandType = CommandType.Text;
 
-                        strBuilder.Append("(");
-                        for (int i = 0; i < parameters.Count(); i++)
+                        StringBuilder strBuilder = new StringBuilder("SELECT ");
+                        strBuilder.Append(function);
+                        if (null != parameters && parameters.Count() > 0)
                         {
-                            if (i > 0)
+                            cmd.Parameters.AddRange(parameters);
+
+                            strBuilder.Append("(");
+                            for (int i = 0; i < parameters.Count(); i++)
                             {
-                                strBuilder.Append(",");
+                                if (i > 0)
+                                {
+                                    strBuilder.Append(",");
+                                }
+                                strBuilder.Append(parameters[i].ParameterName);
                             }
-                            strBuilder.Append(parameters[i].ParameterName);
+                            strBuilder.Append(")");
                         }
-                        strBuilder.Append(")");
+                        else
+                        {
+                            strBuilder.Append("()");
+                        }
+
+                        cmd.CommandText = strBuilder.ToString();
+
+                        object result = cmd.ExecuteScalar();
+
+                        return UtilityHelper.ConvertValue<T>(result);
                     }
-                    else
-                    {
-                        strBuilder.Append("()");
-                    }
-
-                    cmd.CommandText = strBuilder.ToString();
-
-                    object result = cmd.ExecuteScalar();
-
-                    return UtilityHelper.ConvertValue<T>(result);
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -243,33 +256,36 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new InvalidOperationException($"Function '{function}' must contains schema and fucntionName, e.g schema.fucntionName or [schema].[fucntionName]");
             }
 
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            return _pipeline.Execute(exec =>
             {
-                sqlConnection.Open();
-                using (SqlCommand cmd = sqlConnection.CreateCommand())
+                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
-                    cmd.CommandTimeout = _config.TimeoutSecond;
-                    cmd.CommandType = CommandType.Text;
+                    sqlConnection.Open();
+                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                    {
+                        cmd.CommandTimeout = _config.TimeoutSecond;
+                        cmd.CommandType = CommandType.Text;
 
-                    StringBuilder strBuilder = new StringBuilder("SELECT * FROM ");
-                    strBuilder.Append(function);
-                    strBuilder.Append("(");
-                    if (null != parameters && parameters.Count() > 0)
-                    {
-                        cmd.Parameters.AddRange(parameters);
-                        var parameterNames = parameters.Select(p => p.ParameterName);
-                        strBuilder.Append(string.Join(",", parameterNames));
+                        StringBuilder strBuilder = new StringBuilder("SELECT * FROM ");
+                        strBuilder.Append(function);
+                        strBuilder.Append("(");
+                        if (null != parameters && parameters.Count() > 0)
+                        {
+                            cmd.Parameters.AddRange(parameters);
+                            var parameterNames = parameters.Select(p => p.ParameterName);
+                            strBuilder.Append(string.Join(",", parameterNames));
+                        }
+                        strBuilder.Append(")");
+                        cmd.CommandText = strBuilder.ToString();
+                        DataTable dt = new DataTable();
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                        return dt;
                     }
-                    strBuilder.Append(")");
-                    cmd.CommandText = strBuilder.ToString();
-                    DataTable dt = new DataTable();
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                    {
-                        adapter.Fill(dt);
-                    }
-                    return dt;
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -317,23 +333,26 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         public T ExecuteScalar<T>(string commandText, CommandType commandType, params SqlParameter[] parameters)
         {
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            return _pipeline.Execute(exec =>
             {
-                sqlConnection.Open();
-                using (SqlCommand cmd = sqlConnection.CreateCommand())
+                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
-                    cmd.CommandTimeout = _config.TimeoutSecond;
-                    cmd.CommandText = commandText;
-                    cmd.CommandType = commandType;
-                    if (null != parameters && parameters.Count() > 0)
+                    sqlConnection.Open();
+                    using (SqlCommand cmd = sqlConnection.CreateCommand())
                     {
-                        cmd.Parameters.AddRange(parameters);
-                    }
-                    object result = cmd.ExecuteScalar();
+                        cmd.CommandTimeout = _config.TimeoutSecond;
+                        cmd.CommandText = commandText;
+                        cmd.CommandType = commandType;
+                        if (null != parameters && parameters.Count() > 0)
+                        {
+                            cmd.Parameters.AddRange(parameters);
+                        }
+                        object result = cmd.ExecuteScalar();
 
-                    return UtilityHelper.ConvertValue<T>(result);
+                        return UtilityHelper.ConvertValue<T>(result);
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -357,7 +376,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
         /// <summary>
         /// copy data from <see cref="CopyModeBase.SourceData"/> into <see cref="CopyModeBase.TargetTable"/>
-        /// <para>the column map is case-sensitive on source column and destination column</para>
         /// </summary>
         /// <param name="copyMode"></param>
         /// <exception cref="ArgumentNullException"></exception>
@@ -402,7 +420,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                     if (copyMode is CopyMode_InsertUpdate)
                     {
-                        Upsert(copyMode as CopyMode_InsertUpdate, sqlConnection, transaction);
+                        var mode = copyMode as CopyMode_InsertUpdate;
+                        if (mode.SourceData.Rows.Count > 0)
+                        {
+                            Upsert(mode, sqlConnection, transaction);
+                        }
                     }
                     else
                     {
@@ -438,23 +460,27 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         if (_copyMode.SourceData.Rows.Count > 0)
                         {
                             // load data into table
-                            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
-                            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
-                            {
-                                // set timeout to 30 mins, in case large data
-                                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                                sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
+                            Insert(copyMode as CopyMode_Insert, sqlConnection, transaction);
 
-                                if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
-                                {
-                                    foreach (var item in _copyMode.ColumnMappings)
-                                    {
-                                        sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
-                                    }
-                                }
+                            // use insert instead, because SqlBulkCopy is case sensitive
 
-                                sqlBulkCopy.WriteToServer(_copyMode.SourceData);
-                            }
+                            //var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+                            //using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+                            //{
+                            //    // set timeout to 30 mins, in case large data
+                            //    sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                            //    sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
+
+                            //    if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
+                            //    {
+                            //        foreach (var item in _copyMode.ColumnMappings)
+                            //        {
+                            //            sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
+                            //        }
+                            //    }
+
+                            //    sqlBulkCopy.WriteToServer(_copyMode.SourceData);
+                            //}
                         }
                     }
 
@@ -480,6 +506,14 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
+        /// <summary>
+        /// perform insert or update action, 1) write data into temp table, 2) insert or update to target table join with temp table, 3) delete temp table
+        /// </summary>
+        /// <param name="copyMode"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Exception"></exception>
         private void Upsert(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
         {
             if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
@@ -487,78 +521,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
             }
 
-            // create temp table
-            string tempTable = $"#temp_{GetGuid()}";
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append($"CREATE TABLE {tempTable}(");
-
-            var dataTable = copyMode.SourceData;
-            int columnCount = dataTable.Columns.Count;
-
-            // no action if source data has no record
-            if (dataTable.Rows.Count == 0)
-            {
-                return;
-            }
-
-            var targetTableStructure = GetDbTableStructure(copyMode.TargetTable);
-
-            for (int i = 0; i < columnCount; i++)
-            {
-                string s_col = dataTable.Columns[i].ColumnName;
-                string t_col = copyMode.ColumnMappings[s_col];
-
-                var structure = targetTableStructure.First(p => p.COLUMN_NAME.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
-
-                string dataType = "NVARCHAR(MAX)";
-                switch (structure.DATA_TYPE)
-                {
-                    case "datetime":
-                    case "date":
-                        dataType = "datetime";
-                        break;
-                    case "bit":
-                        dataType = "bit";
-                        break;
-                    default:
-                        break;
-                }
-
-                string colum = $"{FormatColumn(s_col)} {dataType}";
-
-                stringBuilder.Append($"{colum}");
-                if (i != columnCount - 1)
-                {
-                    stringBuilder.Append(", ");
-                }
-            }
-            stringBuilder.Append(");");
-
-            string sql_create = stringBuilder.ToString();
-            using (SqlCommand cmd = new SqlCommand(sql_create, sqlConnection, transaction))
-            {
-                cmd.CommandTimeout = _config.TimeoutSecond;
-                cmd.ExecuteNonQuery();
-            }
-
-            // insert data into temp table
-            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
-            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
-            {
-                // set timeout to 30 mins, in case large data
-                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                sqlBulkCopy.DestinationTableName = tempTable;
-
-                if (copyMode.ColumnMappings != null && copyMode.ColumnMappings.Count > 0)
-                {
-                    foreach (var item in copyMode.ColumnMappings)
-                    {
-                        sqlBulkCopy.ColumnMappings.Add(item.Key, item.Key);
-                    }
-                }
-                sqlBulkCopy.WriteToServer(copyMode.SourceData);
-            }
+            // write data into temp table
+            string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction);
 
             // do update & insert to target table, and drop temp table
             // build primary key sql
@@ -628,6 +592,109 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
+        /// <summary>
+        /// perform insert action, 1) write data into temp table, 2) insert into target table from temp table, 3) delete temp table
+        /// </summary>
+        /// <param name="copyMode"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        private void Insert(CopyMode_Insert copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
+        {
+            // write data into temp table
+            string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction);
+
+            // build select & insert columns sql
+            string sql_source_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Keys));
+            string sql_target_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Values));
+
+            // build update and insert sql
+            string sql_upsert = $@"
+                            INSERT INTO {copyMode.TargetTable} ({sql_target_col})
+                            SELECT {sql_source_col}
+                            FROM {tempTable} S;
+
+                            DROP TABLE {tempTable};
+                            ";
+
+            using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
+            {
+                cmd.CommandTimeout = _config.TimeoutSecond;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private string WriteDataIntoTempTable(ICopyMode copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
+        {
+            var copyStuff = copyMode as CopyModeBase;
+            // create temp table
+            string tempTable = $"#temp_{GetGuid()}";
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append($"CREATE TABLE {tempTable}(");
+
+            var dataTable = copyStuff.SourceData;
+            int columnCount = dataTable.Columns.Count;
+
+            var targetTableStructure = GetDbTableStructure(copyStuff.TargetTable);
+
+            for (int i = 0; i < columnCount; i++)
+            {
+                string s_col = dataTable.Columns[i].ColumnName;
+                string t_col = copyStuff.ColumnMappings[s_col];
+
+                var structure = targetTableStructure.First(p => p.COLUMN_NAME.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
+
+                string dataType = "NVARCHAR(MAX)";
+                switch (structure.DATA_TYPE)
+                {
+                    case "datetime":
+                    case "date":
+                        dataType = "datetime";
+                        break;
+                    case "bit":
+                        dataType = "bit";
+                        break;
+                    default:
+                        break;
+                }
+
+                string colum = $"{FormatColumn(s_col)} {dataType}";
+
+                stringBuilder.Append($"{colum}");
+                if (i != columnCount - 1)
+                {
+                    stringBuilder.Append(", ");
+                }
+            }
+            stringBuilder.Append(");");
+
+            string sql_create = stringBuilder.ToString();
+            using (SqlCommand cmd = new SqlCommand(sql_create, sqlConnection, transaction))
+            {
+                cmd.CommandTimeout = _config.TimeoutSecond;
+                cmd.ExecuteNonQuery();
+            }
+
+            // insert data into temp table
+            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+            {
+                // set timeout to 30 mins, in case large data
+                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                sqlBulkCopy.DestinationTableName = tempTable;
+
+                if (copyStuff.ColumnMappings != null && copyStuff.ColumnMappings.Count > 0)
+                {
+                    foreach (var item in copyStuff.ColumnMappings)
+                    {
+                        sqlBulkCopy.ColumnMappings.Add(item.Key, item.Key);
+                    }
+                }
+                sqlBulkCopy.WriteToServer(copyStuff.SourceData);
+            }
+
+            return tempTable;
+        }
 
         private class DbTableStructure
         {

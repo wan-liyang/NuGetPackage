@@ -19,7 +19,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.CopyMode
         public string TargetTable { get; set; }
 
         /// <summary>
-        /// (mandatory) column mappings between source data table and target table, case-sensitive on source column and destination column, if this property is null or empty, will assume source data table and target table has same ColumnName and OrdinalPosition
+        /// (mandatory) column mappings between source data table and target table
+        /// <para>case-insensitive, will write data into temp table and move from temp table into target table via sql script</para>
+        /// <para>if null or empty, will assume source data table and target table has same ColumnName and OrdinalPosition</para>
         /// </summary>
         public Dictionary<string, string> ColumnMappings { get; set; }
 
