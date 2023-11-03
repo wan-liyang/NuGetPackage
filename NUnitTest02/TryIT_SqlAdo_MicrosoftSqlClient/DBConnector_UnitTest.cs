@@ -27,7 +27,7 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
 
             ConnectorConfig config = new ConnectorConfig
             {
-                ConnectionString = "Server=myserver;Database=mydb;Trusted_Connection=True;TrustServerCertificate=True",
+                ConnectionString = "Server=myserver,3030;Database=mydb;Trusted_Connection=True;TrustServerCertificate=True",
                 TimeoutSecond = 10 * 60 // 10 minute
             };
             dbConnector = new DbConnector(config);
@@ -55,7 +55,7 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
             dataRow2["Text_S"] = "Text 2";
             dataTable.Rows.Add(dataRow2);
 
-            ICopyMode copyDataModel = new CopyMode_Insert
+            ICopyMode copyDataModel = new CopyMode_TruncateInsert
             {
                 SourceData = dataTable,
                 TargetTable = "dbo.Test_20231020",

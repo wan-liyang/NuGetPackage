@@ -377,12 +377,12 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <summary>
         /// copy data from <see cref="CopyModeBase.SourceData"/> into <see cref="CopyModeBase.TargetTable"/>
         /// </summary>
-        /// <param name="copyMode"></param>
+        /// <param name="iCopyMode"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public void CopyData(ICopyMode copyMode)
+        public void CopyData(ICopyMode iCopyMode)
         {
-            CopyModeBase _copyMode = copyMode as CopyModeBase;
+            CopyModeBase _copyMode = iCopyMode as CopyModeBase;
 
             if (_copyMode == null)
             {
@@ -406,6 +406,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 {
                     string transName = GetGuid();
 
+                    // get target table structure first outside transaction, to avoid other script locked table
+                    var targetTableStructure = GetDbTableStructure(_copyMode.TargetTable);
+
                     // put unique transaction name to avoid any conflict
                     transaction = sqlConnection.BeginTransaction(transName);
 
@@ -418,19 +421,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                     }
 
-                    if (copyMode is CopyMode_InsertUpdate)
+                    if (iCopyMode is CopyMode_InsertUpdate)
                     {
-                        var mode = copyMode as CopyMode_InsertUpdate;
+                        var mode = iCopyMode as CopyMode_InsertUpdate;
                         if (mode.SourceData.Rows.Count > 0)
                         {
-                            Upsert(mode, sqlConnection, transaction);
+                            Upsert(mode, sqlConnection, transaction, targetTableStructure);
                         }
                     }
                     else
                     {
-                        if (copyMode is CopyMode_TruncateInsert)
+                        if (iCopyMode is CopyMode_TruncateInsert)
                         {
-                            var mode = (CopyMode_TruncateInsert)copyMode;
+                            var mode = (CopyMode_TruncateInsert)iCopyMode;
                             // truncate table before load
                             string cmdText = $"TRUNCATE TABLE {mode.TargetTable};";
                             using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
@@ -439,9 +442,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 cmd.ExecuteNonQuery();
                             }
                         }
-                        else if (copyMode is CopyMode_DeleteInsert)
+                        else if (iCopyMode is CopyMode_DeleteInsert)
                         {
-                            var mode = (CopyMode_DeleteInsert)copyMode;
+                            var mode = (CopyMode_DeleteInsert)iCopyMode;
 
                             if (string.IsNullOrEmpty(mode.DeleteCondition))
                             {
@@ -460,27 +463,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         if (_copyMode.SourceData.Rows.Count > 0)
                         {
                             // load data into table
-                            Insert(copyMode as CopyMode_Insert, sqlConnection, transaction);
+                            // use insert instead, not use SqlBulkCopy because it is case sensitive for column map
 
-                            // use insert instead, because SqlBulkCopy is case sensitive
-
-                            //var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
-                            //using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
-                            //{
-                            //    // set timeout to 30 mins, in case large data
-                            //    sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                            //    sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
-
-                            //    if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
-                            //    {
-                            //        foreach (var item in _copyMode.ColumnMappings)
-                            //        {
-                            //            sqlBulkCopy.ColumnMappings.Add(item.Key, item.Value);
-                            //        }
-                            //    }
-
-                            //    sqlBulkCopy.WriteToServer(_copyMode.SourceData);
-                            //}
+                            Insert(_copyMode, sqlConnection, transaction, targetTableStructure);
                         }
                     }
 
@@ -512,9 +497,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="copyMode"></param>
         /// <param name="sqlConnection"></param>
         /// <param name="transaction"></param>
+        /// <param name="targetTableStructure"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        private void Upsert(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
+        private void Upsert(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
         {
             if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
             {
@@ -522,7 +508,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
 
             // write data into temp table
-            string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction);
+            string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction, targetTableStructure);
 
             // do update & insert to target table, and drop temp table
             // build primary key sql
@@ -595,14 +581,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <summary>
         /// perform insert action, 1) write data into temp table, 2) insert into target table from temp table, 3) delete temp table
         /// </summary>
-        /// <param name="copyMode"></param>
+        /// <param name="iCopyMode"></param>
         /// <param name="sqlConnection"></param>
         /// <param name="transaction"></param>
-        private void Insert(CopyMode_Insert copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
+        /// <param name="targetTableStructure"></param>
+        private void Insert(ICopyMode iCopyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
         {
             // write data into temp table
-            string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction);
+            string tempTable = WriteDataIntoTempTable(iCopyMode, sqlConnection, transaction, targetTableStructure);
 
+            var copyMode = iCopyMode as CopyModeBase;
             // build select & insert columns sql
             string sql_source_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Keys));
             string sql_target_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Values));
@@ -623,7 +611,15 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
-        private string WriteDataIntoTempTable(ICopyMode copyMode, SqlConnection sqlConnection, SqlTransaction transaction)
+        /// <summary>
+        /// write data into temp table
+        /// </summary>
+        /// <param name="copyMode"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        /// <param name="targetTableStructure"></param>
+        /// <returns></returns>
+        private string WriteDataIntoTempTable(ICopyMode copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
         {
             var copyStuff = copyMode as CopyModeBase;
             // create temp table
@@ -634,8 +630,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             var dataTable = copyStuff.SourceData;
             int columnCount = dataTable.Columns.Count;
-
-            var targetTableStructure = GetDbTableStructure(copyStuff.TargetTable);
 
             for (int i = 0; i < columnCount; i++)
             {
