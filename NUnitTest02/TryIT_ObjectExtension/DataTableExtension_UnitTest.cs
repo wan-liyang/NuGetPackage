@@ -16,6 +16,66 @@ namespace NUnitTest02.TryIT_ObjectExtension
             public int? Prop4 { get; set; }
         }
 
+        public enum EnumTest
+        {
+            None,
+            FirstEnum,
+            SecondEnum,
+        }
+
+        public class List_Test2
+        {
+            public string Prop1 { get; set; }
+            public int Prop2 { get; set; }
+            public string Prop3 { get; set; }
+            public EnumTest Prop4 { get; set; }
+        }
+
+        [Test]
+        public void DataTable_ToList_WithEnum()
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1");
+            dataTable.Columns.Add("Col2");
+            dataTable.Columns.Add("Col3");
+            dataTable.Columns.Add("Col4");
+
+            DataRow row = dataTable.NewRow();
+            row["Col1"] = "abc";
+            row["Col2"] = 123;
+            row["Col3"] = "def";
+            row["Col4"] = "FirstEnum";
+            dataTable.Rows.Add(row);
+
+            DataRow row2 = dataTable.NewRow();
+            row2["Col1"] = "hjk";
+            row2["Col2"] = 789;
+            row2["Col3"] = "lmn";
+            row2["Col4"] = "SecondEnum";
+            dataTable.Rows.Add(row2);
+
+            DataRow row3 = dataTable.NewRow();
+            row3["Col1"] = "456";
+            row3["Col2"] = 456;
+            row3["Col3"] = "aaaa";
+            //row3["Col4"] = "ThirdEnum";
+            dataTable.Rows.Add(row3);
+
+            var keyValues = new Dictionary<string, string> {
+                { "Col1", "Prop1"},
+                { "Col2", "Prop2"},
+                { "Col3", "Prop3"},
+                { "Col4", "Prop4"},
+            };
+
+            var list = dataTable.ToList<List_Test2>(keyValues);
+
+            Assert.AreEqual(EnumTest.FirstEnum, list.First().Prop4);
+            Assert.AreEqual(EnumTest.SecondEnum, list.Where(p => p.Prop2 == 789).First().Prop4);
+            Assert.AreEqual(EnumTest.None, list.Where(p => p.Prop2 == 456).First().Prop4);
+
+        }
+
         [Test]
         public void DataTable_ToList_Test()
         {
