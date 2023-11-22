@@ -462,7 +462,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                         if (_copyMode.SourceData.Rows.Count > 0)
                         {
-                            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+                            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.KeepNulls;
                             using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
                             {
                                 sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
@@ -665,7 +665,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
 
             // insert data into temp table
-            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity;
+            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.KeepNulls;
             using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
             {
                 // set timeout to 30 mins, in case large data
