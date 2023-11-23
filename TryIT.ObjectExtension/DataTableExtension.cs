@@ -76,21 +76,6 @@ namespace TryIT.ObjectExtension
                         if (row[colName] != DBNull.Value)
                         {
                             SetValue(obj, prop, row[colName]);
-                            //if (prop.PropertyType.IsGenericType && prop.PropertyType.Name.Contains("Nullable"))
-                            //{
-                            //    if (!string.IsNullOrEmpty(row[colName].ToString()))
-                            //    {
-                            //        prop.SetValue(obj, ConvertValueToType(row[colName], Nullable.GetUnderlyingType(prop.PropertyType)));
-                            //    }
-                            //}
-                            //else if (prop.PropertyType.IsEnum)
-                            //{
-                            //    prop.SetValue(obj, Enum.ToObject(prop.PropertyType, row[colName].ToString()));
-                            //}
-                            //else
-                            //{
-                            //    prop.SetValue(obj, ConvertValueToType(row[colName], prop.PropertyType), null);
-                            //}
                         }
                     }
                 }
@@ -138,18 +123,6 @@ namespace TryIT.ObjectExtension
                                 if (row[colName] != DBNull.Value)
                                 {
                                     SetValue(obj, prop, row[colName]);
-
-                                    //if (prop.PropertyType.IsGenericType && prop.PropertyType.Name.Contains("Nullable"))
-                                    //{
-                                    //    if (!string.IsNullOrEmpty(row[colName].ToString()))
-                                    //    {
-                                    //        prop.SetValue(obj, ConvertValueToType(row[colName], Nullable.GetUnderlyingType(prop.PropertyType)));
-                                    //    }
-                                    //}
-                                    //else
-                                    //{
-                                    //    prop.SetValue(obj, ConvertValueToType(row[colName], prop.PropertyType), null);
-                                    //}
                                 }
                             }
                         }
@@ -171,7 +144,10 @@ namespace TryIT.ObjectExtension
             }
             else if (prop.PropertyType.IsEnum)
             {
-                prop.SetValue(obj, Enum.Parse(prop.PropertyType, value.ToString()));
+                if (!string.IsNullOrEmpty(value.ToString()))
+                {
+                    prop.SetValue(obj, Enum.Parse(prop.PropertyType, value.ToString()));
+                }
             }
             else
             {

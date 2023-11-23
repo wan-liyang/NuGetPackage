@@ -58,7 +58,7 @@ namespace NUnitTest02.TryIT_ObjectExtension
             row3["Col1"] = "456";
             row3["Col2"] = 456;
             row3["Col3"] = "aaaa";
-            //row3["Col4"] = "ThirdEnum";
+            row3["Col4"] = "";
             dataTable.Rows.Add(row3);
 
             var keyValues = new Dictionary<string, string> {
