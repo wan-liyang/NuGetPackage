@@ -409,6 +409,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     // get target table structure first outside transaction, to avoid other script locked table
                     var targetTableStructure = GetDbTableStructure(_copyMode.TargetTable);
 
+                    ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
+
                     // put unique transaction name to avoid any conflict
                     transaction = sqlConnection.BeginTransaction(transName);
 
@@ -518,6 +520,35 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new Exception($"column '{mapValue}' not found in target table");
             }
             return table.COLUMN_NAME;
+        }
+
+        /// <summary>
+        /// validate column map against source DataTable and target Database Table Strucutre
+        /// </summary>
+        /// <param name="sourceTable"></param>
+        /// <param name="dbTableStructures"></param>
+        /// <param name="columnMap"></param>
+        /// <exception cref="Exception"></exception>
+        private void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> dbTableStructures, Dictionary<string, string> columnMap)
+        {
+            // validate column mapping appear in source table
+            List<string> sourceColumns = new List<string>();
+            foreach (DataColumn item in sourceTable.Columns)
+            {
+                sourceColumns.Add(item.ColumnName);
+            }
+            var notExists = columnMap.Where(p => !sourceColumns.Exists(s => s.Equals(p.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
+            if (notExists != null && notExists.Count > 0)
+            {
+                throw new Exception($"column map not found in source data table: {string.Join(", ", notExists)}");
+            }
+
+            // validate column mapping appear in target table
+            notExists = columnMap.Where(p => !dbTableStructures.Exists(s => s.COLUMN_NAME.Equals(p.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
+            if (notExists != null && notExists.Count > 0)
+            {
+                throw new Exception($"column map not found in target database table: {string.Join(", ", notExists)}");
+            }
         }
 
         /// <summary>

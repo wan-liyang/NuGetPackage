@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
+using TryIT.ObjectExtension;
 using TryIT.SqlAdo.MicrosoftSqlClient;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
@@ -31,6 +27,34 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
                 TimeoutSecond = 10 * 60 // 10 minute
             };
             dbConnector = new DbConnector(config);
+        }
+        [Test]
+        public void CopyData()
+        {
+            ConnectorConfig config = new ConnectorConfig
+            {
+                ConnectionString = "",
+                TimeoutSecond = 10 * 60 // 10 minute
+            };
+            dbConnector = new DbConnector(config);
+
+            string sql = "";
+
+            var table = dbConnector.FetchDataTable(sql, CommandType.Text);
+
+            string json = "";
+
+            CopyMode_InsertUpdate mode = json.JsonToObject<CopyMode_InsertUpdate>();
+            mode.SourceData = table;
+
+            config = new ConnectorConfig
+            {
+                ConnectionString = "",
+                TimeoutSecond = 10 * 60 // 10 minute
+            };
+
+            dbConnector = new DbConnector(config);
+            dbConnector.CopyData(mode);
         }
 
         [Test]
