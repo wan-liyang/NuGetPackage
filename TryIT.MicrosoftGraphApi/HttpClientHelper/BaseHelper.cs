@@ -9,6 +9,9 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class BaseHelper
     {
+        /// <summary>
+        /// https://graph.microsoft.com/v1.0
+        /// </summary>
         protected readonly string GraphApiRootUrl = "https://graph.microsoft.com/v1.0";
 
         /// <summary>

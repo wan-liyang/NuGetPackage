@@ -14,6 +14,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     internal class SharepointHelper : BaseHelper
     {
         private TryIT.RestApi.Api api;
+        private readonly HttpClient _httpClient;
 
         public SharepointHelper(HttpClient httpClient)
         {
@@ -26,30 +27,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 HttpClient = httpClient,
                 EnableRetry = true,
             });
-        }
 
-        public GetSiteResponse.Site GetSite(string folderUrl)
-        {
-            folderUrl = folderUrl.Replace("https://", "");
-            string host = folderUrl.Substring(0, folderUrl.IndexOf('/'));
-
-            folderUrl = folderUrl.Replace($"{host}/sites/", "");
-            string site = folderUrl.Substring(0, folderUrl.IndexOf('/'));
-
-            string url = $"{GraphApiRootUrl}/sites/{host}:/sites/{site}";
-
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetSiteResponse.Site>();
-            }
-            catch
-            {
-                throw;
-            }
+            _httpClient = httpClient;
         }
 
         public GetDriveItemResponse.Item GetFolder(string folderUrl)
@@ -80,8 +59,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (string.IsNullOrEmpty(item.parentReference.siteId))
             {
-                var site = GetSite(folderUrl);
-
+                var site = new SiteHelper(_httpClient).GetSiteByUrl(folderUrl);
                 item.parentReference.siteId = site.id;
             }
 

@@ -55,9 +55,16 @@ namespace NUnitTest02.TryIT_ObjectExtension
         }
 
         [Test]
-        public void ToDataTable()
+        public void GetJsonValue2()
         {
-
+            string json = File.ReadAllText(@"test.json");
+            var result = json.GetJsonValue<ListItem>("fields");
+        }
+        class ListItem
+        {
+            public string Title { get; set; }
+            public string RequestBody { get; set; }
+            public string ResponseBody { get; set; }
         }
     }
 }

@@ -217,7 +217,14 @@ namespace TryIT.ObjectExtension
                 }
             }
 
-            return jToken.Value<T>();
+            if (typeof(T).IsValueType || typeof(T) == typeof(String))
+            {
+                return jToken.Value<T>();
+            }
+            else
+            {
+                return jToken.ToString().JsonToObject<T>();
+            }
         }
 
         #endregion
