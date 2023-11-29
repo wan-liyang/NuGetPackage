@@ -5,6 +5,7 @@ using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Transactions;
@@ -406,7 +407,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 {
                     string transName = GetGuid();
 
-                    // get target table structure first outside transaction, to avoid other script locked table
+                    // get target table structure first, outside transaction, to avoid other script locked table
                     var targetTableStructure = GetDbTableStructure(_copyMode.TargetTable);
 
                     ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
@@ -462,26 +463,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                         }
 
-                        if (_copyMode.SourceData.Rows.Count > 0)
-                        {
-                            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.KeepNulls;
-                            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
-                            {
-                                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                                sqlBulkCopy.DestinationTableName = _copyMode.TargetTable;
-
-                                if (_copyMode.ColumnMappings != null && _copyMode.ColumnMappings.Count > 0)
-                                {
-                                    foreach (var item in _copyMode.ColumnMappings)
-                                    {
-                                        string actualColumn = GetTargetColumn(targetTableStructure, item.Value);
-                                        sqlBulkCopy.ColumnMappings.Add(item.Key, actualColumn);
-                                    }
-                                }
-
-                                sqlBulkCopy.WriteToServer(_copyMode.SourceData);
-                            }
-                        }
+                        BulkCopy(_copyMode.SourceData, _copyMode.TargetTable, targetTableStructure, _copyMode.ColumnMappings, sqlConnection, transaction);
                     }
 
                     if (!string.IsNullOrEmpty(_copyMode.PostScript))
@@ -526,28 +508,34 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// validate column map against source DataTable and target Database Table Strucutre
         /// </summary>
         /// <param name="sourceTable"></param>
-        /// <param name="dbTableStructures"></param>
+        /// <param name="targetTableStructure"></param>
         /// <param name="columnMap"></param>
         /// <exception cref="Exception"></exception>
-        private void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> dbTableStructures, Dictionary<string, string> columnMap)
+        private void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
         {
             // validate column mapping appear in source table
-            List<string> sourceColumns = new List<string>();
-            foreach (DataColumn item in sourceTable.Columns)
             {
-                sourceColumns.Add(item.ColumnName);
-            }
-            var notExists = columnMap.Where(p => !sourceColumns.Exists(s => s.Equals(p.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
-            if (notExists != null && notExists.Count > 0)
-            {
-                throw new Exception($"column map not found in source data table: {string.Join(", ", notExists)}");
+                List<string> sourceColumns = new List<string>();
+                foreach (DataColumn item in sourceTable.Columns)
+                {
+                    sourceColumns.Add(item.ColumnName);
+                }
+                var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
+                if (notExists != null && notExists.Count > 0)
+                {
+                    throw new Exception($"column map not found in source data table: {string.Join(", ", notExists)}");
+                }
             }
 
             // validate column mapping appear in target table
-            notExists = columnMap.Where(p => !dbTableStructures.Exists(s => s.COLUMN_NAME.Equals(p.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
-            if (notExists != null && notExists.Count > 0)
             {
-                throw new Exception($"column map not found in target database table: {string.Join(", ", notExists)}");
+                string targetTable = targetTableStructure.First().TABLE_NAME;
+
+                var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
+                if (notExists != null && notExists.Count > 0)
+                {
+                    throw new Exception($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
+                }
             }
         }
 
@@ -696,28 +684,53 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
 
             // insert data into temp table
-            var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.KeepNulls;
-            using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
-            {
-                // set timeout to 30 mins, in case large data
-                sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
-                sqlBulkCopy.DestinationTableName = tempTable;
-
-                if (copyStuff.ColumnMappings != null && copyStuff.ColumnMappings.Count > 0)
-                {
-                    foreach (var item in copyStuff.ColumnMappings)
-                    {
-                        sqlBulkCopy.ColumnMappings.Add(item.Key, item.Key);
-                    }
-                }
-                sqlBulkCopy.WriteToServer(copyStuff.SourceData);
-            }
+            BulkCopy(copyStuff.SourceData, tempTable, null, copyStuff.ColumnMappings, sqlConnection, transaction);
 
             return tempTable;
         }
 
+        /// <summary>
+        /// do bulk copy
+        /// </summary>
+        /// <param name="sourceTable"></param>
+        /// <param name="targetTable"></param>
+        /// <param name="targetTableStructure"></param>
+        /// <param name="columnMappings"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        private void BulkCopy(DataTable sourceTable, string targetTable, List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMappings, SqlConnection sqlConnection, SqlTransaction transaction)
+        {
+            if (sourceTable.Rows.Count > 0)
+            {
+                var bulkOptions = SqlBulkCopyOptions.TableLock | SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.KeepNulls;
+                using (var sqlBulkCopy = new SqlBulkCopy(sqlConnection, bulkOptions, transaction))
+                {
+                    sqlBulkCopy.BulkCopyTimeout = _config.TimeoutSecond;
+                    sqlBulkCopy.DestinationTableName = targetTable;
+
+                    if (columnMappings != null && columnMappings.Count > 0)
+                    {
+                        foreach (var item in columnMappings)
+                        {
+                            string actualColumn = item.Value;
+
+                            if (targetTableStructure != null && targetTableStructure.Count > 0)
+                            {
+                                actualColumn = GetTargetColumn(targetTableStructure, item.Value);
+                            }
+
+                            sqlBulkCopy.ColumnMappings.Add(item.Key, actualColumn);
+                        }
+                    }
+
+                    sqlBulkCopy.WriteToServer(sourceTable);
+                }
+            }
+        }
+
         private class DbTableStructure
         {
+            public string TABLE_NAME { get; set; }
             public string COLUMN_NAME { get; set; }
             public string DATA_TYPE { get; set; }
             public string CHARACTER_MAXIMUM_LENGTH { get; set; }
@@ -734,9 +747,15 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             DataTable table = this.FetchDataTable(sql, CommandType.Text, parameters);
 
+            if (table == null || table.Rows.Count == 0)
+            {
+                throw new Exception($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
+            }
+
             return table.Rows.OfType<DataRow>().Select(k =>
                   new DbTableStructure
                   {
+                      TABLE_NAME = tableName,
                       COLUMN_NAME = k[0].ToString(),
                       DATA_TYPE = k[1].ToString(),
                       CHARACTER_MAXIMUM_LENGTH = k[2].ToString()
