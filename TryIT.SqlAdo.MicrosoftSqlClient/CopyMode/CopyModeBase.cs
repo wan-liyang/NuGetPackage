@@ -27,6 +27,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.CopyMode
 
         /// <summary>
         /// (optional) pre execute script before copy data, within the transaction, it will be execute by ExecuteNonQuery
+        /// <para>it is mandatory for <see cref="CopyMode_DeleteInsert"/> use to perform delete action before insert data</para>
         /// </summary>
         public string PreScript { get; set; }
 

@@ -449,17 +449,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         {
                             var mode = (CopyMode_DeleteInsert)iCopyMode;
 
-                            if (string.IsNullOrEmpty(mode.DeleteCondition))
+                            // PreScript is mandatory for DeleteInsert
+                            if (string.IsNullOrEmpty(mode.PreScript))
                             {
-                                throw new ArgumentNullException(nameof(mode.DeleteCondition), $"The {mode.DeleteCondition} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
-                            }
-
-                            // delete table before load
-                            string cmdText = $"DELETE FROM {mode.TargetTable} {mode.DeleteCondition};";
-                            using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.ExecuteNonQuery();
+                                throw new ArgumentNullException(nameof(mode.PreScript), $"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
                             }
                         }
 
