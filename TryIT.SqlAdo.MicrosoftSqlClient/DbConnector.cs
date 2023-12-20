@@ -125,17 +125,17 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                 {
                     sqlConnection.Open();
-                    using (SqlCommand sqlCommand = sqlConnection.CreateCommand())
+                    using (SqlCommand cmd = sqlConnection.CreateCommand())
                     {
-                        sqlCommand.CommandTimeout = _config.TimeoutSecond;
-                        sqlCommand.CommandText = commandText;
-                        sqlCommand.CommandType = commandType;
+                        cmd.CommandTimeout = _config.TimeoutSecond;
+                        cmd.CommandText = commandText;
+                        cmd.CommandType = commandType;
                         if (parameters != null && parameters.Count() > 0)
                         {
-                            sqlCommand.Parameters.AddRange(parameters);
+                            cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
 
-                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(cmd))
                         {
                             DataTable dataTable = new DataTable();
                             sqlDataAdapter.Fill(dataTable);
@@ -173,7 +173,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         cmd.CommandType = commandType;
                         if (null != parameters && parameters.Count() > 0)
                         {
-                            cmd.Parameters.AddRange(parameters);
+                            cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
                         using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                         {
@@ -219,7 +219,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         strBuilder.Append(function);
                         if (null != parameters && parameters.Count() > 0)
                         {
-                            cmd.Parameters.AddRange(parameters);
+                            cmd.Parameters.AddRange(ClondParameters(parameters));
 
                             strBuilder.Append("(");
                             for (int i = 0; i < parameters.Count(); i++)
@@ -280,7 +280,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         strBuilder.Append("(");
                         if (null != parameters && parameters.Count() > 0)
                         {
-                            cmd.Parameters.AddRange(parameters);
+                            cmd.Parameters.AddRange(ClondParameters(parameters));
                             var parameterNames = parameters.Select(p => p.ParameterName);
                             strBuilder.Append(string.Join(",", parameterNames));
                         }
@@ -323,14 +323,31 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         cmd.CommandType = commandType;
                         if (null != parameters && parameters.Count() > 0)
                         {
-                            cmd.Parameters.AddRange(parameters);
+                            cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
-
                         return cmd.ExecuteNonQuery();
                     }
                 }
             });
         }
+
+        /// <summary>
+        /// clond sql parameter, avoid "The SqlParameter is already contained by another SqlParameterCollection." error when retry execution
+        /// </summary>
+        /// <param name="originalParameters"></param>
+        /// <returns></returns>
+        private SqlParameter[] ClondParameters(SqlParameter[] originalParameters)
+        {
+            SqlParameter[] clonedParameters = new SqlParameter[originalParameters.Length];
+
+            for (int i = 0, j = originalParameters.Length; i < j; i++)
+            { 
+                clonedParameters[i] = (SqlParameter)((ICloneable)originalParameters[i]).Clone(); 
+            }
+
+            return clonedParameters;
+        }
+
 
         /// <summary>
         /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
@@ -354,7 +371,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         cmd.CommandType = commandType;
                         if (null != parameters && parameters.Count() > 0)
                         {
-                            cmd.Parameters.AddRange(parameters);
+                            cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
                         object result = cmd.ExecuteScalar();
 
@@ -377,7 +394,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             cmd.CommandType = CommandType.Text;
             if (null != parameters && parameters.Count() > 0)
             {
-                cmd.Parameters.AddRange(parameters);
+                cmd.Parameters.AddRange(ClondParameters(parameters));
             }
 
             return cmd.ExecuteReader(CommandBehavior.CloseConnection);
