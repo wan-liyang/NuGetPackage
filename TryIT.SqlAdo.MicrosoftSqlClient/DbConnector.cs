@@ -5,10 +5,8 @@ using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
-using System.Transactions;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
@@ -48,14 +46,24 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             if (config.EnableRetry)
             {
-                string networkErrorMessage = "A network-related or instance-specific error occurred while establishing a connection to SQL Server";
+                var builder = new PredicateBuilder();
+                if (config.RetryOn.SqlTimeout)
+                {
+                    builder.Handle<SqlException>(result => result.Number == -2);
+                }
+                if (config.RetryOn.EstablishConnection)
+                {
+                    builder.Handle<SqlException>(result => result.Message.StartsWith(config.RetryOn.EstablishConnnectionErrorMessage));
+                }
+                if (config.RetryOn.Deadlock)
+                {
+                    builder.Handle<SqlException>(result => result.Message.Contains(config.RetryOn.DeadlockErrorMessage));
+                }
 
                 _pipeline = new ResiliencePipelineBuilder()
                            .AddRetry(new RetryStrategyOptions
                            {
-                               ShouldHandle = new PredicateBuilder()
-                                    .Handle<SqlException>(result => result.Number == -2 // handle sql timeout
-                                            || result.Message.StartsWith(networkErrorMessage)), // handle network error
+                               ShouldHandle = builder,
 
                                Delay = TimeSpan.FromSeconds(1),
                                MaxRetryAttempts = 3,
