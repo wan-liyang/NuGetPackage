@@ -70,5 +70,17 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         {
             return _helper.CreateInvitation(invitationModel);
         }
+
+        /// <summary>
+        /// Delete user.
+        /// <para>When deleted, user resources are moved to a temporary container and can be restored within 30 days. After that time, they are permanently deleted. To learn more, see deletedItems.</para>
+        /// <para>https://learn.microsoft.com/en-us/graph/api/user-delete</para>
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns>true: delete success, false: user not exists</returns>
+        public bool DeleteUserByEmail(string userEmail)
+        {
+            return _helper.DeleteUserByEmail(userEmail);
+        }
     }
 }

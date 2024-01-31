@@ -4,8 +4,6 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.ExcelService", "TryIT.ExcelService\TryIT.ExcelService.csproj", "{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.MicrosoftGraphService", "TryIT.MicrosoftGraphService\TryIT.MicrosoftGraphService.csproj", "{86CB1402-653E-4358-91C7-5AE9F5033054}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.SqlAdoService", "TryIT.SqlAdoService\TryIT.SqlAdoService.csproj", "{74510E8B-6A42-4802-A888-915311596FF2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest_Web", "NUnitTest_Web\NUnitTest_Web.csproj", "{8091148E-40E3-4426-8377-A68585FF314E}"
@@ -70,10 +68,6 @@ Global
 		{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD73D112-3D1B-41A6-8318-E47A6ED4C7F7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86CB1402-653E-4358-91C7-5AE9F5033054}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86CB1402-653E-4358-91C7-5AE9F5033054}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86CB1402-653E-4358-91C7-5AE9F5033054}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86CB1402-653E-4358-91C7-5AE9F5033054}.Release|Any CPU.Build.0 = Release|Any CPU
 		{74510E8B-6A42-4802-A888-915311596FF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{74510E8B-6A42-4802-A888-915311596FF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74510E8B-6A42-4802-A888-915311596FF2}.Release|Any CPU.ActiveCfg = Release|Any CPU

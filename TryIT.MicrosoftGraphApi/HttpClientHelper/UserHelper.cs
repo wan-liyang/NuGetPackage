@@ -211,5 +211,37 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw;
             }
         }
+
+
+
+        /// <summary>
+        /// Delete user.
+        /// <para>When deleted, user resources are moved to a temporary container and can be restored within 30 days. After that time, they are permanently deleted. To learn more, see deletedItems.</para>
+        /// <para>https://learn.microsoft.com/en-us/graph/api/user-delete</para>
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns>true: delete success, false: user not exists</returns>
+        public bool DeleteUserByEmail(string userEmail)
+        {
+            var user = GetUserByMail(userEmail);
+
+            if (user != null && !string.IsNullOrEmpty(user.id))
+            {
+                string url = $"{GraphApiRootUrl}/users/{user.id}";
+                try
+                {
+                    var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
+                    CheckStatusCode(response);
+
+                    return true;
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+            return false;            
+        }
     }
 }
