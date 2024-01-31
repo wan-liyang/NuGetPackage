@@ -2,10 +2,12 @@
 using Polly.Retry;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web;
 using TryIT.RestApi.Models;
 using TryIT.RestApi.Utilities;
 
@@ -139,12 +141,45 @@ namespace TryIT.RestApi
         /// <summary>
         /// call Get method
         /// </summary>
-        /// <param name="url"></param>
+        /// <param name="url">url with or without parameters, if with parameters, the parameter key and value must UrlEncode</param>
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetAsync(string url)
         {
             return await _pipeline.ExecuteAsync(async exec =>
             {
+                return await _httpClient.GetAsync(url);
+            });
+        }
+
+        /// <summary>
+        /// call Get method
+        /// </summary>
+        /// <param name="url">base url without parameters</param>
+        /// <param name="parameters">url parameters</param>
+        /// <returns></returns>
+        public async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> parameters)
+        {
+            return await _pipeline.ExecuteAsync(async exec =>
+            {
+                string paras = string.Empty;
+
+                if (paras != null && paras.Length > 0)
+                {
+                    paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
+                }
+
+                if (!string.IsNullOrEmpty(paras))
+                {
+                    if (url.Contains("?"))
+                    {
+                        url = $"{url}&{paras}";
+                    }
+                    else
+                    {
+                        url = $"{url}?{paras}";
+                    }
+                }                
+
                 return await _httpClient.GetAsync(url);
             });
         }
