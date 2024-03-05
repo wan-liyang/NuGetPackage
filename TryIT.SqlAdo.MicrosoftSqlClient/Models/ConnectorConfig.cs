@@ -39,6 +39,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
         {
             get
             {
+                if (RetryOn == null)
+                {
+                    return false;
+                }
+
                 return RetryOn.SqlTimeout || RetryOn.EstablishConnection || RetryOn.Deadlock;
             }
         }

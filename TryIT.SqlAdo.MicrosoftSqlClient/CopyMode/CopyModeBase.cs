@@ -19,9 +19,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.CopyMode
         public string TargetTable { get; set; }
 
         /// <summary>
-        /// (mandatory) column mappings between source data table and target table
+        /// (mandatory) column mappings between source data table and target table (source.column => target.column)
         /// <para>case-insensitive</para>
-        /// <para>if null or empty, will assume source data table and target table has same ColumnName and OrdinalPosition</para>
+        /// <para>if null or empty, will use source data table as mapping (source.column => source.column)</para>
         /// </summary>
         public Dictionary<string, string> ColumnMappings { get; set; }
 

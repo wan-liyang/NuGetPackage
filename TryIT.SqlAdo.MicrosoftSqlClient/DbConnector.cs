@@ -435,6 +435,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     // get target table structure first, outside transaction, to avoid other script locked table
                     var targetTableStructure = GetDbTableStructure(_copyMode.TargetTable);
 
+                    /*
+                     reset column map info
+                    1. if provided: will use provided map to validate
+                    2. if not provided: will reset to source table column, then do validate
+                     
+                    this is to ensure source data are valid against target table, also source data map to correct target column, 
+                    e.g. source data column sequence may different with target table column sequence, if not provide column map, then program will use source table column as default map to ensure source column map to correct target column
+
+                     */
+                    _copyMode.ColumnMappings = ResetColumnMap(_copyMode.SourceData, _copyMode.ColumnMappings);
                     ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
 
                     // put unique transaction name to avoid any conflict
@@ -454,6 +464,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         var mode = iCopyMode as CopyMode_InsertUpdate;
                         if (mode.SourceData.Rows.Count > 0)
                         {
+                            mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
+
                             Upsert(mode, sqlConnection, transaction, targetTableStructure);
                         }
                     }
@@ -523,36 +535,62 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         }
 
         /// <summary>
+        /// reset ColumnMap if not provide, default to source table column
+        /// </summary>
+        /// <param name="sourceData"></param>
+        /// <param name="columnMap"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> ResetColumnMap(DataTable sourceData, Dictionary<string, string> columnMap)
+        {
+            if (columnMap != null && columnMap.Count > 0)
+            {
+                return columnMap;
+            }
+
+            Dictionary<string, string> map = new Dictionary<string, string>();
+
+            foreach (DataColumn col in sourceData.Columns)
+            {
+                map[col.ColumnName] = col.ColumnName;
+            }
+
+            return map;
+        }
+
+        /// <summary>
         /// validate column map against source DataTable and target Database Table Strucutre
         /// </summary>
         /// <param name="sourceTable"></param>
         /// <param name="targetTableStructure"></param>
-        /// <param name="columnMap"></param>
+        /// <param name="columnMap">expected source to target column map, if empty then will skip this validation</param>
         /// <exception cref="Exception"></exception>
         private void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
         {
-            // validate column mapping appear in source table
+            if (columnMap != null && columnMap.Count > 0)
             {
-                List<string> sourceColumns = new List<string>();
-                foreach (DataColumn item in sourceTable.Columns)
+                // validate column mapping appear in source table
                 {
-                    sourceColumns.Add(item.ColumnName);
+                    List<string> sourceColumns = new List<string>();
+                    foreach (DataColumn item in sourceTable.Columns)
+                    {
+                        sourceColumns.Add(item.ColumnName);
+                    }
+                    var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
+                    if (notExists != null && notExists.Count > 0)
+                    {
+                        throw new Exception($"column map not found in source data table: {string.Join(", ", notExists)}");
+                    }
                 }
-                var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
-                if (notExists != null && notExists.Count > 0)
-                {
-                    throw new Exception($"column map not found in source data table: {string.Join(", ", notExists)}");
-                }
-            }
 
-            // validate column mapping appear in target table
-            {
-                string targetTable = targetTableStructure.First().TABLE_NAME;
-
-                var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
-                if (notExists != null && notExists.Count > 0)
+                // validate column mapping appear in target table
                 {
-                    throw new Exception($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
+                    string targetTable = targetTableStructure.First().TABLE_NAME;
+
+                    var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
+                    if (notExists != null && notExists.Count > 0)
+                    {
+                        throw new Exception($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
+                    }
                 }
             }
         }
