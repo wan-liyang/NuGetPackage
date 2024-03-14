@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.AlwaysEncrypted.AzureKeyVaultProvider;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Retry;
 using System;
@@ -544,7 +545,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         {
             if (columnMap != null && columnMap.Count > 0)
             {
-                return columnMap;
+                return columnMap.Where(p => !p.Key.IsNullOrEmpty() && !p.Value.IsNullOrEmpty()).ToDictionary(x => x.Key, x => x.Value);
             }
 
             Dictionary<string, string> map = new Dictionary<string, string>();
@@ -699,14 +700,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append($"CREATE TABLE {tempTable}(");
 
-            var dataTable = copyStuff.SourceData;
-            int columnCount = dataTable.Columns.Count;
-
-            for (int i = 0; i < columnCount; i++)
+            foreach (var dic in copyStuff.ColumnMappings)
             {
-                string s_col = dataTable.Columns[i].ColumnName;
-                string t_col = copyStuff.ColumnMappings[s_col];
-
+                string s_col = dic.Key;
+                string t_col = dic.Value;
                 var structure = targetTableStructure.First(p => p.COLUMN_NAME.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
 
                 string dataType = "NVARCHAR(MAX)";
@@ -721,15 +718,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     default:
                         break;
                 }
+                string column = $"{FormatColumn(s_col)} {dataType}";
+                stringBuilder.Append($"{column}");
 
-                string colum = $"{FormatColumn(s_col)} {dataType}";
-
-                stringBuilder.Append($"{colum}");
-                if (i != columnCount - 1)
-                {
-                    stringBuilder.Append(", ");
-                }
+                stringBuilder.Append(",");
             }
+            // remove last ,
+            stringBuilder.Remove(stringBuilder.Length - 1, 1);
             stringBuilder.Append(");");
 
             string sql_create = stringBuilder.ToString();
@@ -739,8 +734,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 cmd.ExecuteNonQuery();
             }
 
-            // insert data into temp table
-            BulkCopy(copyStuff.SourceData, tempTable, null, copyStuff.ColumnMappings, sqlConnection, transaction);
+            // insert data into temp table, column map need be SourceColumn - SourceColumn
+            Dictionary<string, string> tempTableMap = copyStuff.ColumnMappings.ToDictionary(x => x.Key, x => x.Key);
+            BulkCopy(copyStuff.SourceData, tempTable, null, tempTableMap, sqlConnection, transaction);
 
             return tempTable;
         }
@@ -795,6 +791,32 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         private List<DbTableStructure> GetDbTableStructure(string tableName)
         {
             string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@tableName", tableName)
+            };
+
+            DataTable table = this.FetchDataTable(sql, CommandType.Text, parameters);
+
+            if (table == null || table.Rows.Count == 0)
+            {
+                throw new Exception($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
+            }
+
+            return table.Rows.OfType<DataRow>().Select(k =>
+                  new DbTableStructure
+                  {
+                      TABLE_NAME = tableName,
+                      COLUMN_NAME = k[0].ToString(),
+                      DATA_TYPE = k[1].ToString(),
+                      CHARACTER_MAXIMUM_LENGTH = k[2].ToString()
+                  }).ToList();
+        }
+
+        private List<DbTableStructure> GetDbTableStructure_TempDb(string tableName)
+        {
+            string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM Tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
 
             SqlParameter[] parameters = new SqlParameter[]
             {
