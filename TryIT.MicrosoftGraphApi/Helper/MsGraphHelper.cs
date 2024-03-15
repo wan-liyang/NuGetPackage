@@ -12,12 +12,7 @@ namespace TryIT.MicrosoftGraphApi.Helper
 
         public MsGraphHelper(MsGraphApiConfig config)
         {
-            if (string.IsNullOrEmpty(config.Token))
-            {
-                throw new System.ArgumentNullException(nameof(config.Token));
-            }
-
-            WebProxy proxy = WebProxyHelper.GetProxy(config.Proxy_Url, config.Proxy_Username, config.Proxy_Password);
+            WebProxy proxy = WebProxyHelper.GetProxy(config.Proxy);
 
             HttpClientHandler clientHandler = new HttpClientHandler()
             {

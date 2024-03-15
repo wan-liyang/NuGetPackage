@@ -157,7 +157,7 @@ namespace TryIT.MicrosoftGraphApi.Helper
                     AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
                 };
 
-                WebProxy proxy = WebProxyHelper.GetProxy(_config.Proxy_Url, _config.Proxy_Username, _config.Proxy_Password);
+                WebProxy proxy = WebProxyHelper.GetProxy(_config.Proxy);
                 if (proxy != null)
                 {
                     clientHandler.Proxy = proxy;

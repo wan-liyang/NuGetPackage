@@ -1,17 +1,28 @@
-﻿namespace TryIT.MicrosoftGraphApi.Model
+﻿using TryIT.MicrosoftGraphApi.Model.Utility;
+
+namespace TryIT.MicrosoftGraphApi.Model
 {
     /// <summary>
     /// Config information use for application obtain Token
     /// </summary>
     public class MsGraphGetTokenConfig
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string OAuth_TenantId { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string OAuth_ClientId { get; set; }
         
         /// <summary>
         /// Azure url to obtain token, to config this url, https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token
         /// </summary>
         public string OAuth_GetTokenUrl { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string OAuth_ClientSecret { get; set; }
 
         /// <summary>
@@ -27,9 +38,9 @@
         /// </summary>
         public string OAuth_Scope { get; set; }
 
-
-        public string Proxy_Url { get; set; }
-        public string Proxy_Username { get; set; }
-        public string Proxy_Password { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ProxyModel Proxy { get; set; }
     }
 }

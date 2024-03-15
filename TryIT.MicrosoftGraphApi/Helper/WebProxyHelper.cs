@@ -1,21 +1,22 @@
 ﻿using System.Net;
+using TryIT.MicrosoftGraphApi.Model.Utility;
 
 namespace TryIT.MicrosoftGraphApi.Helper
 {
     internal class WebProxyHelper
     {
-        public static WebProxy GetProxy(string url, string username = "", string password = "")
+        public static WebProxy GetProxy(ProxyModel proxyModel)
         {
             WebProxy proxy = null;
 
-            if (!string.IsNullOrEmpty(url))
+            if (proxyModel != null && !string.IsNullOrEmpty(proxyModel.Url))
             {
-                proxy = new WebProxy(url);
+                proxy = new WebProxy(proxyModel.Url);
 
-                if (!string.IsNullOrEmpty(username))
+                if (!string.IsNullOrEmpty(proxyModel.Username))
                 {
                     proxy.UseDefaultCredentials = false;
-                    proxy.Credentials = new NetworkCredential(username, password);
+                    proxy.Credentials = new NetworkCredential(proxyModel.Username, proxyModel.Password);
                 }
                 proxy.BypassProxyOnLocal = true;
             }
