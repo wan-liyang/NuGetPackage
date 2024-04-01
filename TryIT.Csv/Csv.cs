@@ -143,6 +143,12 @@ namespace TryIT.Csv
             using (var writer = new StringWriter())
             using (var csv = new CsvWriter(writer, config))
             {
+                if (!string.IsNullOrEmpty(csvConfig.FirstLineValue))
+                {
+                    csv.WriteField(csvConfig.FirstLineValue, false);
+                    csv.NextRecord();
+                }
+
                 foreach (DataColumn dc in dataTable.Columns)
                 {
                     csv.WriteField(dc.ColumnName);
@@ -155,6 +161,12 @@ namespace TryIT.Csv
                     {
                         csv.WriteField(dr[dc]);
                     }
+                    csv.NextRecord();
+                }
+
+                if (!string.IsNullOrEmpty(csvConfig.LastLineValue))
+                {
+                    csv.WriteField(csvConfig.LastLineValue);
                     csv.NextRecord();
                 }
 

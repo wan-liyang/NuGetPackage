@@ -23,5 +23,15 @@ namespace TryIT.Csv
         /// indicator always put content inside quote
         /// </summary>
         public bool AlwaysQuote { get; set; }
+
+        /// <summary>
+        /// value to put in first line
+        /// </summary>
+        public string FirstLineValue { get; set; }
+
+        /// <summary>
+        /// value to put in last line
+        /// </summary>
+        public string LastLineValue { get; set; }
     }
 }
