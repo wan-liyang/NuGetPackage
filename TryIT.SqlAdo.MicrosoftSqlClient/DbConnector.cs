@@ -660,7 +660,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             string sql_target_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Values));
 
             // build update and insert sql
-            string sql_upsert = $@"UPDATE T 
+            string sql_upsert = $@"
+                            SET IDENTITY_INSERT {copyMode.TargetTable} ON;
+
+                            UPDATE T 
                             SET {sql_update}
                             FROM {copyMode.TargetTable} T
                             INNER JOIN {tempTable} S ON {sql_key};
@@ -674,6 +677,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             FROM {tempTable} S;
 
                             DROP TABLE {tempTable};
+
+                            SET IDENTITY_INSERT {copyMode.TargetTable} OFF;
                             ";
 
             using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
