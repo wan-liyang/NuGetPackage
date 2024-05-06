@@ -661,7 +661,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             // build update and insert sql
             string sql_upsert = $@"
-                            SET IDENTITY_INSERT {copyMode.TargetTable} ON;
+
+                            IF (OBJECTPROPERTY(OBJECT_ID('{copyMode.TargetTable}'), 'TableHasIdentity') = 1)
+                            BEGIN
+                                SET IDENTITY_INSERT {copyMode.TargetTable} ON;
+                            END
 
                             UPDATE T 
                             SET {sql_update}
@@ -678,7 +682,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                             DROP TABLE {tempTable};
 
-                            SET IDENTITY_INSERT {copyMode.TargetTable} OFF;
+                            IF (OBJECTPROPERTY(OBJECT_ID('{copyMode.TargetTable}'), 'TableHasIdentity') = 1)
+                            BEGIN
+                                SET IDENTITY_INSERT {copyMode.TargetTable} OFF;
+                            END
                             ";
 
             using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
