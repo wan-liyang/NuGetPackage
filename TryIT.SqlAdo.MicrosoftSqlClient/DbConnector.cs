@@ -505,16 +505,23 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             cmd.ExecuteNonQuery();
                         }
                     }
+
+                    // if PostAction is not null, execute the action before commit transaction
+                    if (_copyMode.PostAction != null)
+                    {
+                        _copyMode.PostAction(sqlConnection, transaction);
+                    }
+
                     transaction.Commit();
                 }
-                catch (Exception ex)
+                catch
                 {
                     if (transaction != null)
                     {
                         transaction.Rollback();
                     }
 
-                    throw ex;
+                    throw;
                 }
             }
         }
