@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 {
     /// <summary>
     /// helper for convert value
     /// </summary>
-    public static class UtilityHelper
+    public static class SqlHelper
     {
         /// <summary>
         /// Convert object value to specific type value
@@ -170,6 +174,115 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                 return value.Value;
             }
             return DBNull.Value;
+        }
+
+        /// <summary>
+        /// get a Guid that doesn't contain any numbers and dash
+        /// </summary>
+        /// <returns></returns>
+        public static string GetGuid()
+        {
+            // before: 51e3aaa4-6ff6-475a-8f0f-78cac597b6c3
+            // after: FBVDRRREGWWGEHFRIWAWHITRTFJHSGTD
+            return string.Concat(Guid.NewGuid().ToString("N").Select(c => (char)(c + 17))).ToUpper();
+        }
+
+        /// <summary>
+        /// warp column, Column1 to [Column1]
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public static string SqlWarpColumn(string column)
+        {
+            return column.StartsWith("[") ? column : $"[{column}]";
+        }
+
+        /// <summary>
+        /// warp column, Column1 to [Column1]
+        /// </summary>
+        /// <param name="columns"></param>
+        /// <returns></returns>
+        public static List<string> SqlWarpColumn(IEnumerable<string> columns)
+        {
+            List<string> strings = new List<string>();
+            foreach (var column in columns)
+            {
+                strings.Add(column.StartsWith("[") ? column : $"[{column}]");
+            }
+            return strings;
+        }
+
+        /// <summary>
+        /// clean parameter name, remove the space, remove [ ]
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static string SqlParamName(string param)
+        {
+            return param.Replace(" ", "").Replace("[", "").Replace("]", "");
+        }
+
+
+
+        /*
+            https://learn.microsoft.com/en-us/sql/relational-databases/security/encryption/develop-using-always-encrypted-with-net-framework-data-provider?view=sql-server-2017#inserting-data-example
+
+
+        1. The data type of the parameter targeting the SSN column is set to an ANSI (non-Unicode) string, which maps to the char/varchar SQL Server data type. If the type of the parameter was set to a Unicode string (String), which maps to nchar/nvarchar, the query would fail, as Always Encrypted doesn't support conversions from encrypted nchar/nvarchar values to encrypted char/varchar values. See SQL Server Data Type Mappings for information about the data type mappings.\
+
+        2. The data type of the parameter inserted into the BirthDate column is explicitly set to the target SQL Server data type using SqlParameter.SqlDbType Property, instead of relying on the implicit mapping of .NET types to SQL Server data types applied when using SqlParameter.DbType Property. By default, DateTime Structure maps to the datetime SQL Server data type. As the data type of the BirthDate column is date and Always Encrypted doesn't support a conversion of encrypted datetime values to encrypted date values, using the default mapping would result in an error.
+
+        */
+
+        /// <summary>
+        /// https://learn.microsoft.com/en-us/sql/relational-databases/security/encryption/develop-using-always-encrypted-with-net-framework-data-provider?view=sql-server-2017#inserting-data-example
+        /// </summary>
+        /// <param name="paramName">parameter name without @</param>
+        /// <param name="paramValue"></param>
+        /// <param name="alwaysEncryptedColumns"></param>
+        /// <returns></returns>
+        public static SqlParameter GetParameter(string paramName, object paramValue, List<AlwaysEncryptedColumns> alwaysEncryptedColumns = null)
+        {
+            SqlParameter sqlParameter = new SqlParameter();
+
+            sqlParameter.ParameterName = $"@{SqlHelper.SqlParamName(paramName)}";
+            sqlParameter.Direction = ParameterDirection.Input;
+            sqlParameter.Value = paramValue;
+
+            if (alwaysEncryptedColumns != null)
+            {
+                var col = alwaysEncryptedColumns.Where(p => p.ColumnName.Equals(paramName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+                if (col != null)
+                {
+                    switch (col.ColumnType.ToUpper())
+                    {
+                        case "VARCHAR":
+                            sqlParameter.DbType = DbType.AnsiStringFixedLength;
+                            sqlParameter.Size = col.ColumnMaxLength;
+                            break;
+                        case "NVARCHAR":
+                            sqlParameter.DbType = DbType.String;
+                            sqlParameter.Size = col.ColumnMaxLength;
+                            break;
+                        case "DATE":
+                            sqlParameter.SqlDbType = SqlDbType.Date;
+                            break;
+                        case "DATETIME":
+                            sqlParameter.SqlDbType = SqlDbType.DateTime;
+                            break;
+                        case "DECIMAL":
+                            sqlParameter.SqlDbType = SqlDbType.Decimal;
+                            break;
+                        case "INT":
+                            sqlParameter.SqlDbType = SqlDbType.Int;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            return sqlParameter;
         }
     }
 }

@@ -242,7 +242,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                         object result = cmd.ExecuteScalar();
 
-                        return UtilityHelper.ConvertValue<T>(result);
+                        return SqlHelper.ConvertValue<T>(result);
                     }
                 }
             });
@@ -342,8 +342,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             SqlParameter[] clonedParameters = new SqlParameter[originalParameters.Length];
 
             for (int i = 0, j = originalParameters.Length; i < j; i++)
-            { 
-                clonedParameters[i] = (SqlParameter)((ICloneable)originalParameters[i]).Clone(); 
+            {
+                clonedParameters[i] = (SqlParameter)((ICloneable)originalParameters[i]).Clone();
             }
 
             return clonedParameters;
@@ -376,7 +376,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                         object result = cmd.ExecuteScalar();
 
-                        return UtilityHelper.ConvertValue<T>(result);
+                        return SqlHelper.ConvertValue<T>(result);
                     }
                 }
             });
@@ -431,10 +431,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 SqlTransaction transaction = null;
                 try
                 {
-                    string transName = GetGuid();
+                    string transName = SqlHelper.GetGuid();
 
                     // get target table structure first, outside transaction, to avoid other script locked table
-                    var targetTableStructure = GetDbTableStructure(_copyMode.TargetTable);
+                    var targetTableStructure = this.GetDbTableStructure(_copyMode.TargetTable);
 
                     /*
                      reset column map info
@@ -467,7 +467,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         {
                             mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
 
-                            Upsert(mode, sqlConnection, transaction, targetTableStructure);
+                            var alwaysEncryptedColumns = this.GetAlwaysEncryptedColumns(mode.TargetTable);
+
+                            if (!alwaysEncryptedColumns.IsNullOrEmpty())
+                            {
+                                Upsert_Encrypted(mode, sqlConnection, transaction, alwaysEncryptedColumns);
+                            }
+                            else
+                            {
+                                Upsert(mode, sqlConnection, transaction, targetTableStructure);
+                            }
                         }
                     }
                     else
@@ -603,6 +612,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
+        #region do Update & Insert
         /// <summary>
         /// perform insert or update action, 1) write data into temp table, 2) insert or update to target table join with temp table, 3) delete temp table
         /// </summary>
@@ -636,7 +646,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw new Exception($"Configured primay key column [{s_col}] has no corresponding column in target table {copyMode.TargetTable}");
                 }
 
-                sql_key += $"S.{FormatColumn(s_col)} = T.{FormatColumn(t_col)}";
+                sql_key += $"S.{SqlHelper.SqlWarpColumn(s_col)} = T.{SqlHelper.SqlWarpColumn(t_col)}";
 
                 if (i != keys_count - 1)
                 {
@@ -653,18 +663,18 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 string s_col = item.Key;
                 string t_col = item.Value;
 
-                sql_update += $"T.{FormatColumn(t_col)} = S.{FormatColumn(s_col)},";
+                sql_update += $"T.{SqlHelper.SqlWarpColumn(t_col)} = S.{SqlHelper.SqlWarpColumn(s_col)},";
             }
             sql_update = sql_update.TrimEnd(',');
 
             if (!string.IsNullOrEmpty(copyMode.TimestampColumn))
             {
-                sql_update += $", {FormatColumn(copyMode.TimestampColumn)} = GETDATE()";
+                sql_update += $", {SqlHelper.SqlWarpColumn(copyMode.TimestampColumn)} = GETDATE()";
             }
 
             // build select & insert columns sql
-            string sql_source_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Keys));
-            string sql_target_col = string.Join(", ", FormatColumn(copyMode.ColumnMappings.Values));
+            string sql_source_col = string.Join(", ", SqlHelper.SqlWarpColumn(copyMode.ColumnMappings.Keys));
+            string sql_target_col = string.Join(", ", SqlHelper.SqlWarpColumn(copyMode.ColumnMappings.Values));
 
             // build update and insert sql
             string sql_upsert = $@"
@@ -714,7 +724,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         {
             var copyStuff = copyMode as CopyModeBase;
             // create temp table
-            string tempTable = $"#temp_{GetGuid()}";
+            string tempTable = $"#temp_{SqlHelper.GetGuid()}";
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append($"CREATE TABLE {tempTable}(");
@@ -737,7 +747,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     default:
                         break;
                 }
-                string column = $"{FormatColumn(s_col)} {dataType}";
+                string column = $"{SqlHelper.SqlWarpColumn(s_col)} {dataType}";
                 stringBuilder.Append($"{column}");
 
                 stringBuilder.Append(",");
@@ -758,6 +768,87 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             BulkCopy(copyStuff.SourceData, tempTable, null, tempTableMap, sqlConnection, transaction);
 
             return tempTable;
+        }
+        #endregion
+
+        /// <summary>
+        /// do update and insert for table has AlwaysEncrypted enabled
+        /// </summary>
+        /// <param name="copyMode"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        /// <param name="alwaysEncryptedColumns"></param>
+        private void Upsert_Encrypted(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumns> alwaysEncryptedColumns)
+        {
+            string sql_where = "";
+            string sql_set = "";
+            string sql_insert_columns = "";
+            string sql_insert_params = "";
+
+            for (int i = 0; i < copyMode.PrimaryKeys.Count; i++)
+            {
+                if (i > 0)
+                {
+                    sql_where += " AND ";
+                }
+                sql_where += $"{SqlHelper.SqlWarpColumn(copyMode.PrimaryKeys[i])} = @{SqlHelper.SqlParamName(copyMode.PrimaryKeys[i])}";
+            }
+
+            var tobeUpdateColumns = copyMode.ColumnMappings.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToDictionary(x => x.Key, x => x.Value);
+
+            foreach (var item in tobeUpdateColumns)
+            {
+                string col = SqlHelper.SqlWarpColumn(item.Value);
+                string param = SqlHelper.SqlParamName(item.Value);
+
+                sql_set += $"{col} = @{SqlHelper.SqlParamName(item.Value)},";
+
+                sql_insert_columns += $"{col},";
+
+                sql_insert_params += $"@{param},";
+            }
+            sql_set = sql_set.TrimEnd(',');
+            sql_insert_columns = sql_insert_columns.TrimEnd(',');
+            sql_insert_params = sql_insert_params.TrimEnd(',');
+
+            string sql = $"IF EXISTS (SELECT 1 FROM {copyMode.TargetTable} WHERE {sql_where}) BEGIN UPDATE {copyMode.TargetTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
+
+            using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, transaction))
+            {
+                // below assign value may cause deadlock issue
+                //sqlCommand.CommandText = sql;
+                //sqlCommand.Connection = sqlConnection; 
+                //sqlCommand.Transaction = transaction;
+
+                sqlCommand.CommandType = CommandType.Text;
+
+                for (int i = 0; i < copyMode.SourceData.Rows.Count; i++)
+                {
+                    for (int k = 0; k < copyMode.PrimaryKeys.Count; k++)
+                    {
+                        string t_col = copyMode.PrimaryKeys[k];
+                        string s_col = copyMode.ColumnMappings.First(p => p.Value.Equals(t_col, StringComparison.CurrentCultureIgnoreCase)).Key;
+
+                        var param = SqlHelper.GetParameter(t_col, copyMode.SourceData.Rows[i][s_col], alwaysEncryptedColumns);
+
+                        sqlCommand.Parameters.Add(param);
+                    }
+
+                    foreach (var item in tobeUpdateColumns)
+                    {
+                        string t_col = item.Value;
+                        string s_col = item.Key;
+
+                        var param = SqlHelper.GetParameter(item.Value, copyMode.SourceData.Rows[i][s_col], alwaysEncryptedColumns);
+
+                        sqlCommand.Parameters.Add(param);
+                    }
+
+                    sqlCommand.ExecuteNonQuery();
+
+                    sqlCommand.Parameters.Clear();
+                }
+            }
         }
 
         /// <summary>
@@ -797,96 +888,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     sqlBulkCopy.WriteToServer(sourceTable);
                 }
             }
-        }
-
-        private class DbTableStructure
-        {
-            public string TABLE_NAME { get; set; }
-            public string COLUMN_NAME { get; set; }
-            public string DATA_TYPE { get; set; }
-            public string CHARACTER_MAXIMUM_LENGTH { get; set; }
-        }
-
-        private List<DbTableStructure> GetDbTableStructure(string tableName)
-        {
-            string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
-
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@tableName", tableName)
-            };
-
-            DataTable table = this.FetchDataTable(sql, CommandType.Text, parameters);
-
-            if (table == null || table.Rows.Count == 0)
-            {
-                throw new Exception($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
-            }
-
-            return table.Rows.OfType<DataRow>().Select(k =>
-                  new DbTableStructure
-                  {
-                      TABLE_NAME = tableName,
-                      COLUMN_NAME = k[0].ToString(),
-                      DATA_TYPE = k[1].ToString(),
-                      CHARACTER_MAXIMUM_LENGTH = k[2].ToString()
-                  }).ToList();
-        }
-
-        private List<DbTableStructure> GetDbTableStructure_TempDb(string tableName)
-        {
-            string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM Tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
-
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@tableName", tableName)
-            };
-
-            DataTable table = this.FetchDataTable(sql, CommandType.Text, parameters);
-
-            if (table == null || table.Rows.Count == 0)
-            {
-                throw new Exception($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
-            }
-
-            return table.Rows.OfType<DataRow>().Select(k =>
-                  new DbTableStructure
-                  {
-                      TABLE_NAME = tableName,
-                      COLUMN_NAME = k[0].ToString(),
-                      DATA_TYPE = k[1].ToString(),
-                      CHARACTER_MAXIMUM_LENGTH = k[2].ToString()
-                  }).ToList();
-        }
-
-        /// <summary>
-        /// get a Guid that doesn't contain any numbers and dash
-        /// </summary>
-        /// <returns></returns>
-        private string GetGuid()
-        {
-            // before: 51e3aaa4-6ff6-475a-8f0f-78cac597b6c3
-            // after: FBVDRRREGWWGEHFRIWAWHITRTFJHSGTD
-            return string.Concat(Guid.NewGuid().ToString("N").Select(c => (char)(c + 17))).ToUpper();
-        }
-
-        /// <summary>
-        /// format column, Column1 to [Column1]
-        /// </summary>
-        /// <param name="column"></param>
-        /// <returns></returns>
-        private string FormatColumn(string column)
-        {
-            return column.StartsWith("[") ? column : $"[{column}]";
-        }
-        private List<string> FormatColumn(IEnumerable<string> columns)
-        {
-            List<string> strings = new List<string>();
-            foreach (var column in columns)
-            {
-                strings.Add(column.StartsWith("[") ? column : $"[{column}]");
-            }
-            return strings;
         }
     }
 }
