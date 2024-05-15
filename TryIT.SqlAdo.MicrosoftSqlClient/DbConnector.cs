@@ -453,10 +453,17 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                     if (!string.IsNullOrEmpty(_copyMode.PreScript))
                     {
-                        using (SqlCommand cmd = new SqlCommand(_copyMode.PreScript, sqlConnection, transaction))
+                        try
                         {
-                            cmd.CommandTimeout = _config.TimeoutSecond;
-                            cmd.ExecuteNonQuery();
+                            using (SqlCommand cmd = new SqlCommand(_copyMode.PreScript, sqlConnection, transaction))
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"PreScript failed, {_copyMode.PreScript}", ex);
                         }
                     }
 
@@ -471,11 +478,25 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                             if (!alwaysEncryptedColumns.IsNullOrEmpty())
                             {
-                                Upsert_Encrypted(mode, sqlConnection, transaction, alwaysEncryptedColumns);
+                                try
+                                {
+                                    Upsert_Encrypted(mode, sqlConnection, transaction, alwaysEncryptedColumns);
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception($"Upsert_Encrypted failed", ex);
+                                }
                             }
                             else
                             {
-                                Upsert(mode, sqlConnection, transaction, targetTableStructure);
+                                try
+                                {
+                                    Upsert(mode, sqlConnection, transaction, targetTableStructure);
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception($"Upsert failed", ex);
+                                }
                             }
                         }
                     }
@@ -503,22 +524,43 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                         }
 
-                        BulkCopy(_copyMode.SourceData, _copyMode.TargetTable, targetTableStructure, _copyMode.ColumnMappings, sqlConnection, transaction);
+                        try
+                        {
+                            BulkCopy(_copyMode.SourceData, _copyMode.TargetTable, targetTableStructure, _copyMode.ColumnMappings, sqlConnection, transaction);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"BulkCopy failed", ex);
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(_copyMode.PostScript))
                     {
-                        using (SqlCommand cmd = new SqlCommand(_copyMode.PostScript, sqlConnection, transaction))
+                        try
                         {
-                            cmd.CommandTimeout = _config.TimeoutSecond;
-                            cmd.ExecuteNonQuery();
+                            using (SqlCommand cmd = new SqlCommand(_copyMode.PostScript, sqlConnection, transaction))
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"PostScript failed, {_copyMode.PostScript} ", ex);
                         }
                     }
 
                     // if PostAction is not null, execute the action before commit transaction
                     if (_copyMode.PostAction != null)
                     {
-                        _copyMode.PostAction(sqlConnection, transaction);
+                        try
+                        {
+                            _copyMode.PostAction(sqlConnection, transaction);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"PostAction failed, {_copyMode.PostAction}", ex);
+                        }
                     }
 
                     transaction.Commit();

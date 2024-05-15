@@ -62,13 +62,32 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                   }).ToList();
         }
 
+        /// <summary>
+        /// get always encrypted columns
+        /// </summary>
+        /// <param name="dbConnector"></param>
+        /// <returns></returns>
+        public static List<AlwaysEncryptedColumns> GetAlwaysEncryptedColumns(this DbConnector dbConnector)
+        { 
+            return GetAlwaysEncryptedColumns(dbConnector, string.Empty);
+        }
+
+        /// <summary>
+        /// get always encrypted columns
+        /// </summary>
+        /// <param name="dbConnector"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         public static List<AlwaysEncryptedColumns> GetAlwaysEncryptedColumns(this DbConnector dbConnector, string tableName)
         {
             string cmdText = @"SELECT 
 	                                sch.name + '.' + tbl.name AS TableName,
 	                                col.name AS ColumnName,
 	                                typ.name AS ColumnType,
-	                                col.max_length AS ColumnMaxLength,
+                                    CASE
+                                        WHEN typ.name = 'nvarchar' THEN col.max_length / 2
+                                        ELSE col.max_length 
+                                    END AS ColumnMaxLength,
 	                                col.Precision,
 	                                col.Scale,
 	                                col.encryption_type_desc AS EncryptionType,
@@ -85,7 +104,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                                 JOIN sys.types typ ON typ.system_type_id = col.system_type_id 
 	                                AND typ.user_type_id = col.user_type_id
                                 WHERE col.[encryption_type] IS NOT NULL
-                                AND sch.name + '.' + tbl.name = @tableName
+                                    AND (sch.name + '.' + tbl.name = @tableName OR @tableName = '')
                         ";
 
             SqlParameter[] sqlParameters = new SqlParameter[]
