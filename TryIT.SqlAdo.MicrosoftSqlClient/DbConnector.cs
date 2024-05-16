@@ -820,7 +820,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="sqlConnection"></param>
         /// <param name="transaction"></param>
         /// <param name="alwaysEncryptedColumns"></param>
-        private void Upsert_Encrypted(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumns> alwaysEncryptedColumns)
+        private void Upsert_Encrypted(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
         {
             string sql_where = "";
             string sql_set = "";
@@ -870,8 +870,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     {
                         string t_col = copyMode.PrimaryKeys[k];
                         string s_col = copyMode.ColumnMappings.First(p => p.Value.Equals(t_col, StringComparison.CurrentCultureIgnoreCase)).Key;
+                        AlwaysEncryptedColumn colEncrypt = alwaysEncryptedColumns.FirstOrDefault(p => p.ColumnName.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
 
-                        var param = SqlHelper.GetParameter(t_col, copyMode.SourceData.Rows[i][s_col], alwaysEncryptedColumns);
+                        var param = SqlHelper.GetParameter(t_col, copyMode.SourceData.Rows[i][s_col], colEncrypt);
 
                         sqlCommand.Parameters.Add(param);
                     }
@@ -880,8 +881,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     {
                         string t_col = item.Value;
                         string s_col = item.Key;
+                        AlwaysEncryptedColumn colEncrypt = alwaysEncryptedColumns.FirstOrDefault(p => p.ColumnName.Equals(t_col, StringComparison.CurrentCultureIgnoreCase));
 
-                        var param = SqlHelper.GetParameter(item.Value, copyMode.SourceData.Rows[i][s_col], alwaysEncryptedColumns);
+                        var param = SqlHelper.GetParameter(item.Value, copyMode.SourceData.Rows[i][s_col], colEncrypt);
 
                         sqlCommand.Parameters.Add(param);
                     }

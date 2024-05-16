@@ -67,7 +67,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// </summary>
         /// <param name="dbConnector"></param>
         /// <returns></returns>
-        public static List<AlwaysEncryptedColumns> GetAlwaysEncryptedColumns(this DbConnector dbConnector)
+        public static List<AlwaysEncryptedColumn> GetAlwaysEncryptedColumns(this DbConnector dbConnector)
         { 
             return GetAlwaysEncryptedColumns(dbConnector, string.Empty);
         }
@@ -78,7 +78,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <param name="dbConnector"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public static List<AlwaysEncryptedColumns> GetAlwaysEncryptedColumns(this DbConnector dbConnector, string tableName)
+        public static List<AlwaysEncryptedColumn> GetAlwaysEncryptedColumns(this DbConnector dbConnector, string tableName)
         {
             string cmdText = @"SELECT 
 	                                sch.name + '.' + tbl.name AS TableName,
@@ -116,7 +116,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 
 
             return table.Rows.OfType<DataRow>().Select(k =>
-                  new AlwaysEncryptedColumns
+                  new AlwaysEncryptedColumn
                   {
                       TableName = k[0].ToString(),
                       ColumnName = k[1].ToString(),

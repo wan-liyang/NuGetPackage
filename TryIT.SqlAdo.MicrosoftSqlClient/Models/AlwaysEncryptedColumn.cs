@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
 {
-    public class AlwaysEncryptedColumns
+    public class AlwaysEncryptedColumn
     {
         public string TableName { get; set; }
         public string ColumnName { get; set; }

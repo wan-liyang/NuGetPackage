@@ -239,9 +239,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// </summary>
         /// <param name="paramName">parameter name without @</param>
         /// <param name="paramValue"></param>
-        /// <param name="alwaysEncryptedColumns"></param>
+        /// <param name="alwaysEncryptedColumn">always encrypted column information for the target column which going to update</param>
         /// <returns></returns>
-        public static SqlParameter GetParameter(string paramName, object paramValue, List<AlwaysEncryptedColumns> alwaysEncryptedColumns = null)
+        public static SqlParameter GetParameter(string paramName, object paramValue, AlwaysEncryptedColumn alwaysEncryptedColumn = null)
         {
             SqlParameter sqlParameter = new SqlParameter();
 
@@ -249,36 +249,32 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             sqlParameter.Direction = ParameterDirection.Input;
             sqlParameter.Value = paramValue;
 
-            if (alwaysEncryptedColumns != null)
+            if (alwaysEncryptedColumn != null)
             {
-                var col = alwaysEncryptedColumns.Where(p => p.ColumnName.Equals(paramName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
-                if (col != null)
+                switch (alwaysEncryptedColumn.ColumnType.ToUpper())
                 {
-                    switch (col.ColumnType.ToUpper())
-                    {
-                        case "VARCHAR":
-                            sqlParameter.DbType = DbType.AnsiStringFixedLength;
-                            sqlParameter.Size = col.ColumnMaxLength;
-                            break;
-                        case "NVARCHAR":
-                            sqlParameter.DbType = DbType.String;
-                            sqlParameter.Size = col.ColumnMaxLength;
-                            break;
-                        case "DATE":
-                            sqlParameter.SqlDbType = SqlDbType.Date;
-                            break;
-                        case "DATETIME":
-                            sqlParameter.SqlDbType = SqlDbType.DateTime;
-                            break;
-                        case "DECIMAL":
-                            sqlParameter.SqlDbType = SqlDbType.Decimal;
-                            break;
-                        case "INT":
-                            sqlParameter.SqlDbType = SqlDbType.Int;
-                            break;
-                        default:
-                            break;
-                    }
+                    case "VARCHAR":
+                        sqlParameter.DbType = DbType.AnsiStringFixedLength;
+                        sqlParameter.Size = alwaysEncryptedColumn.ColumnMaxLength;
+                        break;
+                    case "NVARCHAR":
+                        sqlParameter.DbType = DbType.String;
+                        sqlParameter.Size = alwaysEncryptedColumn.ColumnMaxLength;
+                        break;
+                    case "DATE":
+                        sqlParameter.SqlDbType = SqlDbType.Date;
+                        break;
+                    case "DATETIME":
+                        sqlParameter.SqlDbType = SqlDbType.DateTime;
+                        break;
+                    case "DECIMAL":
+                        sqlParameter.SqlDbType = SqlDbType.Decimal;
+                        break;
+                    case "INT":
+                        sqlParameter.SqlDbType = SqlDbType.Int;
+                        break;
+                    default:
+                        break;
                 }
             }
 
