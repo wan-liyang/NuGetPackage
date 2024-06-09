@@ -472,6 +472,151 @@ namespace TryIT.ObjectExtension
         }
 
         /// <summary>
+        /// merge <paramref name="dt1"/> with <paramref name="dt2"/> based on <paramref name="columnMapping"/>, Key is dt1 column, Value is dt2 column, return new DataTable with Key (dt1) as column name
+        /// </summary>
+        /// <param name="dt1"></param>
+        /// <param name="dt2"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
+        public static DataTable Merge(this DataTable dt1, DataTable dt2, Dictionary<string, string> columnMapping)
+        {
+            if (dt1 == null)
+            {
+                throw new ArgumentNullException(nameof(dt1), "Source table cannot be null");
+            }
+            if (dt2 == null)
+            {
+                throw new ArgumentNullException(nameof(dt2), "Merge with table cannot be null");
+            }
+
+            if (columnMapping == null || columnMapping.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(columnMapping), "Columns mapping cannot be null or empty");
+            }
+
+            // Create a new DataTable to hold the combined data
+            DataTable combinedDt = new DataTable();
+
+            // Get the column names from the mapping dictionary
+            List<string> columnNames = columnMapping.Keys.Distinct().ToList();
+
+            // Add columns to the combined DataTable
+            foreach (string columnName in columnNames)
+            {
+                combinedDt.Columns.Add(columnName);
+            }
+
+            // Combine the rows from both DataTables
+            var query = dt1.AsEnumerable()
+                .Select(row => columnMapping.ToDictionary(kvp => kvp.Key, kvp => row.Field<object>(kvp.Key)))
+                .Concat(dt2.AsEnumerable().Select(row => columnMapping.ToDictionary(kvp => kvp.Value, kvp => row.Field<object>(kvp.Value))));
+
+            // Add the combined rows to the new DataTable
+            foreach (var rowValues in query)
+            {
+                combinedDt.Rows.Add(rowValues.Values.ToArray());
+            }
+
+            return combinedDt;
+        }
+
+        /// <summary>
+        /// distinct DataTable
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DataTable Distinct(this DataTable dt)
+        {
+            if (dt == null)
+            {
+                throw new ArgumentNullException(nameof(dt), "Source table cannot be null");
+            }
+
+            // Create a new DataTable to hold the distinct rows
+            DataTable distinctDt = dt.Clone();
+
+            // Convert the DataTable to a list of DataRow arrays
+            var rows = dt.AsEnumerable().Distinct(DataRowComparer.Default);
+
+            // Add the distinct rows to the new DataTable
+            foreach (DataRow row in rows)
+            {
+                distinctDt.Rows.Add(row.ItemArray);
+            }
+
+            return distinctDt;
+        }
+
+
+        /// <summary>
+        /// group by <paramref name="dt"/> with <paramref name="columnNames"/>, return new DataTable with Count column to indicate each group by key has how many records
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="columnNames"></param>
+        /// <returns></returns>
+        public static DataTable GroupBy(this DataTable dt, params string[] columnNames)
+        {
+            if (dt == null)
+            {
+                throw new ArgumentNullException(nameof(dt), "Source table cannot be null");
+            }
+
+            if (columnNames.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(columnNames), "Columns to groupBy cannot be null");
+            }
+
+            // Create a new DataTable to hold the duplicate rows and count
+            DataTable duplicateDt = new DataTable();
+
+            // Add columns to the new DataTable
+            foreach (string columnName in columnNames)
+            {
+                duplicateDt.Columns.Add(columnName);
+            }
+            duplicateDt.Columns.Add("Count", typeof(int));
+
+            var groups = dt.AsEnumerable()
+                .GroupBy(row => columnNames.Select(c => row.Field<object>(c)), new AnonymousObjectComparer())
+                //.Where(g => g.Count() > 1)
+                .Select(g =>
+                {
+                    var key = g.Key;
+                    var count = g.Count();
+
+                    var newRow = duplicateDt.NewRow();
+                    for (int i = 0; i < columnNames.Length; i++)
+                    {
+                        newRow[columnNames[i]] = g.First()[columnNames[i]];
+                    }
+                    newRow["Count"] = count;
+
+                    return newRow;
+                });
+
+            // Add the duplicate rows and count to the new DataTable
+            foreach (var row in groups)
+            {
+                duplicateDt.Rows.Add(row);
+            }
+
+            return duplicateDt;
+        }
+
+        private class AnonymousObjectComparer : IEqualityComparer<IEnumerable<object>>
+        {
+            public bool Equals(IEnumerable<object> x, IEnumerable<object> y)
+            {
+                return x.SequenceEqual(y);
+            }
+
+            public int GetHashCode(IEnumerable<object> obj)
+            {
+                return obj.Aggregate(0, (hash, value) => hash ^ value.GetHashCode());
+            }
+        }
+
+        /// <summary>
         /// group by source table, return new table with Group By column and Count column
         /// </summary>
         /// <param name="dtSource"></param>
@@ -479,6 +624,7 @@ namespace TryIT.ObjectExtension
         /// <param name="countColumnName">column name for count indicator of each group, if <paramref name="groupByColumns"/> has same name as 'Count', need give different name here </param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
+        [Obsolete("Performance issue", true)]
         public static DataTable GroupBy(this DataTable dtSource, string[] groupByColumns, string countColumnName = "Count")
         {
             if (dtSource == null)
