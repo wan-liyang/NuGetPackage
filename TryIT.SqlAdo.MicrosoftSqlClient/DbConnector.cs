@@ -530,7 +530,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"BulkCopy failed", ex);
+                            var map = _copyMode.ColumnMappings.ToArray();
+                            var mapString = string.Join(", ", map.Select(x => $"{x.Key} => {x.Value}"));
+                            throw new Exception($"BulkCopy failed, mapping: [{mapString}]", ex);
                         }
                     }
 
@@ -813,6 +815,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         }
         #endregion
 
+        #region do Update & Insert for tables contains AlwaysEncrypted enabled
         /// <summary>
         /// do update and insert for table has AlwaysEncrypted enabled
         /// </summary>
@@ -822,6 +825,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="alwaysEncryptedColumns"></param>
         private void Upsert_Encrypted(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
         {
+            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
+            }
+
             string sql_where = "";
             string sql_set = "";
             string sql_insert_columns = "";
@@ -894,6 +902,116 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 }
             }
         }
+
+        /// <summary>
+        /// get always encrypted column information, return null if not exists
+        /// </summary>
+        /// <param name="columnName"></param>
+        /// <param name="alwaysEncryptedColumns"></param>
+        /// <returns></returns>
+        private AlwaysEncryptedColumn GetAlwaysEncryptedColumn(string columnName, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
+        {
+            return alwaysEncryptedColumns.Where(p => p.ColumnName.Equals(columnName)).FirstOrDefault();
+        }
+
+        private void PostIntoDb(SqlConnection sqlConnection, SqlTransaction sqlTransaction, string sql, SqlParameter[] sqlParameters)
+        {
+            using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, sqlTransaction))
+            {
+                sqlCommand.CommandTimeout = 10 * 60;
+                sqlCommand.Parameters.Clear();
+                sqlCommand.Parameters.AddRange(sqlParameters);
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
+
+
+        /// <summary>
+        /// reduce database connection times
+        /// </summary>
+        /// <param name="copyMode"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        /// <param name="alwaysEncryptedColumns"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        private void Upsert_Encrypted2(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
+        {
+            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
+            }
+
+            DataTable dt = copyMode.SourceData;
+
+            int paramNumber = 0;
+            StringBuilder stringBuilder = new StringBuilder();
+            List<SqlParameter> sqlParameters = new List<SqlParameter>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                // prepare where condition sql
+                string sql_where = "";
+                for (int k = 0; k < copyMode.PrimaryKeys.Count; k++)
+                {
+                    if (k > 0)
+                    {
+                        sql_where += " AND ";
+                    }
+
+                    string t_col = copyMode.PrimaryKeys[k];
+                    string s_col = copyMode.ColumnMappings.First(p => p.Value.Equals(t_col, StringComparison.CurrentCultureIgnoreCase)).Key;
+                    string t_col_param = $"param_{i}_{t_col}";
+                    object t_col_value = dt.Rows[i][s_col];
+                    AlwaysEncryptedColumn encrypted = GetAlwaysEncryptedColumn(t_col, alwaysEncryptedColumns);
+
+                    sql_where += $"{SqlHelper.SqlWarpColumn(t_col)} = @{SqlHelper.SqlParamName(t_col_param)}";
+
+                    //sqlParameters.Add(SqlHelper.GetParameter(t_col_param, t_col_value, encrypted));
+                    //paramNumber += 1;
+                }
+
+                // prepare columns to be update sql
+                string sql_set = "";
+                string sql_insert_columns = "";
+                string sql_insert_params = "";
+
+                var tobeUpdateColumns = copyMode.ColumnMappings.ToList();//.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToList();
+                for (int c = 0; c < tobeUpdateColumns.Count; c++)
+                {
+                    string s_col = tobeUpdateColumns[c].Key;
+                    string t_col = tobeUpdateColumns[c].Value;
+
+                    string t_col_set = SqlHelper.SqlWarpColumn(t_col);
+                    string t_col_param = $"param_{i}_{t_col}";
+                    object t_col_value = dt.Rows[i][s_col];
+                    AlwaysEncryptedColumn encrypted = GetAlwaysEncryptedColumn(t_col, alwaysEncryptedColumns);
+
+                    sql_set += $"{t_col_set} = @{SqlHelper.SqlParamName(t_col_param)},";
+                    sql_insert_columns += $"{t_col_set},";
+                    sql_insert_params += $"@{t_col_param},";
+
+                    sqlParameters.Add(SqlHelper.GetParameter(t_col_param, t_col_value, encrypted));
+                    paramNumber += 1;
+                }
+                sql_set = sql_set.TrimEnd(',');
+                sql_insert_columns = sql_insert_columns.TrimEnd(',');
+                sql_insert_params = sql_insert_params.TrimEnd(',');
+
+                string sql = $"DELETE FROM {copyMode.TargetTable} WHERE {sql_where}; INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params});";
+                //string sql = $"IF EXISTS (SELECT 1 FROM {copyMode.TargetTable} WHERE {sql_where}) BEGIN UPDATE {copyMode.TargetTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
+
+                stringBuilder.AppendLine(sql);
+
+                if (paramNumber > 2000 || i == dt.Rows.Count - 1)
+                {
+                    PostIntoDb(sqlConnection, transaction, stringBuilder.ToString(), sqlParameters.ToArray());
+
+                    stringBuilder.Clear();
+                    sqlParameters.Clear();
+                    paramNumber = 0;
+                }
+            }
+        }
+        #endregion
 
         /// <summary>
         /// do bulk copy
