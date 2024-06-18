@@ -783,6 +783,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 switch (structure.DATA_TYPE)
                 {
                     case "datetime":
+                    case "time":
                     case "date":
                     case "bit":
                     case "int":
