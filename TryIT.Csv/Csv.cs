@@ -149,11 +149,14 @@ namespace TryIT.Csv
                     csv.NextRecord();
                 }
 
-                foreach (DataColumn dc in dataTable.Columns)
+                if (!csvConfig.SkipHeader)
                 {
-                    csv.WriteField(dc.ColumnName);
-                }
-                csv.NextRecord();
+                    foreach (DataColumn dc in dataTable.Columns)
+                    {
+                        csv.WriteField(dc.ColumnName);
+                        csv.NextRecord();
+                    }
+                }                
 
                 foreach (DataRow dr in dataTable.Rows)
                 {

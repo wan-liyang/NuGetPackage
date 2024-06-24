@@ -33,5 +33,10 @@ namespace TryIT.Csv
         /// value to put in last line
         /// </summary>
         public string LastLineValue { get; set; }
+
+        /// <summary>
+        /// indicate whether skip write header
+        /// </summary>
+        public bool SkipHeader { get; set; }
     }
 }

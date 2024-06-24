@@ -617,87 +617,50 @@ namespace TryIT.ObjectExtension
         }
 
         /// <summary>
-        /// group by source table, return new table with Group By column and Count column
+        /// from this table or <paramref name="dt1"/> exclude rows present in <paramref name="dt2"/> based on <paramref name="keysMap"/>
+        /// <para>keysMap.Key: column name from <paramref name="dt1"/></para>
+        /// <para>keysMap.Value: column name from <paramref name="dt2"/></para>
         /// </summary>
-        /// <param name="dtSource"></param>
-        /// <param name="groupByColumns">columns to group by the rows</param>
-        /// <param name="countColumnName">column name for count indicator of each group, if <paramref name="groupByColumns"/> has same name as 'Count', need give different name here </param>
+        /// <param name="dt1"></param>
+        /// <param name="dt2"></param>
+        /// <param name="keysMap"></param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        [Obsolete("Performance issue", true)]
-        public static DataTable GroupBy(this DataTable dtSource, string[] groupByColumns, string countColumnName = "Count")
+        public static DataTable ExcludeRows(this DataTable dt1, DataTable dt2, Dictionary<string, string> keysMap)
         {
-            if (dtSource == null)
+            if (dt1 == null)
             {
-                throw new ArgumentNullException(nameof(dtSource), "Source table cannot be null");
+                throw new ArgumentNullException(nameof(dt1), "Table1 cannot be null");
+            }
+            if (dt2 == null)
+            {
+                throw new ArgumentNullException(nameof(dt2), "Table2 cannot be null");
             }
 
-            if (groupByColumns.IsNullOrEmpty())
+            if (keysMap == null || keysMap.Count == 0)
             {
-                throw new ArgumentNullException(nameof(groupByColumns), "Columns to groupBy cannot be null");
+                throw new ArgumentNullException(nameof(keysMap), "keys map cannot be empty");
             }
 
-            // prepare new table, with count column
-            DataTable dtNew = new DataTable();
-            foreach (var item in groupByColumns)
+            DataTable dtResult = dt1.Clone();
+
+            // Create a dictionary to store rows from dt2, use HashSet for better performance
+            var dt2RowsKeyHash = dt2.AsEnumerable().Select(row => GetCompositeKey(row, keysMap));
+            HashSet<string> dt2Hash = new HashSet<string>(dt2RowsKeyHash);
+
+            // Get the rows from dt1 that are not present in dt2
+            var rowsToInclude = dt1.AsEnumerable()
+                                   .Where(row1 => !dt2Hash.Contains(GetCompositeKey(row1, keysMap)));
+
+            if (rowsToInclude.Count() > 0)
             {
-                dtNew.Columns.Add(item);
-            }
-            dtNew.Columns.Add(countColumnName, typeof(int));
-
-            // use list string for better performance, use to compare whether exists this group
-            List<string> groupByKeys = new List<string>();
-            
-            // list to store all unique group by key, and DataRows for this key
-            List<GroupByDataRow> groupByRows = new List<GroupByDataRow>();
-
-            dtSource.AsEnumerable()
-                .GroupBy(row => groupByColumns.Select(col => row[col]))
-                .ToList()
-                .ForEach(group =>
-                 {
-                     string keystring = string.Join("-", group.Key);
-                     if (groupByKeys.IsContains(keystring))
-                     {
-                         groupByRows.First(p => p.CombinedKey.IsEquals(keystring)).DataRows.Add(group.First());
-                     }
-                     else
-                     {
-                         groupByRows.Add(new GroupByDataRow
-                         {
-                             CombinedKey = keystring,
-                             Key = group.Key,
-                             DataRows = new List<DataRow>
-                             {
-                                 group.First()
-                             }
-                         });
-                         groupByKeys.Add(keystring);
-                     }
-                 });
-
-            // add DataRows into new table
-            foreach (var item in groupByRows)
-            {
-                DataRow row = dtNew.NewRow();
-
-                for (int i = 0; i < groupByColumns.Length; i++)
-                {
-                    row[i] = item.Key.ElementAt(i);
-                }
-                row[countColumnName] = item.DataRows.Count;
-
-                dtNew.Rows.Add(row);
+                dtResult.Merge(rowsToInclude.CopyToDataTable());                
             }
 
-            return dtNew;
+            return dtResult;
         }
-
-        private class GroupByDataRow
+        private static string GetCompositeKey(DataRow row, Dictionary<string, string> keysMap)
         {
-            public string CombinedKey { get; set; }
-            public IEnumerable<object> Key { get; set; }
-            public List<DataRow> DataRows { get; set; }
+            return string.Join("_", keysMap.Select(kvp => row.Field<object>(kvp.Key)?.ToString().GetHashCode()));
         }
     }
 }
