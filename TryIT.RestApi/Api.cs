@@ -213,6 +213,23 @@ namespace TryIT.RestApi
         }
 
         /// <summary>
+        /// call Patch method
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public async Task<HttpResponseMessage> PatchAsync(string url, HttpContent content)
+        {
+            return await _pipeline.ExecuteAsync(async exec =>
+            {
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
+                request.Content = content;
+
+                return await _httpClient.SendAsync(request);
+            });
+        }
+
+        /// <summary>
         /// call Delete method
         /// </summary>
         /// <param name="url"></param>
