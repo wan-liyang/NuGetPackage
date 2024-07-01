@@ -63,7 +63,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string siteId = new SiteHelper(_httpClient).GetSite(siteName).id;
 
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists";
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?$filter=DisplayName eq '{listName}'";
 
             try
             {
@@ -82,7 +82,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         }
 
         /// <summary>
-        /// get items with Title column available, no customize column
+        /// get items with default columns, no other customize column
         /// </summary>
         /// <param name="siteName"></param>
         /// <param name="listName"></param>
@@ -92,7 +92,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string siteId = new SiteHelper(_httpClient).GetSite(siteName).id;
             string listId = GetList(siteName, listName).id;
 
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items";
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items?expand=fields";
 
             try
             {
@@ -160,6 +160,37 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<GetItemResponse.Item>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// update a item, return the default fields, no customize fields, refer to https://learn.microsoft.com/en-us/graph/api/listitem-update
+        /// </summary>
+        /// <param name="siteName"></param>
+        /// <param name="listName"></param>
+        /// <param name="itemId"></param>
+        /// <param name="jsonBody">json body with necessary columns in list</param>
+        /// <returns></returns>
+        public GetItemResponse.Fields UpdateItem(string siteName, string listName, string itemId, string jsonBody)
+        {
+            string siteId = new SiteHelper(_httpClient).GetSite(siteName).id;
+            string listId = GetList(siteName, listName).id;
+
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/{itemId}/fields";
+
+            try
+            {
+                HttpContent httpContent = new StringContent(jsonBody);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = api.PatchAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                return content.JsonToObject<GetItemResponse.Fields>();
             }
             catch
             {

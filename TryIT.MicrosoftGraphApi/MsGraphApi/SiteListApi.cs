@@ -43,7 +43,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// get items with Title column available, no customize column
+        /// get items with default columns, no other customize column
         /// </summary>
         /// <param name="siteName"></param>
         /// <param name="listName"></param>
@@ -76,6 +76,21 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public GetItemResponse.Item CreateItem(string siteName, string listName, string jsonBody)
         {
             return _helper.CreateItem(siteName, listName, jsonBody);
+        }
+
+
+
+        /// <summary>
+        /// update a item, refer to https://learn.microsoft.com/en-us/graph/api/listitem-update
+        /// </summary>
+        /// <param name="siteName"></param>
+        /// <param name="listName"></param>
+        /// <param name="itemId"></param>
+        /// <param name="jsonBody">json body with necessary columns in list</param>
+        /// <returns></returns>
+        public GetItemResponse.Fields UpdateItem(string siteName, string listName, string itemId, string jsonBody)
+        {
+            return _helper.UpdateItem(siteName, listName, itemId, jsonBody);
         }
     }
 }
