@@ -17,14 +17,15 @@ dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:Pack
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.5
 dotnet pack ./TryIT.Impersonation.Win/TryIT.Impersonation.Win.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.Jwt/TryIT.Jwt.csproj --output nupkgs -p:PackageVersion=1.0.9
-dotnet pack ./TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj --output nupkgs -p:PackageVersion=1.3.2
+dotnet pack ./TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj --output nupkgs -p:PackageVersion=1.3.8
 dotnet pack ./TryIT.ObjectExtension/TryIT.ObjectExtension.csproj --output nupkgs -p:PackageVersion=1.2.5
 dotnet pack ./TryIT.PGP/TryIT.PGP.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj --output nupkgs -p:PackageVersion=1.0.2
-dotnet pack ./TryIT.RestApi/TryIT.RestApi.csproj --output nupkgs -p:PackageVersion=1.0.8
+dotnet pack ./TryIT.RestApi/TryIT.RestApi.csproj --output nupkgs -p:PackageVersion=1.0.9
 dotnet pack ./TryIT.RestApiService/TryIT.RestApiService.csproj --output nupkgs -p:PackageVersion=1.0.3
 dotnet pack ./TryIT.SFTP/TryIT.SFTP.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.SqlAdoService/TryIT.SqlAdoService.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.SqlAdo.MicrosoftSqlClient/TryIT.SqlAdo.MicrosoftSqlClient.csproj --output nupkgs -p:PackageVersion=1.4.8
 dotnet pack ./TryIT.TableauApi/TryIT.TableauApi.csproj --output nupkgs -p:PackageVersion=1.1.9
 dotnet pack ./TryIT.WindowService/TryIT.WindowService.csproj --output nupkgs -p:PackageVersion=1.0.2
+dotnet pack ./TryIT.Zip/TryIT.Zip.csproj --output nupkgs -p:PackageVersion=1.0.2
