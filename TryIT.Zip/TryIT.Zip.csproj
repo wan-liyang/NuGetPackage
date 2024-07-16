@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>TryIT</Authors>
+    <Company>TryIT</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>zip a folder, unzip the file</Description>
+    <PackageId>TryIT.Zip</PackageId>
+    <PackageTags>Zip UnZip</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Release;Debug</Configurations>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" Version="1.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
