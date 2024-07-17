@@ -506,7 +506,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         {
                             var mode = (CopyMode_TruncateInsert)iCopyMode;
                             // truncate table before load
-                            string cmdText = $"TRUNCATE TABLE {mode.TargetTable};";
+                            string cmdText = $"TRUNCATE TABLE {SqlHelper.SqlWarpTable(mode.TargetTable)};";
                             using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -721,31 +721,33 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             string sql_target_col = string.Join(", ", SqlHelper.SqlWarpColumn(copyMode.ColumnMappings.Values));
 
             // build update and insert sql
+            string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
+
             string sql_upsert = $@"
 
-                            IF (OBJECTPROPERTY(OBJECT_ID('{copyMode.TargetTable}'), 'TableHasIdentity') = 1)
+                            IF (OBJECTPROPERTY(OBJECT_ID('{warppedTable}'), 'TableHasIdentity') = 1)
                             BEGIN
-                                SET IDENTITY_INSERT {copyMode.TargetTable} ON;
+                                SET IDENTITY_INSERT {warppedTable} ON;
                             END
 
                             UPDATE T 
                             SET {sql_update}
-                            FROM {copyMode.TargetTable} T
+                            FROM {warppedTable} T
                             INNER JOIN {tempTable} S ON {sql_key};
 
                             DELETE S 
                             FROM {tempTable} S
-                            INNER JOIN {copyMode.TargetTable} T ON {sql_key};
+                            INNER JOIN {warppedTable} T ON {sql_key};
 
-                            INSERT INTO {copyMode.TargetTable} ({sql_target_col})
+                            INSERT INTO {warppedTable} ({sql_target_col})
                             SELECT {sql_source_col}
                             FROM {tempTable} S;
 
                             DROP TABLE {tempTable};
 
-                            IF (OBJECTPROPERTY(OBJECT_ID('{copyMode.TargetTable}'), 'TableHasIdentity') = 1)
+                            IF (OBJECTPROPERTY(OBJECT_ID('{warppedTable}'), 'TableHasIdentity') = 1)
                             BEGIN
-                                SET IDENTITY_INSERT {copyMode.TargetTable} OFF;
+                                SET IDENTITY_INSERT {warppedTable} OFF;
                             END
                             ";
 
@@ -862,7 +864,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             sql_insert_columns = sql_insert_columns.TrimEnd(',');
             sql_insert_params = sql_insert_params.TrimEnd(',');
 
-            string sql = $"IF EXISTS (SELECT 1 FROM {copyMode.TargetTable} WHERE {sql_where}) BEGIN UPDATE {copyMode.TargetTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
+            string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
+            string sql = $"IF EXISTS (SELECT 1 FROM {warppedTable} WHERE {sql_where}) BEGIN UPDATE {warppedTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {warppedTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
 
             using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, transaction))
             {

@@ -198,6 +198,39 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         }
 
         /// <summary>
+        /// warp column to avoid sql reserved name
+        /// <para>dbo.User to [dbo].[User]</para>
+        /// <para>User to [User]</para>
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public static string SqlWarpTable(string tableName)
+        {
+            string[] items = tableName.Split('.');
+
+            if (items.Length == 2)
+            {
+                string schema = items[0];
+                string table = items[1];
+
+
+                schema = schema.StartsWith("[") ? schema : $"[{schema}]";
+                table = table.StartsWith("[") ? table : $"[{table}]";
+
+                return $"{schema}.{table}";
+            }
+            else if (items.Length == 1)
+            {
+                string table = items[0];
+                table = table.StartsWith("[") ? table : $"[{table}]";
+
+                return table;
+            }
+
+            return tableName;
+        }
+
+        /// <summary>
         /// warp column, Column1 to [Column1]
         /// </summary>
         /// <param name="columns"></param>
