@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.CopyMode
 {

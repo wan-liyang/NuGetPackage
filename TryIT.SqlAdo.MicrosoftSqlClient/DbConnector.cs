@@ -402,6 +402,199 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         }
 
         /// <summary>
+        /// copy data from one source to multiple target table (within same target db)
+        /// </summary>
+        /// <param name="copyModes"></param>
+        public void CopyData(List<ICopyMode> copyModes)
+        {
+            List<Tuple<ICopyMode, List<DbTableStructure>>> tobeCopyModes = new List<Tuple<ICopyMode, List<DbTableStructure>>>();
+
+            // validate information
+            foreach (var item in copyModes)
+            {
+                CopyModeBase _copyMode = item as CopyModeBase;
+
+                if (_copyMode == null)
+                {
+                    throw new ArgumentNullException(nameof(_copyMode));
+                }
+                if (string.IsNullOrEmpty(_copyMode.TargetTable))
+                {
+                    throw new ArgumentNullException(nameof(_copyMode.TargetTable));
+                }
+                if (_copyMode.TargetTable.Split('.').Length != 2)
+                {
+                    throw new InvalidOperationException($"TargetTable '{_copyMode.TargetTable}' must contains schema and table, e.g schema.table or [schema].[table]");
+                }
+
+                // get target table structure first, outside transaction, to avoid other script locked table
+                var targetTableStructure = this.GetDbTableStructure(_copyMode.TargetTable);
+
+                /*
+                    reset column map info
+                1. if provided: will use provided map to validate
+                2. if not provided: will reset to source table column, then do validate
+
+                this is to ensure source data are valid against target table, also source data map to correct target column, 
+                e.g. source data column sequence may different with target table column sequence, if not provide column map, then program will use source table column as default map to ensure source column map to correct target column
+
+                    */
+                _copyMode.ColumnMappings = ResetColumnMap(_copyMode.SourceData, _copyMode.ColumnMappings);
+                ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
+
+                tobeCopyModes.Add(new Tuple<ICopyMode, List<DbTableStructure>>(item, targetTableStructure));
+            }
+
+
+            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            {
+                sqlConnection.Open();
+
+                SqlTransaction transaction = null;
+
+                try
+                {
+                    // put unique transaction name to avoid any conflict
+                    string transName = SqlHelper.GetGuid();
+                    transaction = sqlConnection.BeginTransaction(transName);
+
+                    foreach (var doCopyMode in tobeCopyModes)
+                    {
+                        ICopyMode iCopyMode = doCopyMode.Item1;
+                        List<DbTableStructure> targetTableStructure = doCopyMode.Item2;
+
+                        CopyModeBase _copyMode = iCopyMode as CopyModeBase;
+
+                        if (!string.IsNullOrEmpty(_copyMode.PreScript))
+                        {
+                            try
+                            {
+                                using (SqlCommand cmd = new SqlCommand(_copyMode.PreScript, sqlConnection, transaction))
+                                {
+                                    cmd.CommandTimeout = _config.TimeoutSecond;
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception($"PreScript failed, {_copyMode.PreScript}", ex);
+                            }
+                        }
+
+                        if (iCopyMode is CopyMode_InsertUpdate)
+                        {
+                            var mode = iCopyMode as CopyMode_InsertUpdate;
+                            if (mode.SourceData.Rows.Count > 0)
+                            {
+                                mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
+
+                                var alwaysEncryptedColumns = this.GetAlwaysEncryptedColumns(mode.TargetTable);
+
+                                if (!alwaysEncryptedColumns.IsNullOrEmpty())
+                                {
+                                    try
+                                    {
+                                        Upsert_Encrypted(mode, sqlConnection, transaction, alwaysEncryptedColumns);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        throw new Exception($"Upsert_Encrypted failed", ex);
+                                    }
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        Upsert(mode, sqlConnection, transaction, targetTableStructure);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        throw new Exception($"Upsert failed", ex);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (iCopyMode is CopyMode_TruncateInsert)
+                            {
+                                var mode = (CopyMode_TruncateInsert)iCopyMode;
+                                // truncate table before load
+                                string cmdText = $"TRUNCATE TABLE {SqlHelper.SqlWarpTable(mode.TargetTable)};";
+                                using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
+                                {
+                                    cmd.CommandTimeout = _config.TimeoutSecond;
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            else if (iCopyMode is CopyMode_DeleteInsert)
+                            {
+                                var mode = (CopyMode_DeleteInsert)iCopyMode;
+
+                                // PreScript is mandatory for DeleteInsert
+                                if (string.IsNullOrEmpty(mode.PreScript))
+                                {
+                                    throw new ArgumentNullException(nameof(mode.PreScript), $"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
+                                }
+                            }
+
+                            try
+                            {
+                                BulkCopy(_copyMode.SourceData, _copyMode.TargetTable, targetTableStructure, _copyMode.ColumnMappings, sqlConnection, transaction);
+                            }
+                            catch (Exception ex)
+                            {
+                                var map = _copyMode.ColumnMappings.ToArray();
+                                var mapString = string.Join(", ", map.Select(x => $"{x.Key} => {x.Value}"));
+                                throw new Exception($"BulkCopy failed, mapping: [{mapString}]", ex);
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(_copyMode.PostScript))
+                        {
+                            try
+                            {
+                                using (SqlCommand cmd = new SqlCommand(_copyMode.PostScript, sqlConnection, transaction))
+                                {
+                                    cmd.CommandTimeout = _config.TimeoutSecond;
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception($"PostScript failed, {_copyMode.PostScript} ", ex);
+                            }
+                        }
+
+                        // if PostAction is not null, execute the action before commit transaction
+                        if (_copyMode.PostAction != null)
+                        {
+                            try
+                            {
+                                _copyMode.PostAction(sqlConnection, transaction);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception($"PostAction failed, {_copyMode.PostAction}", ex);
+                            }
+                        }
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    if (transaction != null)
+                    {
+                        transaction.Rollback();
+                    }
+
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
         /// copy data from <see cref="CopyModeBase.SourceData"/> into <see cref="CopyModeBase.TargetTable"/>
         /// </summary>
         /// <param name="iCopyMode"></param>
