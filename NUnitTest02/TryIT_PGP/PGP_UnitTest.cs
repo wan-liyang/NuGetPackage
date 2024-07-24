@@ -10,7 +10,7 @@ namespace NUnitTest02.TryIT_PGP
             string inputFile = @"C:\inputFile.docx";
             //string outputFile = @"C:\inputFile.docx.pgp";
 
-            TryIT.PGP.PgpEncryption.EncryptFile(publicKeyFile, inputFile);
+            TryIT.PGP.Lib.EncryptFile(publicKeyFile, inputFile);
 
             Assert.Pass();
         }
@@ -23,7 +23,7 @@ namespace NUnitTest02.TryIT_PGP
             string inputFile = @"C:\inputFile.docx.pgp";
             //string outputFile = @"C:\inputFile.docx.pgp";
 
-            TryIT.PGP.PgpEncryption.DecryptFile(privateKeyFile, passPhrase, inputFile);
+            TryIT.PGP.Lib.DecryptFile(privateKeyFile, passPhrase, inputFile);
 
             Assert.Pass();
         }

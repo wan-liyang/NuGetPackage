@@ -1,23 +1,35 @@
-﻿using System;
+﻿using PgpCore;
 using System.IO;
-using PgpCore;
 
 namespace TryIT.PGP
 {
-    public class PgpEncryption
+    /// <summary>
+    /// library for Pgp encryption and decryption method
+    /// </summary>
+    public class Lib
     {
-        public PgpEncryption()
-        {
-
-        }
-
+        /// <summary>
+        /// validate file exists, throw exception if not exists
+        /// </summary>
+        /// <param name="fileNameAndPath"></param>
+        /// <param name="message"></param>
+        /// <exception cref="FileNotFoundException"></exception>
         private static void ValidateFileExists(string fileNameAndPath, string message)
         {
-            if(!File.Exists(fileNameAndPath))
-                throw new FileNotFoundException(message);
-
             if (!File.Exists(fileNameAndPath))
                 throw new FileNotFoundException(message);
+        }
+
+        /// <summary>
+        /// delete the file if exists
+        /// </summary>
+        /// <param name="fileNameAndPath"></param>
+        private static void DeleteIfExists(string fileNameAndPath)
+        {
+            if (File.Exists(fileNameAndPath))
+            {
+                File.Delete(fileNameAndPath);
+            }
         }
 
         /// <summary>
@@ -47,6 +59,8 @@ namespace TryIT.PGP
             FileInfo input = new FileInfo(inputFileNameAndPath);
             FileInfo output = new FileInfo(outputFileNameAndPath);
 
+            DeleteIfExists(outputFileNameAndPath);
+
             // Encrypt
             PgpCore.PGP pgp = new PgpCore.PGP(encryptionKeys);
             pgp.EncryptFileAsync(input, output).GetAwaiter().GetResult();
@@ -67,7 +81,7 @@ namespace TryIT.PGP
             ValidateFileExists(privateKeyFileNameAndPath, "private key file not found.");
             ValidateFileExists(inputFileNameAndPath, "input file not found.");
 
-            // set output file as .gpg extension and save into same input path
+            // set output file as .pgp extension and save into same input path
             if (string.IsNullOrEmpty(outputFileNameAndPath))
             {
                 outputFileNameAndPath = inputFileNameAndPath.Replace(".pgp", "");
@@ -78,12 +92,14 @@ namespace TryIT.PGP
             EncryptionKeys encryptionKeys = new EncryptionKeys(privateKey, passPhrase);
 
             // Reference input/output files
-            FileInfo inputFile = new FileInfo(inputFileNameAndPath);
-            FileInfo decryptedFile = new FileInfo(outputFileNameAndPath);
+            FileInfo input = new FileInfo(inputFileNameAndPath);
+            FileInfo output = new FileInfo(outputFileNameAndPath);
+
+            DeleteIfExists(outputFileNameAndPath);
 
             // Decrypt
             PgpCore.PGP pgp = new PgpCore.PGP(encryptionKeys);
-            pgp.DecryptFileAsync(inputFile, decryptedFile).GetAwaiter().GetResult();
+            pgp.DecryptFileAsync(input, output).GetAwaiter().GetResult();
 
             return outputFileNameAndPath;
         }
