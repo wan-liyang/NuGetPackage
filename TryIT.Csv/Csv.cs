@@ -140,40 +140,58 @@ namespace TryIT.Csv
                 config.ShouldQuote = args => true;
             }
 
+            bool hasPreviousRow = false;
+
             using (var writer = new StringWriter())
             using (var csv = new CsvWriter(writer, config))
             {
                 if (!string.IsNullOrEmpty(csvConfig.FirstLineValue))
                 {
                     csv.WriteField(csvConfig.FirstLineValue, false);
-                    csv.NextRecord();
+                    hasPreviousRow = true;
                 }
 
                 if (!csvConfig.SkipHeader)
                 {
+                    NextRecord(csv, hasPreviousRow);
                     foreach (DataColumn dc in dataTable.Columns)
                     {
                         csv.WriteField(dc.ColumnName);
-                        csv.NextRecord();
                     }
+                    hasPreviousRow = true;
                 }                
 
                 foreach (DataRow dr in dataTable.Rows)
                 {
+                    NextRecord(csv, hasPreviousRow);
                     foreach (DataColumn dc in dataTable.Columns)
                     {
                         csv.WriteField(dr[dc]);
                     }
-                    csv.NextRecord();
+                    hasPreviousRow = true;
                 }
 
                 if (!string.IsNullOrEmpty(csvConfig.LastLineValue))
                 {
+                    NextRecord(csv, hasPreviousRow);
                     csv.WriteField(csvConfig.LastLineValue);
-                    csv.NextRecord();
                 }
 
+                csv.Flush();
                 File.WriteAllText(csvConfig.OutputFileNameAndPath, writer.ToString());
+            }
+        }
+
+        /// <summary>
+        /// end current row and start a new row, when the <paramref name="hasPreviousRow"/> is true
+        /// </summary>
+        /// <param name="csv"></param>
+        /// <param name="hasPreviousRow"></param>
+        private static void NextRecord(CsvWriter csv, bool hasPreviousRow)
+        {
+            if (hasPreviousRow)
+            {
+                csv.NextRecord();
             }
         }
     }
