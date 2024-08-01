@@ -260,12 +260,14 @@ namespace TryIT.FileExplorer
             return fileName;
         }
 
+        #region Move
         /// <summary>
         /// move <paramref name="sourceFileNameAndPath"/> into <paramref name="destinationFolder"/>, if folder not exists, will create the folder
         /// </summary>
         /// <param name="sourceFileNameAndPath"></param>
         /// <param name="destinationFolder"></param>
-        public static void MoveInto(string sourceFileNameAndPath, string destinationFolder)
+        /// <param name="isOverwrite"></param>
+        public static void MoveInto(string sourceFileNameAndPath, string destinationFolder, bool isOverwrite = false)
         {
             if (!Directory.Exists(destinationFolder))
             {
@@ -274,7 +276,8 @@ namespace TryIT.FileExplorer
 
             string destinationFileName = Path.GetFileName(sourceFileNameAndPath);
             string destinationFileNameAndPath = Path.Combine(destinationFolder, destinationFileName);
-            File.Move(sourceFileNameAndPath, destinationFileNameAndPath);
+
+            _Move(sourceFileNameAndPath, destinationFileNameAndPath, isOverwrite);
         }
 
         /// <summary>
@@ -282,7 +285,8 @@ namespace TryIT.FileExplorer
         /// </summary>
         /// <param name="sourceFileNameAndPath"></param>
         /// <param name="subDirName"></param>
-        public static void MoveIntoSubDir(string sourceFileNameAndPath, string subDirName)
+        /// <param name="isOverwrite"></param>
+        public static void MoveIntoSubDir(string sourceFileNameAndPath, string subDirName, bool isOverwrite = false)
         {
             string sourceDir = Path.GetDirectoryName(sourceFileNameAndPath);
             string sourceFileName = Path.GetFileName(sourceFileNameAndPath);
@@ -294,7 +298,8 @@ namespace TryIT.FileExplorer
             }
 
             string destFileNameAndPath = Path.Combine(destDir, sourceFileName);
-            File.Move(sourceFileNameAndPath, destFileNameAndPath);
+
+            _Move(sourceFileNameAndPath, destFileNameAndPath, isOverwrite);
         }
 
         /// <summary>
@@ -325,7 +330,8 @@ namespace TryIT.FileExplorer
         /// </summary>
         /// <param name="sourceFileNameAndPath"></param>
         /// <param name="destinationFileNameAndPath"></param>
-        public static void Move(string sourceFileNameAndPath, string destinationFileNameAndPath)
+        /// <param name="isOverwrite"></param>
+        public static void Move(string sourceFileNameAndPath, string destinationFileNameAndPath, bool isOverwrite = false)
         {
             string destinationFolder = Path.GetDirectoryName(destinationFileNameAndPath);
             if (!Directory.Exists(destinationFolder))
@@ -333,9 +339,24 @@ namespace TryIT.FileExplorer
                 Directory.CreateDirectory(destinationFolder);
             }
 
-            File.Move(sourceFileNameAndPath, destinationFileNameAndPath);
+            _Move(sourceFileNameAndPath, destinationFileNameAndPath, isOverwrite);
         }
 
+        private static void _Move(string sourceFileNameAndPath, string destinationFileNameAndPath, bool isOverwrite = false)
+        {
+            if (isOverwrite)
+            {
+                if (File.Exists(destinationFileNameAndPath))
+                {
+                    File.Delete(destinationFileNameAndPath);
+                }
+            }
+
+            File.Move(sourceFileNameAndPath, destinationFileNameAndPath);
+        } 
+        #endregion
+
+        #region Copy
         /// <summary>
         /// copy source file as destination file, if destination directory not exists will create it.
         /// </summary>
@@ -413,7 +434,8 @@ namespace TryIT.FileExplorer
                     CopyDirectory(subDir.FullName, newDestinationDir, true, overwrite);
                 }
             }
-        }
+        } 
+        #endregion
 
         /// <summary>
         /// get file from path based on Regex pattern

@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Data;
 using TryIT.ExcelService;
+using System.Diagnostics;
 
 namespace NUnitTest02.TryIT_ObjectExtension
 {
@@ -280,6 +281,164 @@ namespace NUnitTest02.TryIT_ObjectExtension
             table.Rows.Add("Value5", 2, 2.2);
 
             return table;
+        }
+
+        [Test]
+        public void ExcludeRows1()
+        {
+            // Initialize DataTables with dynamic columns
+            DataTable dt1 = new DataTable();
+            dt1.Columns.Add("Column1", typeof(string));
+            dt1.Columns.Add("Column2", typeof(int));
+            dt1.Columns.Add("Column3", typeof(bool));
+
+            DataTable dt2 = new DataTable();
+            dt2.Columns.Add("Column_1", typeof(string));
+            dt2.Columns.Add("Column_2", typeof(int));
+            dt2.Columns.Add("Column_3", typeof(bool));
+
+            // Add some test data
+            dt1.Rows.Add("Value1", 1, true);
+            dt1.Rows.Add("Value2", 2, false);
+            dt1.Rows.Add("Value4", 2, false);
+
+            dt2.Rows.Add("Value1", 1, true);
+            dt2.Rows.Add("Value2", 2, false);
+            dt2.Rows.Add("Value3", 3, true);
+
+            Dictionary<string, string> keysMap = new Dictionary<string, string>
+            {
+                { "Column1", "Column_1"}
+            };
+
+            // Act
+            DataTable resultTable = dt1.ExcludeRows(dt2, keysMap);
+
+            // Assert
+            Assert.That(resultTable.Rows.Count, Is.EqualTo(1));
+
+            //Assert.AreEqual("Value3", resultTable.Rows[0]["Column1"]);
+            //Assert.AreEqual(3, resultTable.Rows[0]["Column2"]);
+            //Assert.AreEqual(true, resultTable.Rows[0]["Column3"]);
+        }
+
+        [Test]
+        public void ExcludeRows2()
+        {
+            // Initialize DataTables with dynamic columns
+            DataTable dt1 = new DataTable();
+            dt1.Columns.Add("Column1", typeof(string));
+            dt1.Columns.Add("Column2", typeof(int));
+            dt1.Columns.Add("Column3", typeof(bool));
+
+            DataTable dt2 = new DataTable();
+            dt2.Columns.Add("Column_1", typeof(string));
+            dt2.Columns.Add("Column_2", typeof(int));
+            dt2.Columns.Add("Column_3", typeof(bool));
+
+            // Add some test data
+            dt1.Rows.Add("Value1", 1, true);
+            dt1.Rows.Add("Value2", 2, false);
+            dt1.Rows.Add("Value4", 2, false);
+
+            dt2.Rows.Add("Value1", 1, true);
+            dt2.Rows.Add("Value2", 3, false);
+            dt2.Rows.Add("Value3", 3, true);
+
+            Dictionary<string, string> keysMap = new Dictionary<string, string>
+            {
+                { "Column1", "Column_1"},
+                { "Column2", "Column_2"}
+            };
+
+            // Act
+            DataTable resultTable = dt1.ExcludeRows(dt2, keysMap);
+
+            // Assert
+            Assert.That(resultTable.Rows.Count, Is.EqualTo(2));
+
+            //Assert.AreEqual("Value3", resultTable.Rows[0]["Column1"]);
+            //Assert.AreEqual(3, resultTable.Rows[0]["Column2"]);
+            //Assert.AreEqual(true, resultTable.Rows[0]["Column3"]);
+        }
+
+        [Test]
+        public void ExcludeRows3()
+        {
+            // Create two DataTables with a million rows each
+            DataTable dt1 = CreateDataTable(100000);
+            DataTable dt2 = CreateDataTable(100000);
+
+            // Exclude rows from dt1 that are present in dt2
+            Dictionary<string, string> keysMap = new Dictionary<string, string>
+            {
+                { "Column1", "Column1"},
+                { "Column2", "Column2"}
+            };
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            DataTable filteredDt = dt1.ExcludeRows(dt2, keysMap);
+            stopwatch.Stop();
+
+            Console.WriteLine($"Filtered DataTable has {filteredDt.Rows.Count} rows.");
+            Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        static DataTable CreateDataTable(int rowCount)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Column1", typeof(int));
+            dt.Columns.Add("Column2", typeof(string));
+            dt.Columns.Add("Column3", typeof(DateTime));
+
+            Random random = new Random();
+            for (int i = 0; i < rowCount; i++)
+            {
+                dt.Rows.Add(i, Guid.NewGuid().ToString(), DateTime.Now.AddDays(random.Next(-365, 365)));
+            }
+
+
+            dt.Rows.Add(100001, null, null);
+            dt.Rows.Add(100002, "aaa", null);
+
+            return dt;
+        }
+
+        [Test]
+        public void ExcludeRows4()
+        {
+            Dictionary<string, string> keysMap = new Dictionary<string, string>
+            {
+                { "Column1", "Column1"},
+                { "Column2", "Column2"}
+            };
+
+            // Create two DataTables with a million rows each
+            DataTable dt1 = CreateDataTable(100000);
+            DataTable dt2 = CreateDataTable(100000);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            // Create a dictionary to store rows from dt2
+            var dt2RowsDictionary = dt2.AsEnumerable()
+                                       .ToDictionary(row => GetCompositeKey(row, keysMap), row => row);
+
+            // Get the rows from dt1 that are not present in dt2
+            var rowsToInclude = dt1.AsEnumerable()
+                                   .Where(row1 => !dt2RowsDictionary.ContainsKey(GetCompositeKey(row1, keysMap)))
+                                   .CopyToDataTable();
+
+            stopwatch.Stop();
+
+            Console.WriteLine($"Filtered DataTable has {rowsToInclude.Rows.Count} rows.");
+            Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
+
+        }
+
+        // Helper method to create a composite key from a row and a dictionary of column mappings
+        static string GetCompositeKey(DataRow row, Dictionary<string, string> keysMap)
+        {
+            return string.Join("_", keysMap.Select(kvp => row.Field<object>(kvp.Key).ToString().GetHashCode()));
         }
     }
 }
