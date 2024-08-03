@@ -11,7 +11,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.CopyMode
     public class CopyMode_InsertUpdate : CopyModeBase
     {
         /// <summary>
-        /// (mandatory) primary key on target table
+        /// (mandatory) primary key column on target table, use to perform update and insert
         /// </summary>
         public List<string> PrimaryKeys { get; set; }
 

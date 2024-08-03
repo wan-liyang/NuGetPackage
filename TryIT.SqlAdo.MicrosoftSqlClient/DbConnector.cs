@@ -875,8 +875,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             int keys_count = copyMode.PrimaryKeys.Count;
             for (int i = 0; i < keys_count; i++)
             {
-                string s_col = copyMode.PrimaryKeys[i];
-                string t_col = copyMode.ColumnMappings.Values.Where(p => p.Equals(s_col, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+                string t_col = copyMode.PrimaryKeys[i];
+                string s_col = copyMode.ColumnMappings.First(p => p.Value.Equals(t_col, StringComparison.CurrentCultureIgnoreCase)).Key;
 
                 if (string.IsNullOrEmpty(t_col))
                 {
@@ -1033,11 +1033,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             for (int i = 0; i < copyMode.PrimaryKeys.Count; i++)
             {
+                string t_col = copyMode.PrimaryKeys[i];
+
                 if (i > 0)
                 {
                     sql_where += " AND ";
                 }
-                sql_where += $"{SqlHelper.SqlWarpColumn(copyMode.PrimaryKeys[i])} = @{SqlHelper.SqlParamName(copyMode.PrimaryKeys[i])}";
+                sql_where += $"{SqlHelper.SqlWarpColumn(t_col)} = @{SqlHelper.SqlParamName(t_col)}";
             }
 
             var tobeUpdateColumns = copyMode.ColumnMappings.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToDictionary(x => x.Key, x => x.Value);

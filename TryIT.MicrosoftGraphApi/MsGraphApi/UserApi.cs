@@ -82,5 +82,15 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         {
             return _helper.DeleteUserByEmail(userEmail);
         }
+
+        /// <summary>
+        /// https://learn.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public byte[] GetPhoth(string email)
+        {
+            return _helper.GetPhoto(email);
+        }
     }
 }

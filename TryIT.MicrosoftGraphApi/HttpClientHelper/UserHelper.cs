@@ -243,5 +243,31 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             return false;            
         }
+
+        public byte[] GetPhoto(string email)
+        {
+            // /users/{id | userPrincipalName}/photo
+            var user = GetUserByMail(email);
+
+            if (user != null && !string.IsNullOrEmpty(user.id))
+            {
+                string url = $"{GraphApiRootUrl}/users/{user.id}/photo/$value";
+                try
+                {
+                    var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                    CheckStatusCode(response);
+
+                    return response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+            else
+            {
+                throw new Exception($"user {email} not found");
+            }
+        }
     }
 }
