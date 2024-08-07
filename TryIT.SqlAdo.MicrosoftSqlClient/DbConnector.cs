@@ -407,6 +407,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="copyModes"></param>
         public void CopyData(List<ICopyMode> copyModes)
         {
+            ConsoleLog("CopyData started with list copy mode");
+
             List<Tuple<ICopyMode, List<DbTableStructure>>> tobeCopyModes = new List<Tuple<ICopyMode, List<DbTableStructure>>>();
 
             // validate information
@@ -602,6 +604,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <exception cref="InvalidOperationException"></exception>
         public void CopyData(ICopyMode iCopyMode)
         {
+            ConsoleLog("CopyData started with single copy mode");
+
             CopyModeBase _copyMode = iCopyMode as CopyModeBase;
 
             if (_copyMode == null)
@@ -1026,6 +1030,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
             }
 
+            ConsoleLog("upsert with always encrypted started");
+
             string sql_where = "";
             string sql_set = "";
             string sql_insert_columns = "";
@@ -1040,6 +1046,12 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     sql_where += " AND ";
                 }
                 sql_where += $"{SqlHelper.SqlWarpColumn(t_col)} = @{SqlHelper.SqlParamName(t_col)}";
+
+                // add primary key column into insert statement
+                string col = SqlHelper.SqlWarpColumn(t_col);
+                string param = SqlHelper.SqlParamName(t_col);
+                sql_insert_columns += $"{col},";
+                sql_insert_params += $"@{param},";
             }
 
             var tobeUpdateColumns = copyMode.ColumnMappings.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToDictionary(x => x.Key, x => x.Value);
@@ -1049,10 +1061,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 string col = SqlHelper.SqlWarpColumn(item.Value);
                 string param = SqlHelper.SqlParamName(item.Value);
 
+                // add update column into update statement
                 sql_set += $"{col} = @{SqlHelper.SqlParamName(item.Value)},";
 
+                // add update column into insert statement
                 sql_insert_columns += $"{col},";
-
                 sql_insert_params += $"@{param},";
             }
             sql_set = sql_set.TrimEnd(',');
@@ -1070,6 +1083,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 //sqlCommand.Transaction = transaction;
 
                 sqlCommand.CommandType = CommandType.Text;
+
+                int row = 0;
 
                 for (int i = 0; i < copyMode.SourceData.Rows.Count; i++)
                 {
@@ -1098,8 +1113,17 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     sqlCommand.ExecuteNonQuery();
 
                     sqlCommand.Parameters.Clear();
+
+                    row++;
+                    if (row % 2000 == 0)
+                    {
+                        ConsoleLog($"{row} exec posted");
+                    }
                 }
+
+                ConsoleLog($"{copyMode.SourceData.Rows.Count} exec posted");
             }
+            ConsoleLog("upsert with always encrypted completed");
         }
 
         /// <summary>
@@ -1140,8 +1164,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
             }
 
+            ConsoleLog("upsert with always encrypted v2 started");
+
             DataTable dt = copyMode.SourceData;
 
+            int row = 0;
             int paramNumber = 0;
             StringBuilder stringBuilder = new StringBuilder();
             List<SqlParameter> sqlParameters = new List<SqlParameter>();
@@ -1195,8 +1222,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 sql_insert_columns = sql_insert_columns.TrimEnd(',');
                 sql_insert_params = sql_insert_params.TrimEnd(',');
 
-                string sql = $"DELETE FROM {copyMode.TargetTable} WHERE {sql_where}; INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params});";
-                //string sql = $"IF EXISTS (SELECT 1 FROM {copyMode.TargetTable} WHERE {sql_where}) BEGIN UPDATE {copyMode.TargetTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
+                //string sql = $"DELETE FROM {copyMode.TargetTable} WHERE {sql_where}; INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params});";
+                string sql = $"IF EXISTS (SELECT 1 FROM {copyMode.TargetTable} WHERE {sql_where}) BEGIN UPDATE {copyMode.TargetTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
 
                 stringBuilder.AppendLine(sql);
 
@@ -1208,7 +1235,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     sqlParameters.Clear();
                     paramNumber = 0;
                 }
+
+                row++;
+                if (row % 2000 == 0)
+                {
+                    ConsoleLog($"{row} exec posted");
+                }
             }
+
+            ConsoleLog($"{copyMode.SourceData.Rows.Count} exec posted");
+            ConsoleLog("upsert with always encrypted v2 completed");
         }
         #endregion
 
@@ -1249,6 +1285,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     sqlBulkCopy.WriteToServer(sourceTable);
                 }
             }
+        }
+
+        private void ConsoleLog(string message)
+        {
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} {message}");
         }
     }
 }

@@ -76,7 +76,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// get always encrypted columns
         /// </summary>
         /// <param name="dbConnector"></param>
-        /// <param name="tableName"></param>
+        /// <param name="tableName">table name with schema, e.g. dbo.table</param>
         /// <returns></returns>
         public static List<AlwaysEncryptedColumn> GetAlwaysEncryptedColumns(this DbConnector dbConnector, string tableName)
         {
