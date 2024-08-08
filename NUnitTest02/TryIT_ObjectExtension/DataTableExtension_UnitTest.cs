@@ -440,5 +440,44 @@ namespace NUnitTest02.TryIT_ObjectExtension
         {
             return string.Join("_", keysMap.Select(kvp => row.Field<object>(kvp.Key).ToString().GetHashCode()));
         }
+
+
+
+        [Test]
+        public void ToList_StringToGuid()
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1", typeof(string));
+
+            dataTable.Rows.Add(Guid.NewGuid().ToString());
+
+            var list = dataTable.ToList<TableToList>();
+
+            Assert.IsTrue(list.Count == 1);
+        }
+        class TableToList
+        {
+            public Guid Col1 { get; set; }
+        }
+
+
+
+        [Test]
+        public void ToList_GuidToString()
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1", typeof(Guid));
+
+            dataTable.Rows.Add(Guid.NewGuid());
+
+            var list = dataTable.ToList<TableToList2>();
+
+            Assert.IsTrue(list.Count == 1);
+        }
+
+        class TableToList2
+        {
+            public string Col1 { get; set; }
+        }
     }
 }

@@ -165,6 +165,18 @@ namespace TryIT.ObjectExtension
                     return Encoding.UTF8.GetBytes(value.ToString());
                 }
 
+                // guid to string, need this special handle
+                if (value is Guid && Type.GetTypeCode(type) == TypeCode.String)
+                {
+                    return value.ToString();
+                }
+
+                // string to guid, need this special handle
+                if (value is String && type.FullName == "System.Guid")
+                {
+                    return Guid.Parse(value.ToString());
+                }
+
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Boolean:
