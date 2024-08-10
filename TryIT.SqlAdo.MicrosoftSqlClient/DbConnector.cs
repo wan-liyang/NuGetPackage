@@ -925,12 +925,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
 
             string sql_upsert = $@"
-
-                            IF (OBJECTPROPERTY(OBJECT_ID('{warppedTable}'), 'TableHasIdentity') = 1)
-                            BEGIN
-                                SET IDENTITY_INSERT {warppedTable} ON;
-                            END
-
                             UPDATE T 
                             SET {sql_update}
                             FROM {warppedTable} T
@@ -945,14 +939,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             FROM {tempTable} S;
 
                             DROP TABLE {tempTable};
-
-                            IF (OBJECTPROPERTY(OBJECT_ID('{warppedTable}'), 'TableHasIdentity') = 1)
-                            BEGIN
-                                SET IDENTITY_INSERT {warppedTable} OFF;
-                            END
                             ";
 
-            using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
+            string sql_warp = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql_upsert);
+
+            using (SqlCommand cmd = new SqlCommand(sql_warp, sqlConnection, transaction))
             {
                 cmd.CommandTimeout = _config.TimeoutSecond;
                 cmd.ExecuteNonQuery();
@@ -1078,6 +1069,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
             string sql = $"IF EXISTS (SELECT 1 FROM {warppedTable} WHERE {sql_where}) BEGIN UPDATE {warppedTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {warppedTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
+
+            sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
 
             using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, transaction))
             {
@@ -1227,12 +1220,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 sql_insert_params = sql_insert_params.TrimEnd(',');
 
                 //string sql = $"DELETE FROM {copyMode.TargetTable} WHERE {sql_where}; INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params});";
-                string sql = $"IF EXISTS (SELECT 1 FROM {copyMode.TargetTable} WHERE {sql_where}) BEGIN UPDATE {copyMode.TargetTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
+                string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
+
+                string sql = $"IF EXISTS (SELECT 1 FROM {warppedTable} WHERE {sql_where}) BEGIN UPDATE {warppedTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {warppedTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
 
                 stringBuilder.AppendLine(sql);
 
                 if (paramNumber > 2000 || i == dt.Rows.Count - 1)
                 {
+                    sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
+
                     PostIntoDb(sqlConnection, transaction, stringBuilder.ToString(), sqlParameters.ToArray());
 
                     stringBuilder.Clear();

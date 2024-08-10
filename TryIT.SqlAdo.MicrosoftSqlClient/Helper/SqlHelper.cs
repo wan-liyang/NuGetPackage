@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.NetworkInformation;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
@@ -228,6 +229,31 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             }
 
             return tableName;
+        }
+
+        /// <summary>
+        /// warp sql command with SET IDENTITY_INSERT ON and OFF, only set IDENTITY_INSERT when table has identity column
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        public static string SqlWarpIdentityInsert(string tableName, string sql)
+        {
+            string warppedTable = SqlWarpTable(tableName);
+
+            return $@"
+                    IF (OBJECTPROPERTY(OBJECT_ID('{warppedTable}'), 'TableHasIdentity') = 1)
+                    BEGIN
+                        SET IDENTITY_INSERT {warppedTable} ON;
+                    END
+
+                    {sql}
+
+                    IF (OBJECTPROPERTY(OBJECT_ID('{warppedTable}'), 'TableHasIdentity') = 1)
+                    BEGIN
+                        SET IDENTITY_INSERT {warppedTable} OFF;
+                    END
+                    ";
         }
 
         /// <summary>
