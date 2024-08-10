@@ -594,6 +594,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw;
                 }
             }
+
+            ConsoleLog("CopyData completed with list copy mode");
         }
 
         /// <summary>
@@ -774,6 +776,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw;
                 }
             }
+
+            ConsoleLog("CopyData completed with single copy mode");
         }
 
         /// <summary>
@@ -1289,7 +1293,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
         private void ConsoleLog(string message)
         {
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} {message}");
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")} {message}");
         }
     }
 }
