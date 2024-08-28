@@ -204,6 +204,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
+
+        private List<GetDriveItemResponse.Item> ChildrenItems;
         public List<GetDriveItemResponse.Item> GetChildren(string folderAbsoluteUrl)
         {
             var folder = GetFolder(folderAbsoluteUrl);
@@ -216,7 +218,40 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetDriveItemResponse.Response>().value;
+                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+
+                ChildrenItems = new List<GetDriveItemResponse.Item>();
+                ChildrenItems.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    GetChildrenNextLink(responseObj.odatanextLink);
+                }
+
+                return ChildrenItems;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public void GetChildrenNextLink(string nextLink)
+        {
+            try
+            {
+                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+
+                ChildrenItems.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    GetChildrenNextLink(responseObj.odatanextLink);
+                }
             }
             catch
             {

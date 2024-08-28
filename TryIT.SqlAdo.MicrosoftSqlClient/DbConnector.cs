@@ -941,9 +941,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             DROP TABLE {tempTable};
                             ";
 
-            string sql_warp = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql_upsert);
+            // if target table has identity column, then check the column map has that column or not, if has, then warp with IdentityInsert, otherwise not need warp
+            string identityColumn = this.GetIdentityColumnName(copyMode.TargetTable);
+            if (!string.IsNullOrEmpty(identityColumn))
+            {
+                var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
-            using (SqlCommand cmd = new SqlCommand(sql_warp, sqlConnection, transaction))
+                if (!map.IsNullOrEmpty())
+                {
+                    sql_upsert = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql_upsert);
+                }                
+            }
+
+            using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
             {
                 cmd.CommandTimeout = _config.TimeoutSecond;
                 cmd.ExecuteNonQuery();
@@ -981,6 +991,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     case "date":
                     case "bit":
                     case "int":
+                    case "uniqueidentifier":
                         dataType = structure.DATA_TYPE;
                         break;
                     default:
@@ -1070,7 +1081,17 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
             string sql = $"IF EXISTS (SELECT 1 FROM {warppedTable} WHERE {sql_where}) BEGIN UPDATE {warppedTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {warppedTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
 
-            sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
+            // if target table has identity column, then check the column map has that column or not, if has, then warp with IdentityInsert, otherwise not need warp
+            string identityColumn = this.GetIdentityColumnName(copyMode.TargetTable);
+            if (!string.IsNullOrEmpty(identityColumn))
+            {
+                var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+                if (!map.IsNullOrEmpty())
+                {
+                    sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
+                }
+            }
 
             using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, transaction))
             {
@@ -1165,6 +1186,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             DataTable dt = copyMode.SourceData;
 
+            // if target table has identity column, then check the column map has that column or not, if has, then warp with IdentityInsert, otherwise not need warp
+            bool identityHasMap = false;
+            string identityColumn = this.GetIdentityColumnName(copyMode.TargetTable);
+            if (!string.IsNullOrEmpty(identityColumn))
+            {
+                var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+                if (!map.IsNullOrEmpty())
+                {
+                    identityHasMap = true;
+                }
+            }
+
             int row = 0;
             int paramNumber = 0;
             StringBuilder stringBuilder = new StringBuilder();
@@ -1228,7 +1262,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                 if (paramNumber > 2000 || i == dt.Rows.Count - 1)
                 {
-                    sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
+                    if (identityHasMap)
+                    {
+                        sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
+                    }
 
                     PostIntoDb(sqlConnection, transaction, stringBuilder.ToString(), sqlParameters.ToArray());
 

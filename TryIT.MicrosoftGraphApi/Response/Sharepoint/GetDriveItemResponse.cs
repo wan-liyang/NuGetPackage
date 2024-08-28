@@ -11,6 +11,9 @@ namespace TryIT.MicrosoftGraphApi.Response.Sharepoint
             [JsonProperty("@odata.context")]
             public string OdataContext { get; set; }
 
+            [JsonProperty("@odata.nextLink")]
+            public string odatanextLink { get; set; }
+
             public List<Item> value { get; set; }
         }
 

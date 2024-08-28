@@ -10,6 +10,18 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 {
     public static class DbInfoHelper
     {
+        public static string GetIdentityColumnName(this DbConnector dbConnector, string tableName)
+        {
+            string sql = $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName AND COLUMNPROPERTY(OBJECT_ID(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1";
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@tableName", tableName)
+            };
+
+            return dbConnector.ExecuteScalar<string>(sql, CommandType.Text, parameters);
+        }
+
         public static List<DbTableStructure> GetDbTableStructure(this DbConnector dbConnector, string tableName)
         {
             string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
