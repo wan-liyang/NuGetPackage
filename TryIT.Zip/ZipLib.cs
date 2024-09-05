@@ -99,33 +99,72 @@ namespace TryIT.Zip
         /// <param name="password"></param>
         public static void UnZip(string sourceZipFile, string targetDir, string password)
         {
-            using (ZipInputStream zipStream = new ZipInputStream(File.OpenRead(sourceZipFile)))
+            ExtractZipContent(sourceZipFile, password, targetDir);
+        }
+
+
+        /// <summary>
+        /// Extracts the content from a .zip file inside an specific folder.
+        /// https://ourcodeworld.com/articles/read/629/how-to-create-and-extract-zip-files-compress-and-decompress-zip-with-sharpziplib-with-csharp-in-winforms
+        /// </summary>
+        /// <param name="FileZipPath"></param>
+        /// <param name="password"></param>
+        /// <param name="OutputFolder"></param>
+        private static void ExtractZipContent(string FileZipPath, string password, string OutputFolder)
+        {
+            ZipFile file = null;
+            try
             {
-                zipStream.Password = password; // Set the password if the ZIP file is encrypted
+                FileStream fs = File.OpenRead(FileZipPath);
+                file = new ZipFile(fs);
 
-                ZipEntry entry;
-                while ((entry = zipStream.GetNextEntry()) != null)
+                if (!String.IsNullOrEmpty(password))
                 {
-                    string entryFileName = Path.GetFileName(entry.Name);
-                    string outputPath = Path.Combine(targetDir, entryFileName);
+                    // AES encrypted entries are handled automatically
+                    file.Password = password;
+                }
 
-                    if (entry.IsDirectory)
+                foreach (ZipEntry zipEntry in file)
+                {
+                    if (!zipEntry.IsFile)
                     {
-                        Directory.CreateDirectory(outputPath);
+                        // Ignore directories
+                        continue;
                     }
-                    else
+
+                    String entryFileName = zipEntry.Name;
+                    // to remove the folder from the entry:- entryFileName = Path.GetFileName(entryFileName);
+                    // Optionally match entrynames against a selection list here to skip as desired.
+                    // The unpacked length is available in the zipEntry.Size property.
+
+                    // 4K is optimum
+                    byte[] buffer = new byte[4096];
+                    Stream zipStream = file.GetInputStream(zipEntry);
+
+                    // Manipulate the output filename here as desired.
+                    String fullZipToPath = Path.Combine(OutputFolder, entryFileName);
+                    string directoryName = Path.GetDirectoryName(fullZipToPath);
+
+                    if (directoryName.Length > 0)
                     {
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        using (FileStream fileStream = File.Create(outputPath))
-                        {
-                            int sourceBytes;
-                            byte[] buffer = new byte[4096];
-                            while ((sourceBytes = zipStream.Read(buffer, 0, buffer.Length)) > 0)
-                            {
-                                fileStream.Write(buffer, 0, sourceBytes);
-                            }
-                        }
+                        Directory.CreateDirectory(directoryName);
                     }
+
+                    // Unzip file in buffered chunks. This is just as fast as unpacking to a buffer the full size
+                    // of the file, but does not waste memory.
+                    // The "using" will close the stream even if an exception occurs.
+                    using (FileStream streamWriter = File.Create(fullZipToPath))
+                    {
+                        StreamUtils.Copy(zipStream, streamWriter, buffer);
+                    }
+                }
+            }
+            finally
+            {
+                if (file != null)
+                {
+                    file.IsStreamOwner = true; // Makes close also shut the underlying stream
+                    file.Close(); // Ensure we release resources
                 }
             }
         }

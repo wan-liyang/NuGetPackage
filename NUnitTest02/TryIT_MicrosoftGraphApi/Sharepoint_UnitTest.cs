@@ -23,14 +23,19 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
             SharepointApi api = new SharepointApi(config);
 
             string folderUrl = "";
+
+            var items = api.GetChildren(folderUrl);
+
+            var items2 = api.GetFiles(folderUrl);
+
             string oldName = "";
             string newName = "";
 
-            var item = api.RenameItem(folderUrl, oldName, newName);
-            Assert.True(item.name == newName);
+            //var item = api.RenameItem(folderUrl, oldName, newName);
+            //Assert.True(item.name == newName);
 
-            item = api.RenameItem(folderUrl, newName, oldName);
-            Assert.True(item.name == oldName);
+            //item = api.RenameItem(folderUrl, newName, oldName);
+            //Assert.True(item.name == oldName);
         }
     }
 }

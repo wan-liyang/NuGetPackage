@@ -55,5 +55,6 @@
     <ProjectReference Include="..\TryIT.WindowService\TryIT.WindowService.csproj" />
     <ProjectReference Include="..\TryIT.PGP\TryIT.PGP.csproj" />
     <ProjectReference Include="..\TryIT.Azure.JWT\TryIT.Azure.JWT.csproj" />
+    <ProjectReference Include="..\TryIT.Zip\TryIT.Zip.csproj" />
   </ItemGroup>
 </Project>
