@@ -18,6 +18,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// init Teams api with configuration
         /// </summary>
         /// <param name="config"></param>
+        public TeamApi(MsGraphApiConfig config)
+        {
+            MsGraphHelper graphHelper = new MsGraphHelper(config);
+            _helper = new TeamHelper(graphHelper.GetHttpClient());
+        }
+
+        /// <summary>
+        /// init Teams api with configuration
+        /// </summary>
+        /// <param name="config"></param>
         /// <param name="teamNamePolicy">prefix-{teamName}-suffix</param>
         public TeamApi(MsGraphApiConfig config, string teamNamePolicy)
         {
