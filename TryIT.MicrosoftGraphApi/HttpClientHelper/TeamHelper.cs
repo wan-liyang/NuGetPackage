@@ -23,6 +23,19 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// init team api
         /// </summary>
         /// <param name="httpClient"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public TeamHelper(HttpClient httpClient)
+        {
+            if (null == httpClient)
+                throw new ArgumentNullException(nameof(httpClient));
+
+            _httpClient = httpClient;
+        }
+
+        /// <summary>
+        /// init team api
+        /// </summary>
+        /// <param name="httpClient"></param>
         /// <param name="teamNamePolicy">prefix-{teamName}-suffix</param>
         /// <exception cref="ArgumentNullException"></exception>
         public TeamHelper(HttpClient httpClient, string teamNamePolicy)
