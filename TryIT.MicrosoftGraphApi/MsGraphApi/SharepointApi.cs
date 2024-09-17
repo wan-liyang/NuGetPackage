@@ -27,6 +27,27 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
+        /// get folder information with folder url
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <returns></returns>
+        public GetDriveItemResponse.Item GetFolder(string folderUrl)
+        {
+            return _helper.GetFolder(folderUrl);
+        }
+
+        /// <summary>
+        /// get item by item path, https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="driveId">get from <see cref="GetFolder(string)"/></param>
+        /// <param name="itemPath">e.g. /folder/folder or /folder/folder/file.txt</param>
+        /// <returns></returns>
+        public GetDriveItemResponse.Item GetItemByPath(string driveId, string itemPath)
+        {
+            return _helper.GetItemByPath(driveId, itemPath);
+        }
+
+        /// <summary>
         /// upload file into Sharepoint by folder absolute url
         /// </summary>
         /// <param name="folderUrl"></param>
@@ -288,6 +309,40 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 }
                 _UploadFile(subDir.FullName, subFolderUrl, allowPartialSuccess);
             }
+        }
+        #endregion
+
+        #region Permissions
+
+        /// <summary>
+        /// list permission of item
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <returns></returns>
+        public List<ListPermissionsResponse.Value> ListPermissions(string folderUrl)
+        {
+            return _helper.ListPermissions(folderUrl);
+        }
+
+        /// <summary>
+        /// add permission
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="addPermissionModel"></param>
+        /// <returns></returns>
+        public List<AddPermissionResponse.Value> AddPermissions(string folderUrl, AddPermissionModel addPermissionModel)
+        {
+            return _helper.AddPermissions(folderUrl, addPermissionModel);
+        }
+        /// <summary>
+        /// delete permission
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string)"/></param>
+        /// <returns></returns>
+        public bool DeletePermission(string folderUrl, string permissionId)
+        {
+            return _helper.DeletePermission(folderUrl, permissionId);
         }
         #endregion
     }

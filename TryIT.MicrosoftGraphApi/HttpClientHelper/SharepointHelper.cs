@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model.Sharepoint;
 using TryIT.MicrosoftGraphApi.Request.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
 
@@ -31,6 +32,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             _httpClient = httpClient;
         }
 
+        /// <summary>
+        /// get folder information with folder url
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public GetDriveItemResponse.Item GetFolder(string folderUrl)
         {
             string encodedUrl = Base64EncodeUrl(folderUrl);
@@ -64,6 +71,31 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
 
             return item;
+        }
+
+        /// <summary>
+        /// get item by item path, https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="driveId">get from <see cref="GetFolder(string)"/></param>
+        /// <param name="itemPath">e.g. /folder/folder or /folder/folder/file.txt</param>
+        /// <returns></returns>
+        public GetDriveItemResponse.Item GetItemByPath(string driveId, string itemPath)
+        {
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/root:/{itemPath}";
+
+            try
+            {
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+                return responseObj.value.FirstOrDefault();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public GetDriveItemResponse.Item UploadFile(string folderAbsoluteUrl, string fileName, byte[] fileContent)
@@ -476,5 +508,101 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return itemName.Replace("#", "_").Replace("%", "_")
                 .Replace("\"", "_").Replace("*", "_").Replace(":", "_").Replace("<", "_").Replace(">", "_").Replace("?", "_").Replace("/", "_").Replace("\\", "_").Replace("|", "_");
         }
+
+
+        #region Permissions
+        /// <summary>
+        /// list permission of item
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <returns></returns>
+        public List<ListPermissionsResponse.Value> ListPermissions(string folderUrl)
+        {
+            var folder = GetFolder(folderUrl);
+            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/permissions";
+
+            try
+            {
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var item = content.JsonToObject<ListPermissionsResponse.Response>();
+
+                return item.value;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// add permission
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="addPermissionModel"></param>
+        /// <returns></returns>
+        public List<AddPermissionResponse.Value> AddPermissions(string folderUrl, AddPermissionModel addPermissionModel)
+        {
+            var folder = GetFolder(folderUrl);
+            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/invite";
+
+            try
+            {
+                AddPermissionRequest.Body requestBody = new AddPermissionRequest.Body
+                {
+                    recipients = new List<AddPermissionRequest.Recipient>
+                    {
+                        new AddPermissionRequest.Recipient {email = addPermissionModel.email}
+                    },
+                    roles = new List<string> { addPermissionModel.role.ToString() },
+                    sendInvitation = addPermissionModel.sendInvitation
+                };
+                string jsonContent = requestBody.ObjectToJson();
+                HttpContent httpContent = new StringContent(jsonContent);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var item = content.JsonToObject<AddPermissionResponse.Response>();
+
+                return item.value;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// delete permission
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string)"/></param>
+        /// <returns></returns>
+        public bool DeletePermission(string folderUrl, string permissionId)
+        {
+            var folder = GetFolder(folderUrl);
+            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/permissions/{permissionId}";
+
+            try
+            {
+                var response = api.DeleteAsync(url).GetAwaiter().GetResult();
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return true;
+                }
+                CheckStatusCode(response, api.RetryResults);
+                return false;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #endregion
     }
 }
