@@ -89,8 +89,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
-                return responseObj.value.FirstOrDefault();
+                var responseObj = content.JsonToObject<GetDriveItemResponse.Item>();
+                return responseObj;
             }
             catch
             {
