@@ -557,7 +557,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                         new AddPermissionRequest.Recipient {email = addPermissionModel.email}
                     },
                     roles = new List<string> { addPermissionModel.role.ToString() },
-                    sendInvitation = addPermissionModel.sendInvitation
+                    sendInvitation = addPermissionModel.sendInvitation,
+                    requireSignIn = true
                 };
                 string jsonContent = requestBody.ObjectToJson();
                 HttpContent httpContent = new StringContent(jsonContent);

@@ -15,7 +15,7 @@ namespace TryIT.MicrosoftGraphApi.Request.Sharepoint
         {
             public List<Recipient> recipients { get; set; }
             //public string message { get; set; }
-            //public bool requireSignIn { get; set; }
+            public bool requireSignIn { get; set; }
             public bool sendInvitation { get; set; }
             public List<string> roles { get; set; }
             //public string password { get; set; }
