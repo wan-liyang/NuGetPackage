@@ -100,13 +100,21 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         {
             List<GetDriveItemResponse.Item> listNewFolders = new List<GetDriveItemResponse.Item>();
             var parentFolder = _helper.GetFolder(parentFolderUrl);
+            string driveId = parentFolder.parentReference.driveId;
 
             string[] folders = folderNameOrPath.Split('\\');
 
             for (int i = 0; i < folders.Length; i++)
             {
                 string folderName = folders[i];
-                parentFolder = CreateSubFolder(parentFolder.webUrl, folderName);
+
+                // check if subfolder exists, if exist then skip
+                var children = GetChildren(parentFolder.webUrl);
+                parentFolder = children.FirstOrDefault(p => p.name.IsEquals(folderName));
+                if (parentFolder == null)
+                {
+                    parentFolder = CreateSubFolder(parentFolder.webUrl, folderName);
+                }
                 listNewFolders.Add(parentFolder);
             }
 
