@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TryIT.MicrosoftGraphApi.Helper
 {
@@ -104,6 +106,27 @@ namespace TryIT.MicrosoftGraphApi.Helper
             {
                 return jToken.ToString().JsonToObject<T>();
             }
+        }
+
+        /// <summary>
+        /// convert path a\b\c\d to list of individual path
+        /// 
+        /// a,
+        /// a\b,
+        /// a\b\c,
+        /// a\b\c\d,
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static List<string> ConvertPathToList(this string path)
+        {
+            // Split the path into individual components
+            string[] components = path.TrimEnd('\\').Split('\\');
+
+            // Use LINQ to create a list of progressively longer paths
+            return components
+                .Select((_, index) => string.Join("\\", components.Take(index + 1)))
+                .ToList();
         }
     }
 }

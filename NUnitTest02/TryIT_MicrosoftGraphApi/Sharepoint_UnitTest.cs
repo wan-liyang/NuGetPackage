@@ -12,14 +12,20 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 {
     internal class Sharepoint_UnitTest
     {
-        [Test]
-        public void Rename_Test()
+        MsGraphApiConfig config;
+
+        [SetUp]
+        public void Setup()
         {
-            MsGraphApiConfig config = new MsGraphApiConfig
+            config = new MsGraphApiConfig
             {
                 Token = "",
             };
+        }
 
+        [Test]
+        public void Rename_Test()
+        {
             SharepointApi api = new SharepointApi(config);
 
             string folderUrl = "";
@@ -36,6 +42,17 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             //item = api.RenameItem(folderUrl, newName, oldName);
             //Assert.True(item.name == oldName);
+        }
+
+        [Test]
+        public void CreateFolder()
+        {
+            SharepointApi api = new SharepointApi(config);
+            
+            string parentFolderUrl = "";
+            string folderPath = @"a\b\c\d";
+
+            var response = api.CreateFolder(parentFolderUrl, folderPath, false);
         }
     }
 }

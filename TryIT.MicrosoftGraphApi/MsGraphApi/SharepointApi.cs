@@ -95,35 +95,45 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="parentFolderUrl"></param>
         /// <param name="folderNameOrPath"></param>
+        /// <param name="stopInherit">indicate whether stop the newly created folder to stop inherit permission from it's parent folder, if yes, program will delete existing permission (by do this delete permission the folder will become stop inherit)</param>
         /// <returns>created subfolder list</returns>
-        public List<GetDriveItemResponse.Item> CreateFolder(string parentFolderUrl, string folderNameOrPath)
+        public List<GetDriveItemResponse.Item> CreateFolder(string parentFolderUrl, string folderNameOrPath, bool stopInherit = false)
         {
             List<GetDriveItemResponse.Item> listNewFolders = new List<GetDriveItemResponse.Item>();
-            var parentFolder = _helper.GetFolder(parentFolderUrl);
-            string driveId = parentFolder.parentReference.driveId;
 
-            string[] folders = folderNameOrPath.Split('\\');
+            var pathList = folderNameOrPath.ConvertPathToList();
 
-            for (int i = 0; i < folders.Length; i++)
+            var rootItem = _helper.GetFolder(parentFolderUrl);
+            string driveId = rootItem.parentReference.driveId;
+            parentFolderUrl = rootItem.webUrl;
+
+            for (int i = 0; i < pathList.Count; i++)
             {
-                string folderName = folders[i];
+                string subFolderPath = pathList[i];
+                string subFolderName = pathList[i].Split('\\').Last();
+                var subFolder = _helper.GetItemByPath(driveId, subFolderPath);
 
-                // check if subfolder exists, if exist then skip
-                var children = GetChildren(parentFolder.webUrl);
-                parentFolder = children.FirstOrDefault(p => p.name.IsEquals(folderName));
-                if (parentFolder == null)
+                if (subFolder == null)
                 {
-                    parentFolder = CreateSubFolder(parentFolder.webUrl, folderName);
+                    subFolder = _helper.CreateFolder(parentFolderUrl, subFolderName);
+                    listNewFolders.Add(subFolder);
+
+                    if (stopInherit)
+                    {
+                        // for new created folder, do remove permission, so that it will stop inherit permission
+                        var permissions = _helper.ListPermissions(subFolder.webUrl);
+                        if (permissions != null && permissions.Count > 0)
+                        {
+                            foreach (var item in permissions)
+                            {
+                                _helper.DeletePermission(subFolder.webUrl, item.id);
+                            }
+                        }
+                    }
                 }
-                listNewFolders.Add(parentFolder);
+                parentFolderUrl = subFolder.webUrl;
             }
-
             return listNewFolders;
-        }
-
-        private GetDriveItemResponse.Item CreateSubFolder(string parentFolderUrl, string subFolderName)
-        {
-            return _helper.CreateFolder(parentFolderUrl, subFolderName);
         }
 
         /// <summary>
