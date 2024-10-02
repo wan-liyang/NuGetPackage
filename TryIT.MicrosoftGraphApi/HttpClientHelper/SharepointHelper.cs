@@ -74,7 +74,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         }
 
         /// <summary>
-        /// get item by item path, https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0&tabs=http
+        /// get item by item path, return null if not found https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0&tabs=http
         /// </summary>
         /// <param name="driveId">get from <see cref="GetFolder(string)"/></param>
         /// <param name="itemPath">e.g. /folder/folder or /folder/folder/file.txt</param>
@@ -86,6 +86,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             try
             {
                 var response = api.GetAsync(url).GetAwaiter().GetResult();
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+
                 CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
@@ -467,6 +473,43 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             try
             {
                 string cleanName = CleanItemName(itemNewName);
+                RenameItemRequest.Body requestBody = new RenameItemRequest.Body
+                {
+                    Name = cleanName
+                };
+                string jsonContent = requestBody.ObjectToJson();
+                HttpContent httpContent = new StringContent(jsonContent);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var item = content.JsonToObject<GetDriveItemResponse.Item>();
+
+                return item;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// rename sharepoint item
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="newName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public GetDriveItemResponse.Item RenameItem(string driveId, string itemId, string newName)
+        {
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}";
+
+            try
+            {
+                string cleanName = CleanItemName(newName);
                 RenameItemRequest.Body requestBody = new RenameItemRequest.Body
                 {
                     Name = cleanName

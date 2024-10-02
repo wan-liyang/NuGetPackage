@@ -37,7 +37,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// get item by item path, https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0&tabs=http
+        /// get item by item path, return null if not found https://learn.microsoft.com/en-us/graph/api/driveitem-get?view=graph-rest-1.0&tabs=http
         /// </summary>
         /// <param name="driveId">get from <see cref="GetFolder(string)"/></param>
         /// <param name="itemPath">e.g. /folder/folder or /folder/folder/file.txt</param>
@@ -153,15 +153,15 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// rename sharepoint item under <paramref name="folderUrl"/>
+        /// rename sharepoint item
         /// </summary>
-        /// <param name="folderUrl"></param>
-        /// <param name="itemOldName"></param>
-        /// <param name="itemNewName"></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="newName"></param>
         /// <returns></returns>
-        public GetDriveItemResponse.Item RenameItem(string folderUrl, string itemOldName, string itemNewName)
+        public GetDriveItemResponse.Item RenameItem(string driveId, string itemId, string newName)
         {
-            return _helper.Rename(folderUrl, itemOldName, itemNewName);
+            return _helper.RenameItem(driveId, itemId, newName);
         }
 
         List<string> _listFiles;
