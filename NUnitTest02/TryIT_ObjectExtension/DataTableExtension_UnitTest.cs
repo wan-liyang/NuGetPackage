@@ -206,6 +206,34 @@ namespace NUnitTest02.TryIT_ObjectExtension
         }
 
         [Test]
+        public void DataTable_ToHtmlString_IgnoreHeader_Test()
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1");
+            dataTable.Columns.Add("Col2");
+            dataTable.Columns.Add("Col3");
+            dataTable.Columns.Add("Col4");
+
+            DataRow row = dataTable.NewRow();
+            row["Col1"] = "abc";
+            row["Col2"] = 123;
+            row["Col3"] = "def";
+            row["Col4"] = 456;
+            dataTable.Rows.Add(row);
+
+            DataTableExtension.ToHtmlString_TableStyle style = new DataTableExtension.ToHtmlString_TableStyle
+            {
+                Table = "border-collapse: collapse;border: 1px solid;",
+                Th = "border: 1px solid;",
+                Td = "border: 1px solid;"
+            };
+
+            string html = dataTable.ToHtmlString(style, ignoreHeader: true);
+
+            Assert.IsTrue(true);
+        }
+
+        [Test]
         public void ConvertColumnType_Test()
         {
             DataTable dataTable = new DataTable();

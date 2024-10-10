@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>ObjectExtension</name>
+        <name>TryIT.ObjectExtension</name>
     </assembly>
     <members>
-        <member name="T:ObjectExtension.ArrayExtension">
+        <member name="T:TryIT.ObjectExtension.ArrayExtension">
             <summary>
             extension method for <see cref="T:System.Array"/>
             </summary>
         </member>
-        <member name="M:ObjectExtension.ArrayExtension.IndexOf``1(``0[],``0)">
+        <member name="M:TryIT.ObjectExtension.ArrayExtension.IndexOf``1(``0[],``0)">
             <summary>
             The zero-based index of the first occurrence of value in the entire array, if found; otherwise, -1.
             </summary>
@@ -18,19 +18,30 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="T:ObjectExtension.DataTableExtension">
+        <member name="T:TryIT.ObjectExtension.AspNetExtension">
+            <summary>
+            the common extension method for AspNet
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.AspNetExtension.GetCurrentNamespace">
+            <summary>
+            get caller Assembly namespace
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.DataTableExtension">
             <summary>
             extension method for <see cref="T:System.Data.DataTable"/>
             </summary>
         </member>
-        <member name="M:ObjectExtension.DataTableExtension.IsNullOrEmpty(System.Data.DataTable)">
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.IsNullOrEmpty(System.Data.DataTable)">
             <summary>
             Indicates whether the specified DataTable is null or has not row.
             </summary>
             <param name="dt"></param>
             <returns>true: table is null or has not row, false: table is not null and has row</returns>
         </member>
-        <member name="M:ObjectExtension.DataTableExtension.ToList(System.Data.DataTable,System.String,System.Boolean)">
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToList(System.Data.DataTable,System.String,System.Boolean)">
             <summary>
             convert specified column to string list, return empty list if dtSource or columnName invalid.
             </summary>
@@ -39,7 +50,15 @@
             <param name="ignoreBlank">whether ignore blank or null</param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.DataTableExtension.ToList``1(System.Data.DataTable,System.Collections.Generic.Dictionary{System.String,System.String})">
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToList``1(System.Data.DataTable)">
+            <summary>
+            convert datatable to object list, only load datatable columns matched with object property
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="dtSource"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToList``1(System.Data.DataTable,System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>
             convert <paramref name="dtSource"/> to list of <typeparamref name="T"/>, based on <paramref name="keyValues"/> mapping,
             <para>Keys: is Source Column</para>
@@ -50,27 +69,27 @@
             <param name="keyValues"></param>
             <returns></returns>
         </member>
-        <member name="T:ObjectExtension.DataTableExtension.ToHtmlString_TableStyle">
+        <member name="T:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle">
             <summary>
             style value for convert DataTable to HtmlString
             </summary>
         </member>
-        <member name="P:ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Table">
+        <member name="P:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Table">
             <summary>
             Table format
             </summary>
         </member>
-        <member name="P:ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Th">
+        <member name="P:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Th">
             <summary>
             Th format
             </summary>
         </member>
-        <member name="P:ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Td">
+        <member name="P:TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle.Td">
             <summary>
             Td format
             </summary>
         </member>
-        <member name="T:ObjectExtension.DataTableExtension.Delegate_TdFormat">
+        <member name="T:TryIT.ObjectExtension.DataTableExtension.Delegate_TdFormat">
             <summary>
             delegate function for customize cell format
             </summary>
@@ -79,7 +98,7 @@
             <param name="col"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.DataTableExtension.ToHtmlString(System.Data.DataTable,ObjectExtension.DataTableExtension.ToHtmlString_TableStyle,ObjectExtension.DataTableExtension.Delegate_TdFormat,System.Collections.Generic.IEnumerable{System.String})">
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToHtmlString(System.Data.DataTable,TryIT.ObjectExtension.DataTableExtension.ToHtmlString_TableStyle,TryIT.ObjectExtension.DataTableExtension.Delegate_TdFormat,System.Collections.Generic.IEnumerable{System.String},System.Boolean)">
             <summary>
             convert DataTable to HtmlString
             <para>\r\n &amp; \n will be replace to <br/> </para>
@@ -91,9 +110,140 @@
             <para>string Func(DataTable dataTable, int row, int col)</para>
             </param>
             <param name="columns">columns to include in html, default null to include all columns</param>
+            <param name="ignoreHeader">indicate to ignore table header when generate html string</param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.DictionaryExtension.IsContainsKey(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ConvertColumnType(System.Data.DataTable,System.String,System.Type)">
+            <summary>
+            convert existing column <paramref name="columnName"/> to new type <paramref name="newType"/>, if existing data type equals to <paramref name="newType"/>, no action wil perform
+            <para>if convert to System.Data.SqlTypes.SqlBinary, the value will proceed as String value then conver to byte[]</para>
+            </summary>
+            <param name="dataTable"></param>
+            <param name="columnName"></param>
+            <param name="newType"></param>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.Copy(System.Data.DataTable,System.String[])">
+            <summary>
+            copy <paramref name="dtSource"/> as new DataTable with selected columns from <paramref name="columns"/>
+            </summary>
+            <param name="dtSource"></param>
+            <param name="columns"></param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="columns"/> cannot be null</exception>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToString(System.Data.DataTable,System.String)">
+            <summary>
+            get <paramref name="dtSource"/> as csv format with <paramref name="separator"/>
+            </summary>
+            <param name="dtSource"></param>
+            <param name="separator"></param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="dtSource"/> cannot be null</exception>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.Merge(System.Data.DataTable,System.Data.DataTable,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            merge <paramref name="dt1"/> with <paramref name="dt2"/> based on <paramref name="columnMapping"/>, Key is dt1 column, Value is dt2 column, return new DataTable with Key (dt1) as column name
+            </summary>
+            <param name="dt1"></param>
+            <param name="dt2"></param>
+            <param name="columnMapping"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.Distinct(System.Data.DataTable)">
+            <summary>
+            distinct DataTable
+            </summary>
+            <param name="dt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.GroupBy(System.Data.DataTable,System.String[])">
+            <summary>
+            group by <paramref name="dt"/> with <paramref name="columnNames"/>, return new DataTable with Count column to indicate each group by key has how many records
+            </summary>
+            <param name="dt"></param>
+            <param name="columnNames"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ExcludeRows(System.Data.DataTable,System.Data.DataTable,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            from this table or <paramref name="dt1"/> exclude rows present in <paramref name="dt2"/> based on <paramref name="keysMap"/>
+            <para>keysMap.Key: column name from <paramref name="dt1"/></para>
+            <para>keysMap.Value: column name from <paramref name="dt2"/></para>
+            </summary>
+            <param name="dt1"></param>
+            <param name="dt2"></param>
+            <param name="keysMap"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.ObjectExtension.FiscalYear">
+            <summary>
+            fiscal year information
+            </summary>
+        </member>
+        <member name="T:TryIT.ObjectExtension.DateTimeExtension">
+            <summary>
+            <see cref="T:System.DateTime"/> extension method
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.GetFiscalYear(System.DateTime)">
+            <summary>
+            get fiscal year information based on input <paramref name="dateTime"/>
+            </summary>
+            <param name="dateTime"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.Diff(System.DateTime,System.DateTime,TryIT.ObjectExtension.DatePart)">
+            <summary>
+            Compare to datetime, return number of datepart between t1 and t2, t1 - t2
+            </summary>
+            <param name="t1">first datetime</param>
+            <param name="t2">second datetime</param>
+            <param name="datepart">Year, Month, Day, compare which datepart, default compart whole date</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.IsAfter(System.DateTime,System.DateTime,TryIT.ObjectExtension.DatePart)">
+            <summary>
+            check whether the <paramref name="dt1"/> is after <paramref name="dt2"/>
+            </summary>
+            <param name="dt1"></param>
+            <param name="dt2"></param>
+            <param name="datepart"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.IsSame(System.DateTime,System.DateTime,TryIT.ObjectExtension.DatePart)">
+            <summary>
+            check whether the <paramref name="dtSource"/> is same as <paramref name="dtValue"/>
+            </summary>
+            <param name="dtSource"></param>
+            <param name="dtValue"></param>
+            <param name="datepart"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.IsBetween(System.DateTime,System.DateTime,System.DateTime,TryIT.ObjectExtension.DatePart)">
+            <summary>
+            indicator whether <paramref name="dt"/> is between <paramref name="dtStart"/> and <paramref name="dtEnd"/> for specific <paramref name="datepart"/>
+            </summary>
+            <param name="dt"></param>
+            <param name="dtStart"></param>
+            <param name="dtEnd"></param>
+            <param name="datepart"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.FirstDay(System.DateTime)">
+            <summary>
+            get first day in month of <paramref name="dt"/>, default time to 12:00:00 am
+            </summary>
+            <param name="dt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DateTimeExtension.LastDay(System.DateTime)">
+            <summary>
+            get last day in month of <paramref name="dt"/>, default time to 12:00:00 am
+            </summary>
+            <param name="dt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DictionaryExtension.IsContainsKey(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
             <summary>
             check whether string dictionary contains provided key, default ignore case, return false if key is null
             </summary>
@@ -102,7 +252,7 @@
             <param name="comparisonType"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.DictionaryExtension.IsContainsValue(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
+        <member name="M:TryIT.ObjectExtension.DictionaryExtension.IsContainsValue(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
             <summary>
             check whether string dictionary contains provided value, default ignore case, return false if value is null
             </summary>
@@ -111,7 +261,7 @@
             <param name="comparisonType"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.DictionaryExtension.TryGetValue(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+        <member name="M:TryIT.ObjectExtension.DictionaryExtension.TryGetValue(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
             <summary>
             try get value from Dictionary, return null if not exists
             </summary>
@@ -119,12 +269,12 @@
             <param name="key"></param>
             <returns></returns>
         </member>
-        <member name="T:ObjectExtension.ExceptionExtension">
+        <member name="T:TryIT.ObjectExtension.ExceptionExtension">
             <summary>
             extension method for <see cref="T:System.Exception"/>
             </summary>
         </member>
-        <member name="M:ObjectExtension.ExceptionExtension.ToCustomizeString(System.Exception)">
+        <member name="M:TryIT.ObjectExtension.ExceptionExtension.ToCustomizeString(System.Exception)">
             <summary>
             convert Exception object to Customize String
             <para>return <paramref name="ex"/> + <paramref name="ex"/>.InnerException + <paramref name="ex"/>.InnerExeption.InnerException</para>
@@ -132,19 +282,19 @@
             <param name="ex"></param>
             <returns></returns>
         </member>
-        <member name="T:ObjectExtension.IEnumerableExtension">
+        <member name="T:TryIT.ObjectExtension.IEnumerableExtension">
             <summary>
             Extension method for <see cref="T:System.Collections.Generic.IEnumerable`1"/> item
             </summary>
         </member>
-        <member name="M:ObjectExtension.IEnumerableExtension.IsNullOrEmpty(System.Collections.Generic.IEnumerable{System.Object})">
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.IsNullOrEmpty(System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
             indicator whether <paramref name="list"/> is null or empty
             </summary>
             <param name="list"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.IEnumerableExtension.IsContains(System.Collections.Generic.IEnumerable{System.String},System.String,System.StringComparison)">
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.IsContains(System.Collections.Generic.IEnumerable{System.String},System.String,System.StringComparison)">
             <summary>
             check whether string list contains provided value, default ignore case, return false if value is null
             </summary>
@@ -153,7 +303,7 @@
             <param name="comparisonType"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.IEnumerableExtension.DistinctBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.DistinctBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
             <summary>
             distict IEnumerable object by specific property
             <para>list.DistinctBy(p => p.Id)</para>
@@ -165,7 +315,7 @@
             <param name="keySelector"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.IEnumerableExtension.ToDataTable``1(System.Collections.Generic.List{``0})">
+        <member name="M:TryIT.ObjectExtension.IEnumerableExtension.ToDataTable``1(System.Collections.Generic.List{``0})">
             <summary>
             Convert list to DataTable
             </summary>
@@ -173,12 +323,12 @@
             <param name="items"></param>
             <returns></returns>
         </member>
-        <member name="T:ObjectExtension.ObjExtension">
+        <member name="T:TryIT.ObjectExtension.ObjExtension">
             <summary>
             extension method for Object type
             </summary>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.DeepCopy``1(``0)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.DeepCopy``1(``0)">
             <summary>
             deep copy by serializing it and then returning a deserialized copy
             </summary>
@@ -186,7 +336,7 @@
             <param name="self"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.ToBoolean(System.Object)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ToBoolean(System.Object)">
             <summary>
             convert object value to boolean, return false if value is null
             <para>true: value of "Y", "Yes", "On" will be true</para>
@@ -195,7 +345,7 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.ConvertValue``1(System.Object)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ConvertValue``1(System.Object)">
             <summary>
             Convert object value to specific type value
             </summary>
@@ -203,14 +353,14 @@
             <param name="objValue"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.ObjectToBase64String(System.Object)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ObjectToBase64String(System.Object)">
             <summary>
             Convert object to Base64 string
             </summary>
             <param name="obj"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.Base64StringToObj``1(System.String)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.Base64StringToObj``1(System.String)">
             <summary>
             Convert Base64 string to specific object
             </summary>
@@ -218,7 +368,7 @@
             <param name="stringBase64"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.JsonToObject``1(System.String)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.JsonToObject``1(System.String)">
             <summary>
             covnert Json string to specific object
             </summary>
@@ -226,28 +376,41 @@
             <param name="jsonString"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.ObjExtension.ObjectToJson(System.Object)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ObjectToJson(System.Object)">
             <summary>
             convert object to Json string
             </summary>
             <param name="obj"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringAppend.ToString(System.String)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.GetJsonValue``1(System.String,System.String)">
+            <summary>
+            get value from Json string and convert to specific type
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="jsonString"></param>
+            <param name="keyPath">key name or key path
+            <para>keyPath = key1, this return value of key1</para>
+            <para>keyPath = key1:key2, this look for key2 under key1, then return value of key2</para>
+            <para>keyPath = key1:key2[1]:key3, this look for second object under key2, then return value of key3</para>
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringAppend.ToString(System.String)">
             <summary>
             get final string which concat all appended string by <paramref name="concatBy"/>
             </summary>
             <param name="concatBy"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringAppend.Append(System.String)">
+        <member name="M:TryIT.ObjectExtension.StringAppend.Append(System.String)">
             <summary>
             get final string which concat all appended string
             </summary>
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.IsEquals(System.String,System.String,System.StringComparison,System.Boolean)">
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsEquals(System.String,System.String,System.StringComparison,System.Boolean)">
             <summary>
             check whether string is equals to provide value, default ignore case, return false if value is null
             </summary>
@@ -257,7 +420,7 @@
             <param name="isTrim">whether use string.Trim() to remove space.</param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.IsIn(System.String,System.String[])">
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsIn(System.String,System.String[])">
             <summary>
             check whether this string value exists in values list, ignore case
             </summary>
@@ -265,7 +428,7 @@
             <param name="values"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.IsContains(System.String,System.String,System.StringComparison)">
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsContains(System.String,System.String,System.StringComparison)">
             <summary>
             check whether string contains provided value, default ignore case, return false if value is null
             </summary>
@@ -274,7 +437,7 @@
             <param name="comparisonType"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.IsStartsWith(System.String,System.String,System.StringComparison)">
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsStartsWith(System.String,System.String,System.StringComparison)">
             <summary>
             Determines whether the beginning of this string instance matches the specified string, default ignore case
             </summary>
@@ -283,7 +446,7 @@
             <param name="comparisonType"></param>
             <returns>true if value matches the beginning of this string; otherwise, false.</returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.IsEndsWith(System.String,System.String,System.StringComparison)">
+        <member name="M:TryIT.ObjectExtension.StringExtension.IsEndsWith(System.String,System.String,System.StringComparison)">
             <summary>
             Determines whether the end of this string instance matches the specified string, default ignore case
             </summary>
@@ -292,7 +455,7 @@
             <param name="comparisonType"></param>
             <returns>true if value matches the beginning of this string; otherwise, false.</returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.Split(System.String,System.String[])">
+        <member name="M:TryIT.ObjectExtension.StringExtension.Split(System.String,System.String[])">
             <summary>
             split string <paramref name="value"/> by <paramref name="separator"/>, will remove empty item
             </summary>
@@ -300,7 +463,21 @@
             <param name="separator"></param>
             <returns></returns>
         </member>
-        <member name="M:ObjectExtension.StringExtension.IndexOf(System.String,System.String,System.Int32,System.StringComparison,System.Boolean)">
+        <member name="M:TryIT.ObjectExtension.StringExtension.ReplaceString(System.String,System.String,System.String,System.StringComparison,System.Boolean)">
+            <summary>
+            Returns a new string in which all occurrences of a specified string in the current instance are replaced with another 
+            specified string according the type of search to use for the specified string.
+            </summary>
+            <param name="value">The string performing the replace method.</param>
+            <param name="oldValue">The string to be replaced.</param>
+            <param name="newValue">The string replace all occurrences of <paramref name="oldValue"/>. 
+            If value is equal to <c>null</c>, than all occurrences of <paramref name="oldValue"/> will be removed from the <paramref name="value"/>.</param>
+            <param name="comparisonType">One of the enumeration values that specifies the rules for the search, defualt <c>StringComparison.OrdinalIgnoreCase</c> </param>
+            <param name="isWholdWord">true to match whold word during the comparison; otherwise, false. default false, e.g. if value is true, then find 'A' from 'ABC' will not able found, find 'A' from 'A BC' will able found</param>
+            <returns>A string that is equivalent to the current string except that all instances of <paramref name="oldValue"/> are replaced with <paramref name="newValue"/>. 
+            If <paramref name="oldValue"/> is not found in the current instance, the method returns the current instance unchanged.</returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.StringExtension.IndexOf(System.String,System.String,System.Int32,System.StringComparison,System.Boolean)">
             <summary>
             Reports the zero-based index of the first occurrence of the specified string in the current System.String object
             </summary>

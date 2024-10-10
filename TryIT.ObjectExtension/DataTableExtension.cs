@@ -266,8 +266,9 @@ namespace TryIT.ObjectExtension
         /// <para>string Func(DataTable dataTable, int row, int col)</para>
         /// </param>
         /// <param name="columns">columns to include in html, default null to include all columns</param>
+        /// <param name="ignoreHeader">indicate to ignore table header when generate html string</param>
         /// <returns></returns>
-        public static string ToHtmlString(this DataTable dt, ToHtmlString_TableStyle style = null, Delegate_TdFormat tdFormatFunc = null, IEnumerable<string> columns = null)
+        public static string ToHtmlString(this DataTable dt, ToHtmlString_TableStyle style = null, Delegate_TdFormat tdFormatFunc = null, IEnumerable<string> columns = null, bool ignoreHeader = false)
         {
             string style_table;
             string style_th;
@@ -300,30 +301,34 @@ namespace TryIT.ObjectExtension
             }
 
             // append header
-            stringBuilder.Append("<thead>");
-            stringBuilder.Append("<tr>");
-
-            foreach (DataColumn col in dt.Columns)
+            if (!ignoreHeader)
             {
-                string colName = col.ColumnName;
+                stringBuilder.Append("<thead>");
+                stringBuilder.Append("<tr>");
 
-                if (columns == null || columns.IsContains(colName))
+                foreach (DataColumn col in dt.Columns)
                 {
-                    if (!string.IsNullOrEmpty(style_th))
-                    {
-                        stringBuilder.Append($"<th style='" + style_th + "'>");
-                    }
-                    else
-                    {
-                        stringBuilder.Append("<th>");
-                    }
-                    stringBuilder.Append(colName);
-                    stringBuilder.Append("</th>");
-                }
-            }
+                    string colName = col.ColumnName;
 
-            stringBuilder.Append("</tr>");
-            stringBuilder.Append("</thead>");
+                    if (columns == null || columns.IsContains(colName))
+                    {
+                        if (!string.IsNullOrEmpty(style_th))
+                        {
+                            stringBuilder.Append($"<th style='" + style_th + "'>");
+                        }
+                        else
+                        {
+                            stringBuilder.Append("<th>");
+                        }
+                        stringBuilder.Append(colName);
+                        stringBuilder.Append("</th>");
+                    }
+                }
+
+                stringBuilder.Append("</tr>");
+                stringBuilder.Append("</thead>");
+            }
+            
 
             // append row
             stringBuilder.Append("<tbody>");
