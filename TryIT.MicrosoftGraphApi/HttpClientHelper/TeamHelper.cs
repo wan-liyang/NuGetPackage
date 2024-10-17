@@ -125,9 +125,9 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <summary>
         /// get team member list
         /// </summary>
-        /// <param name="teamId"></param>
+        /// <param name="teamName"></param>
         /// <returns></returns>
-        public GetMembersResponse.Response GetMembers(string teamName)
+        public List<GetMembersResponse.Member> GetMembers(string teamName)
         {
             string teamId = GetTeam(teamName).id;
             string url = $"{GraphApiRootUrl}/teams/{teamId}/members";
@@ -138,7 +138,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetMembersResponse.Response>();
+                return content.JsonToObject<GetMembersResponse.Response>().value;
             }
             catch
             {

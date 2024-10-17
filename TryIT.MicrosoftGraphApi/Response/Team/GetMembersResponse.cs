@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TryIT.MicrosoftGraphApi.Response.Team
 {
-    internal class GetMembersResponse
+    public class GetMembersResponse
     {
         public class Response
         {

@@ -116,5 +116,15 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         {
             return _helper.GetChannelSharepoint(teamName, channelName);
         }
+
+        /// <summary>
+        /// get team member list
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <returns></returns>
+        public List<GetMembersResponse.Member> GetMembers(string teamName)
+        { 
+            return _helper.GetMembers(teamName);
+        }
     }
 }
