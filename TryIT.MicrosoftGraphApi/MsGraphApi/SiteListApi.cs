@@ -14,10 +14,11 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// init Teams api with configuration
         /// </summary>
         /// <param name="config"></param>
-        public SiteListApi(MsGraphApiConfig config)
+        /// <param name="hostName"></param>
+        public SiteListApi(MsGraphApiConfig config, string hostName)
         {
             MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new SiteListHelper(graphHelper.GetHttpClient());
+            _helper = new SiteListHelper(graphHelper.GetHttpClient(), hostName);
         }
 
         /// <summary>

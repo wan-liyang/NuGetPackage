@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using TryIT.MicrosoftGraphApi.Helper;
-using TryIT.MicrosoftGraphApi.Response.Sharepoint;
+using TryIT.MicrosoftGraphApi.Response.Site;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SiteHelper : BaseHelper
     {
         private TryIT.RestApi.Api api;
-
-        public SiteHelper(HttpClient httpClient)
+        private readonly string _hostName;
+        public SiteHelper(HttpClient httpClient, string hostName)
         {
             if (null == httpClient)
                 throw new ArgumentNullException(nameof(httpClient));
@@ -22,11 +20,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 HttpClient = httpClient,
                 EnableRetry = true,
             });
+            _hostName = hostName;
         }
 
-        public GetSiteResponse.Site GetSite(string siteName)
+        public GetSiteResponse.Response GetSite(string siteName)
         {
-            string url = $"{GraphApiRootUrl}/sites/groupncs.sharepoint.com:/sites/{siteName}";
+            string url = $"{GraphApiRootUrl}/sites/{_hostName}:/sites/{siteName}";
 
             try
             {
@@ -34,7 +33,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetSiteResponse.Site>();
+                return content.JsonToObject<GetSiteResponse.Response>();
             }
             catch
             {
@@ -42,7 +41,25 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
-        public GetSiteResponse.Site GetSiteByUrl(string folderUrl)
+        public GetDriveResponse.Response GetDrive(string siteId)
+        {
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/drive";
+
+            try
+            {
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                return content.JsonToObject<GetDriveResponse.Response>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public GetSiteResponse.Response GetSiteByUrl(string folderUrl)
         {
             folderUrl = folderUrl.Replace("https://", "");
             string host = folderUrl.Substring(0, folderUrl.IndexOf('/'));
@@ -58,7 +75,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response, api.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetSiteResponse.Site>();
+                return content.JsonToObject<GetSiteResponse.Response>();
             }
             catch
             {

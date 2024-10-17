@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace TryIT.MicrosoftGraphApi.Response.Sharepoint
+namespace TryIT.MicrosoftGraphApi.Response.Site
 {
     public class GetSiteResponse
     {
-        public class Site
+        public class Response
         {
             [JsonProperty("@odata.context")]
             public string odatacontext { get; set; }

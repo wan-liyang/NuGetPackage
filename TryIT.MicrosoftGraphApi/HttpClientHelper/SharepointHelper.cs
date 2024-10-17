@@ -66,7 +66,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (string.IsNullOrEmpty(item.parentReference.siteId))
             {
-                var site = new SiteHelper(_httpClient).GetSiteByUrl(folderUrl);
+                var site = new SiteHelper(_httpClient, null).GetSiteByUrl(folderUrl);
                 item.parentReference.siteId = site.id;
             }
 
