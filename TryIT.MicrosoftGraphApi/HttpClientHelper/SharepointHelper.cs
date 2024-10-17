@@ -106,7 +106,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         public GetDriveItemResponse.Item UploadFile(string folderAbsoluteUrl, string fileName, byte[] fileContent)
         {
-            fileName = CleanItemName(fileName);
+            fileName = UtilityHelper.CleanItemName(fileName);
 
             var sharepointFolder = GetFolder(folderAbsoluteUrl);
 
@@ -145,7 +145,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         private GetDriveItemResponse.Item UploadSmallFile(UploadSmallFileModel fileModel)
         {
-            string fileName = CleanItemName(fileModel.FileName);
+            string fileName = UtilityHelper.CleanItemName(fileModel.FileName);
             byte[] fileContent = fileModel.FileContent;
 
             /*
@@ -202,7 +202,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             try
             {
                 HttpContent httpContent = new ByteArrayContent(fileModel.FileContent);
-                string contentType = MIMEType.GetContentType(CleanItemName(fileModel.FileName));
+                string contentType = MIMEType.GetContentType(UtilityHelper.CleanItemName(fileModel.FileName));
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
                 httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModel.FileContent.Length - 1, fileModel.FileContent.Length);
 
@@ -350,7 +350,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             CreateFolderRequest.Body model = new CreateFolderRequest.Body
             {
-                Name = CleanItemName(subFolderName),
+                Name = UtilityHelper.CleanItemName(subFolderName),
                 ConflictBehavior = ConflictBehaviorEnum.replace.ToString(),
                 Folder = new GetDriveItemResponse.Item.Folder()
             };
@@ -472,7 +472,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                string cleanName = CleanItemName(itemNewName);
+                string cleanName = UtilityHelper.CleanItemName(itemNewName);
                 RenameItemRequest.Body requestBody = new RenameItemRequest.Body
                 {
                     Name = cleanName
@@ -509,7 +509,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                string cleanName = CleanItemName(newName);
+                string cleanName = UtilityHelper.CleanItemName(newName);
                 RenameItemRequest.Body requestBody = new RenameItemRequest.Body
                 {
                     Name = cleanName
@@ -538,20 +538,6 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string encodedUrl = "u!" + base64Value.TrimEnd('=').Replace('/', '_').Replace('+', '-');
             return encodedUrl;
         }
-
-
-        /// <summary>
-        /// https://support.microsoft.com/en-gb/office/restrictions-and-limitations-in-onedrive-and-sharepoint-64883a5d-228e-48f5-b3d2-eb39e07630fa#invalidcharacters
-        /// </summary>
-        /// <param name="itemName"></param>
-        /// <returns></returns>
-        private string CleanItemName(string itemName)
-        {
-            // " * : < > ? / \ |
-            return itemName.Replace("#", "_").Replace("%", "_")
-                .Replace("\"", "_").Replace("*", "_").Replace(":", "_").Replace("<", "_").Replace(">", "_").Replace("?", "_").Replace("/", "_").Replace("\\", "_").Replace("|", "_");
-        }
-
 
         #region Permissions
         /// <summary>
