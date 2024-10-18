@@ -121,12 +121,12 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                     if (stopInherit)
                     {
                         // for new created folder, do remove permission, so that it will stop inherit permission
-                        var permissions = _helper.ListPermissions(subFolder.webUrl);
+                        var permissions = _helper.ListPermissions(driveId, subFolder.id);
                         if (permissions != null && permissions.Count > 0)
                         {
-                            foreach (var item in permissions)
+                            foreach (var permission in permissions)
                             {
-                                _helper.DeletePermission(subFolder.webUrl, item.id);
+                                _helper.DeletePermission(driveId, subFolder.id, permission.id);
                             }
                         }
                     }
@@ -335,32 +335,35 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <summary>
         /// list permission of item
         /// </summary>
-        /// <param name="folderUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
         /// <returns></returns>
-        public List<ListPermissionsResponse.Value> ListPermissions(string folderUrl)
+        public List<ListPermissionsResponse.Value> ListPermissions(string driveId, string itemId)
         {
-            return _helper.ListPermissions(folderUrl);
+            return _helper.ListPermissions(driveId, itemId);
         }
 
         /// <summary>
         /// add permission
         /// </summary>
-        /// <param name="folderUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
         /// <param name="addPermissionModel"></param>
         /// <returns></returns>
-        public List<AddPermissionResponse.Value> AddPermissions(string folderUrl, AddPermissionModel addPermissionModel)
+        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionModel addPermissionModel)
         {
-            return _helper.AddPermissions(folderUrl, addPermissionModel);
+            return _helper.AddPermissions(driveId, itemId, addPermissionModel);
         }
         /// <summary>
         /// delete permission
         /// </summary>
-        /// <param name="folderUrl"></param>
-        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string)"/></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string, string)"/></param>
         /// <returns></returns>
-        public bool DeletePermission(string folderUrl, string permissionId)
+        public bool DeletePermission(string driveId, string itemId, string permissionId)
         {
-            return _helper.DeletePermission(folderUrl, permissionId);
+            return _helper.DeletePermission(driveId, itemId, permissionId);
         }
         #endregion
     }

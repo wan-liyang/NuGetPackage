@@ -540,15 +540,16 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         }
 
         #region Permissions
+
         /// <summary>
         /// list permission of item
         /// </summary>
-        /// <param name="folderUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
         /// <returns></returns>
-        public List<ListPermissionsResponse.Value> ListPermissions(string folderUrl)
+        public List<ListPermissionsResponse.Value> ListPermissions(string driveId, string itemId)
         {
-            var folder = GetFolder(folderUrl);
-            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/permissions";
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/permissions";
 
             try
             {
@@ -569,13 +570,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <summary>
         /// add permission
         /// </summary>
-        /// <param name="folderUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
         /// <param name="addPermissionModel"></param>
         /// <returns></returns>
-        public List<AddPermissionResponse.Value> AddPermissions(string folderUrl, AddPermissionModel addPermissionModel)
+        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionModel addPermissionModel)
         {
-            var folder = GetFolder(folderUrl);
-            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/invite";
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/invite";
 
             try
             {
@@ -610,14 +611,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <summary>
         /// delete permission
         /// </summary>
-        /// <param name="folderUrl"></param>
-        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string)"/></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string, string)"/></param>
         /// <returns></returns>
-        public bool DeletePermission(string folderUrl, string permissionId)
+        public bool DeletePermission(string driveId, string itemId, string permissionId)
         {
-            var folder = GetFolder(folderUrl);
-            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/permissions/{permissionId}";
-
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/permissions/{permissionId}";
             try
             {
                 var response = api.DeleteAsync(url).GetAwaiter().GetResult();
