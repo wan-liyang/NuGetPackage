@@ -148,6 +148,46 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         }
 
         /// <summary>
+        /// https://learn.microsoft.com/en-us/graph/aad-advanced-queries?tabs=http
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="expression">employeeId eq 'xxx'</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public List<T> FilterUser<T>(string expression) where T : class
+        {
+            if (string.IsNullOrEmpty(expression))
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
+            string url = $"{GraphApiRootUrl}/users?$filter={expression}";
+            try
+            {
+                var props = typeof(T).GetProperties();
+                string select = $"&$select=";
+                foreach (var item in props)
+                {
+                    select += $"{item.Name},";
+                }
+                select = select.TrimEnd(',');
+
+                url += select;
+
+                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                return content.GetJsonValue<List<T>>("value");
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
         /// get user by following url
         /// <para>https://graph.microsoft.com/v1.0/users?$filter={attrKey} eq '{attrValue}'</para>
         /// </summary>

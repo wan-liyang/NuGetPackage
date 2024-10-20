@@ -1,4 +1,7 @@
-﻿using TryIT.MicrosoftGraphApi.Helper;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.User;
@@ -37,6 +40,18 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public GetUserResponse.User GetUserByMail(string userEmail)
         {
             return _helper.GetUserByMail(userEmail);
+        }
+
+        /// <summary>
+        /// filter user with <paramref name="expression"/>, return list of <typeparamref name="T"/> which contains expected attributes, https://learn.microsoft.com/en-us/graph/aad-advanced-queries?tabs=http
+        /// </summary>
+        /// <typeparam name="T">expected response type contains expected attributes</typeparam>
+        /// <param name="expression">employeeId eq 'xxx'</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public List<T> FilterUser<T>(string expression) where T : class
+        {
+            return _helper.FilterUser<T>(expression);
         }
 
         /// <summary>

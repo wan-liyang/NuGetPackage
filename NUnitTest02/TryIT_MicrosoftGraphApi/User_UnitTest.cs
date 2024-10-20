@@ -11,21 +11,41 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 {
     internal class User_UnitTest
     {
-        [Test]
-        public void Group_Test()
+        public MsGraphApiConfig _config;
+        [SetUp]
+        public void Setup()
         {
-            MsGraphApiConfig config = new MsGraphApiConfig
+            _config = new MsGraphApiConfig
             {
                 Token = "",
             };
+        }
 
-            UserApi api = new UserApi(config);
+        [Test]
+        public void Group_Test()
+        {
+            UserApi api = new UserApi(_config);
 
             var result = api.GetUserByMail("liyang.wan2@ncs.co");
             var result2 = api.GetUserByAttribute("employeeId", "1207563");
             var result3 = api.GetUserByMailWithAdditionalAttribute("liyang.wan2@ncs.co", "employeeId");
 
             Assert.True(1 == 1);
+        }
+
+        [Test]
+        public void FilterUser_Test()
+        {
+            UserApi api = new UserApi(_config);
+            var result = api.FilterUser<User>("startsWith(employeeID, '135')");
+
+            Assert.True(1 == 1);
+        }
+
+        public class User
+        {
+            public string id { get; set; }
+            public bool accountEnabled { get; set; }
         }
     }
 }
