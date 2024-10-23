@@ -244,6 +244,34 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
 
         private List<GetDriveItemResponse.Item> ChildrenItems;
+        public List<GetDriveItemResponse.Item> GetChildren(string driveId, string itemId)
+        {
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/children";
+
+            try
+            {
+                var response = api.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+
+                ChildrenItems = new List<GetDriveItemResponse.Item>();
+                ChildrenItems.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    GetChildrenNextLink(responseObj.odatanextLink);
+                }
+
+                return ChildrenItems;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public List<GetDriveItemResponse.Item> GetChildren(string folderAbsoluteUrl)
         {
             var folder = GetFolder(folderAbsoluteUrl);

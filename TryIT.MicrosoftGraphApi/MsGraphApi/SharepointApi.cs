@@ -80,6 +80,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
+        /// List children of a driveItem, https://learn.microsoft.com/en-us/graph/api/driveitem-list-children?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <returns></returns>
+        public List<GetDriveItemResponse.Item> GetChildren(string driveId, string itemId)
+        {
+            return _helper.GetChildren(driveId, itemId);
+        }
+
+        /// <summary>
         /// get file content (aka download file)
         /// </summary>
         /// <param name="folderAbsoluteUrl"></param>
