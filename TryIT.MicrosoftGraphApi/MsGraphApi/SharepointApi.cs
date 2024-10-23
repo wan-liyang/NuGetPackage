@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TryIT.MicrosoftGraphApi.Helper;
@@ -169,6 +170,8 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.MoveFile(file.id, targetFolderUrl, targetFileName);
         }
 
+
+        [Obsolete("change to use DeleteDriveItem", true)]
         /// <summary>
         /// delete item from sharepoint folder
         /// </summary>
@@ -178,6 +181,17 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public bool DeleteItem(string folderUrl, string itemName)
         {
             return _helper.DeleteItem(folderUrl, itemName);
+        }
+
+        /// <summary>
+        /// Delete a DriveItem, https://learn.microsoft.com/en-us/graph/api/driveitem-delete?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="folderUrl"></param>
+        /// <param name="itemName"></param>
+        /// <returns></returns>
+        public bool DeleteDriveItem(string driveId, string itemId)
+        {
+            return _helper.DeleteDriveItem(driveId, itemId);
         }
 
         /// <summary>

@@ -450,6 +450,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw;
             }
         }
+
         public bool DeleteItem(string folderUrl, string itemName)
         {
             var folder = GetFolder(folderUrl);
@@ -477,6 +478,33 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw;
             }
         }
+
+        /// <summary>
+        /// https://learn.microsoft.com/en-us/graph/api/driveitem-delete?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public bool DeleteDriveItem(string driveId, string itemId)
+        {
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}";
+
+            try
+            {
+                var response = api.DeleteAsync(url).GetAwaiter().GetResult();
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return true;
+                }
+                CheckStatusCode(response, api.RetryResults);
+                return false;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
 
 
         /// <summary>
