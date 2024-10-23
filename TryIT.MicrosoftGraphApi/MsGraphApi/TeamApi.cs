@@ -84,6 +84,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
+        /// Remove member from team, https://learn.microsoft.com/en-us/graph/api/team-delete-members?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="teamId"></param>
+        /// <param name="membershipId"></param>
+        public void RemoveMember(string teamId, string membershipId)
+        {
+            _helper.RemoveMember(teamId, membershipId);
+        }
+
+        /// <summary>
         /// create channel when same name channel not exists
         /// </summary>
         /// <param name="model"></param>
