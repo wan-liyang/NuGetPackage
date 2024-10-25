@@ -156,6 +156,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <exception cref="ArgumentNullException"></exception>
         public List<T> FilterUser<T>(string expression) where T : class
         {
+            List<T> list = new List<T>();
+
             if (string.IsNullOrEmpty(expression))
             {
                 throw new ArgumentNullException(nameof(expression));
@@ -165,7 +167,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             try
             {
                 var props = typeof(T).GetProperties();
-                string select = $"&$select=";
+                string select = $"&$count=true&$select=";
                 foreach (var item in props)
                 {
                     select += $"{item.Name},";
@@ -174,16 +176,52 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
                 url += select;
 
+                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
+
                 var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                return content.GetJsonValue<List<T>>("value");
+                var data = content.GetJsonValue<List<T>>("value");
+                list.AddRange(data);
+
+                string nextLink = content.GetJsonValue<string>("@odata.nextLink");
+
+                if (!string.IsNullOrEmpty(nextLink))
+                {
+                    FilterUserNextLink<T>(nextLink, list);
+                }
+
+                return list;
             }
             catch
             {
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// get next page data
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="nextlink"></param>
+        /// <param name="list"></param>
+        private void FilterUserNextLink<T>(string nextlink, List<T> list)
+        {
+            var response = _httpClient.GetAsync(nextlink).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            var data = content.GetJsonValue<List<T>>("value");
+            list.AddRange(data);
+
+            string next = content.GetJsonValue<string>("@odata.nextLink");
+
+            if (!string.IsNullOrEmpty(next))
+            {
+                FilterUserNextLink<T>(next, list);
             }
         }
 

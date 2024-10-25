@@ -42,10 +42,23 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
             Assert.True(1 == 1);
         }
 
+        [Test]
+        public void FilterUser2_Test()
+        {
+            UserApi api = new UserApi(_config);
+            //var result = api.FilterUser<User>("accountEnabled eq true and NOT(userType eq 'guest') and NOT(endsWith(userPrincipalName,'@groupncs.onmicrosoft.com') )");
+            var result = api.FilterUser<User>("startsWith(employeeId,'1201')");
+
+            Assert.True(1 == 1);
+        }
+
         public class User
         {
             public string id { get; set; }
+            public string displayName { get; set; }
             public bool accountEnabled { get; set; }
+            public string userPrincipalName { get; set; }
+            public string mail { get; set; }
         }
     }
 }
