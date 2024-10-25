@@ -26,9 +26,9 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         {
             UserApi api = new UserApi(_config);
 
-            var result = api.GetUserByMail("liyang.wan2@ncs.co");
-            var result2 = api.GetUserByAttribute("employeeId", "1207563");
-            var result3 = api.GetUserByMailWithAdditionalAttribute("liyang.wan2@ncs.co", "employeeId");
+            var result = api.GetUserByMail("");
+            var result2 = api.GetUserByAttribute("", "");
+            var result3 = api.GetUserByMailWithAdditionalAttribute("", "");
 
             Assert.True(1 == 1);
         }
