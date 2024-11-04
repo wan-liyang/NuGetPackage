@@ -49,15 +49,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// upload file into Sharepoint by folder absolute url
+        /// upload file into Sharepoint folder
         /// </summary>
-        /// <param name="folderUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="folderItemId"></param>
         /// <param name="fileName"></param>
         /// <param name="fileContent"></param>
         /// <returns>created Sharepoint item (Id and Name)</returns>
-        public GetDriveItemResponse.Item UploadFile(string folderUrl, string fileName, byte[] fileContent)
+        public GetDriveItemResponse.Item UploadFile(string driveId, string folderItemId, string fileName, byte[] fileContent)
         {
-            return _helper.UploadFile(folderUrl, fileName, fileContent);
+            return _helper.UploadFile(driveId, folderItemId, fileName, fileContent);
         }
 
         /// <summary>
@@ -102,21 +103,20 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// create subfolder under <paramref name="parentFolderUrl"/>, the subfolder <paramref name="folderNameOrPath"/> could be subfolder name or subfolder path, e.g A\B\C
+        /// create subfolder under <paramref name="folderItemId"/>, the subfolder <paramref name="newFolderNameOrPath"/> could be subfolder name or subfolder path, e.g A\B\C
         /// </summary>
-        /// <param name="parentFolderUrl"></param>
-        /// <param name="folderNameOrPath"></param>
+        /// <param name="driveId"></param>
+        /// <param name="folderItemId"></param>
+        /// <param name="newFolderNameOrPath"></param>
         /// <param name="stopInherit">indicate whether stop the newly created folder to stop inherit permission from it's parent folder, if yes, program will delete existing permission (by do this delete permission the folder will become stop inherit)</param>
         /// <returns>created subfolder list</returns>
-        public List<GetDriveItemResponse.Item> CreateFolder(string parentFolderUrl, string folderNameOrPath, bool stopInherit = false)
+        public List<GetDriveItemResponse.Item> CreateFolder(string driveId, string folderItemId, string newFolderNameOrPath, bool stopInherit = false)
         {
             List<GetDriveItemResponse.Item> listNewFolders = new List<GetDriveItemResponse.Item>();
 
-            var pathList = folderNameOrPath.ConvertPathToList();
+            var pathList = newFolderNameOrPath.ConvertPathToList();
 
-            var rootItem = _helper.GetFolder(parentFolderUrl);
-            string driveId = rootItem.parentReference.driveId;
-            parentFolderUrl = rootItem.webUrl;
+            string parentFolderId = folderItemId;
 
             for (int i = 0; i < pathList.Count; i++)
             {
@@ -126,7 +126,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
                 if (subFolder == null)
                 {
-                    subFolder = _helper.CreateFolder(parentFolderUrl, subFolderName);
+                    subFolder = _helper.CreateFolder(driveId, parentFolderId, subFolderName);
                     listNewFolders.Add(subFolder);
 
                     if (stopInherit)
@@ -142,7 +142,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                         }
                     }
                 }
-                parentFolderUrl = subFolder.webUrl;
+                parentFolderId = subFolder.id;
             }
             return listNewFolders;
         }
@@ -206,35 +206,32 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.RenameItem(driveId, itemId, newName);
         }
 
-        List<string> _listFiles;
-        #region Download sharepoint folder to local
         /// <summary>
-        /// download sharepoint folder to local, recursive subfolder
+        /// download sharepoint entire folder or individual item to local, recursive subfolder
         /// </summary>
-        /// <param name="folderAbsUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="itemId">folder item id, or content item id</param>
         /// <param name="localRootFolder"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        public List<string> DownloadFolder(string folderAbsUrl, string localRootFolder)
+        public List<DownloadFolderResult> DownloadItems(string driveId, string itemId, string localRootFolder)
         {
+            List<DownloadFolderResult> results = new List<DownloadFolderResult>();
+
             if (string.IsNullOrEmpty(localRootFolder))
             {
                 throw new System.ArgumentNullException(nameof(localRootFolder));
             }
 
-            _listFiles = new List<string>();
+            var items = GetChildren(driveId, itemId);
 
-            var driveItems = GetChildren(folderAbsUrl);
-
-            foreach (var item in driveItems)
+            foreach (var item in items)
             {
-                _DownloadFile(item, localRootFolder);
+                _DownloadItems(item, localRootFolder, results);
             }
 
-            return _listFiles;
+            return results;
         }
-
-        private void _DownloadFile(GetDriveItemResponse.Item item, string folderPath)
+        private void _DownloadItems(GetDriveItemResponse.Item item, string folderPath, List<DownloadFolderResult> results)
         {
             if (item.file != null)
             {
@@ -248,7 +245,13 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 }
 
                 File.WriteAllBytes(localFileNameAndPath, _byte);
-                _listFiles.Add(localFileNameAndPath);
+
+                results.Add(new DownloadFolderResult
+                {
+                    FileOrFolder = "file",
+                    DriveItem = item,
+                    LocalItem = localFileNameAndPath,
+                });
             }
             else
             {
@@ -258,17 +261,23 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                     Directory.CreateDirectory(parentPath);
                 }
 
-                var subItems = GetChildren(item.webUrl);
+                results.Add(new DownloadFolderResult
+                {
+                    FileOrFolder = "folder",
+                    DriveItem = item,
+                    LocalItem = folderPath,
+                });
+
+                var subItems = GetChildren(item.parentReference.driveId, item.id);
                 if (subItems.Count > 0)
                 {
                     foreach (var subItem in subItems)
                     {
-                        _DownloadFile(subItem, parentPath);
+                        _DownloadItems(subItem, parentPath, results);
                     }
                 }
             }
         }
-        #endregion
 
         #region Upload local folder to sharepoint
 
@@ -277,13 +286,14 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <summary>
         /// upload local folder to sharepoint
         /// </summary>
-        /// <param name="folderAbsUrl"></param>
+        /// <param name="driveId"></param>
+        /// <param name="folderItemId"></param>
         /// <param name="localRootFolder"></param>
         /// <param name="allowPartialSuccess">indicator allow partial upload success, true(default): if one file failed, will continue rest, false: if one file failed, will stop and throw exception</param>
         /// <returns>upload status for each file, either success or failure with exception</returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public List<FileUploadResult> UploadFolder(string folderAbsUrl, string localRootFolder, bool allowPartialSuccess = true)
+        public List<FileUploadResult> UploadFolder(string driveId, string folderItemId, string localRootFolder, bool allowPartialSuccess = true)
         {
             if (string.IsNullOrEmpty(localRootFolder))
             {
@@ -297,10 +307,10 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
             _uploadFolderStatus = new List<FileUploadResult>();
 
-            _UploadFile(localRootFolder, folderAbsUrl, allowPartialSuccess);
+            _UploadFile(driveId, folderItemId, localRootFolder, allowPartialSuccess);
             return _uploadFolderStatus;
         }
-        private void _UploadFile(string sourceDir, string sharepointFolderUrl, bool allowPartialSuccess)
+        private void _UploadFile(string driveId, string folderItemId, string sourceDir, bool allowPartialSuccess)
         {
             var dir = new DirectoryInfo(sourceDir);
 
@@ -310,7 +320,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             {
                 try
                 {
-                    UploadFile(sharepointFolderUrl, file.Name, File.ReadAllBytes(file.FullName));
+                    UploadFile(driveId, folderItemId, file.Name, File.ReadAllBytes(file.FullName));
                     _uploadFolderStatus.Add(new FileUploadResult
                     {
                         FileName = file.Name,
@@ -337,19 +347,19 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
             foreach (DirectoryInfo subDir in dirs)
             {
-                var items = GetChildren(sharepointFolderUrl);
+                var items = GetChildren(driveId, folderItemId);
                 var subfolder = items.Where(p => p.folder != null && p.name.IsEquals(subDir.Name)).FirstOrDefault();
-                string subFolderUrl = string.Empty;
+                string subFolderItemId = string.Empty;
                 if (subfolder == null)
                 {
-                    var newfolder = CreateFolder(sharepointFolderUrl, subDir.Name);
-                    subFolderUrl = newfolder.First().webUrl;
+                    var newfolder = _helper.CreateFolder(driveId, folderItemId, subDir.Name);
+                    subFolderItemId = newfolder.id;
                 }
                 else
                 {
-                    subFolderUrl = subfolder.webUrl;
+                    subFolderItemId = subfolder.id;
                 }
-                _UploadFile(subDir.FullName, subFolderUrl, allowPartialSuccess);
+                _UploadFile(driveId, subFolderItemId, subDir.FullName, allowPartialSuccess);
             }
         }
         #endregion

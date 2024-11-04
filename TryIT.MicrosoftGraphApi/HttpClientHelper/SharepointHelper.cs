@@ -104,24 +104,21 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
-        public GetDriveItemResponse.Item UploadFile(string folderAbsoluteUrl, string fileName, byte[] fileContent)
+        public GetDriveItemResponse.Item UploadFile(string driveId, string folderItemId, string fileName, byte[] fileContent)
         {
             fileName = UtilityHelper.CleanItemName(fileName);
-
-            var sharepointFolder = GetFolder(folderAbsoluteUrl);
 
             // if file size < 4 MB, use normal upload, otherwise use upload session
             if (fileContent.Length < 4 * 1024 * 1024)
             {
-                string siteId = sharepointFolder.parentReference.siteId;
-                var children = GetChildren(folderAbsoluteUrl);
+                var children = GetChildren(driveId, folderItemId);
 
                 string fileId = children.Where(p => p.name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault()?.id;
 
                 UploadSmallFileModel smallFileModel = new UploadSmallFileModel
                 {
-                    DriveId = sharepointFolder.parentReference.driveId,
-                    ParentId = sharepointFolder.id,
+                    DriveId = driveId,
+                    ParentId = folderItemId,
                     ItemId = fileId,
                     FileName = fileName,
                     FileContent = fileContent
@@ -133,8 +130,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             {
                 UploadLargeFileModel largeFileModel = new UploadLargeFileModel
                 {
-                    DriveId = sharepointFolder.parentReference.driveId,
-                    ItemId = sharepointFolder.id,
+                    DriveId = driveId,
+                    ItemId = folderItemId,
                     FileName = fileName,
                     FileContent = fileContent
                 };
@@ -374,7 +371,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
-        public GetDriveItemResponse.Item CreateFolder(string folderAbsoluteUrl, string subFolderName)
+        /// <summary>
+        /// create subfolder
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="folderItemId">create new subfolder inside this folder</param>
+        /// <param name="subFolderName">new subfolder name</param>
+        /// <returns></returns>
+        public GetDriveItemResponse.Item CreateFolder(string driveId, string folderItemId, string subFolderName)
         {
             CreateFolderRequest.Body model = new CreateFolderRequest.Body
             {
@@ -383,8 +387,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 Folder = new GetDriveItemResponse.Item.Folder()
             };
 
-            var folder = GetFolder(folderAbsoluteUrl);
-            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/children";
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{folderItemId}/children";
 
             try
             {

@@ -48,11 +48,34 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         public void CreateFolder()
         {
             SharepointApi api = new SharepointApi(config);
-            
-            string parentFolderUrl = "";
+
             string folderPath = @"a\b\c\d";
 
-            var response = api.CreateFolder(parentFolderUrl, folderPath, false);
+            string hostname = "";
+            string sitename = "";
+            SiteApi siteApi = new SiteApi(config, hostname);
+            var site = siteApi.GetSite(sitename);
+            var drive = siteApi.GetDrive(site.id);
+
+            var item = api.GetItemByPath(drive.id, "");
+
+            var response = api.CreateFolder(drive.id, item.id, folderPath);
+        }
+
+        [Test]
+        public void DownloadFolder()
+        {
+            SharepointApi api = new SharepointApi(config);
+
+            string hostname = "";
+            string sitename = "";
+            SiteApi siteApi = new SiteApi(config, hostname);
+            var site = siteApi.GetSite(sitename);
+            var drive = siteApi.GetDrive(site.id);
+
+            var item = api.GetItemByPath(drive.id, @"sgfinance\Project_Office\013-CIS\01 - To Generate (GB)");
+
+            var response = api.DownloadItems(drive.id, item.id, @"D:\01_NCS_Project\New folder");
         }
     }
 }
