@@ -17,10 +17,17 @@ namespace TryIT.RestApi.Models
         /// <summary>
         /// response message for each retry
         /// </summary>
-        public HttpResponseMessage Result { get; set; }
+        public ResultMessage Result { get; set; }
         /// <summary>
         /// exception for each retry
         /// </summary>
         public Exception Exception { get; set; }
+    }
+
+    public class ResultMessage
+    {
+        public string StatusCode { get; set; }
+        public string ReasonPhrase { get; set; }
+        public Uri RequestUri { get; set; }
     }
 }

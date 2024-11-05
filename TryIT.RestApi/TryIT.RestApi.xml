@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TryIT.RestApi</name>
+    </assembly>
+    <members>
+        <member name="T:TryIT.RestApi.Api">
+            <summary>
+            make a api call with retry
+            </summary>
+        </member>
+        <member name="F:TryIT.RestApi.Api.RetryResults">
+            <summary>
+            retry results, capture each response or exception
+            </summary>
+        </member>
+        <member name="M:TryIT.RestApi.Api.#ctor(TryIT.RestApi.Models.ApiConfig)">
+            <summary>
+            init Api instance with HttpClient instance
+            </summary>
+            <param name="apiConfig"></param>
+        </member>
+        <member name="M:TryIT.RestApi.Api.#ctor(TryIT.RestApi.Models.HttpClientConfig)">
+            <summary>
+            init api instance with HttpClient configuration
+            </summary>
+            <param name="clientConfig"></param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:TryIT.RestApi.Api.EnableRetry(System.Boolean)">
+            <summary>
+            init retry pipeline
+            </summary>
+            <param name="isEnable"></param>
+        </member>
+        <member name="M:TryIT.RestApi.Api.GetAsync(System.String)">
+            <summary>
+            call Get method
+            </summary>
+            <param name="url">url with or without parameters, if with parameters, the parameter key and value must UrlEncode</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.RestApi.Api.GetAsync(System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            call Get method
+            </summary>
+            <param name="url">base url without parameters</param>
+            <param name="parameters">url parameters</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.RestApi.Api.PostAsync(System.String,System.Net.Http.HttpContent)">
+            <summary>
+            call Post method
+            </summary>
+            <param name="url"></param>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.RestApi.Api.PutAsync(System.String,System.Net.Http.HttpContent)">
+            <summary>
+            call Put method
+            </summary>
+            <param name="url"></param>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.RestApi.Api.PatchAsync(System.String,System.Net.Http.HttpContent)">
+            <summary>
+            call Patch method
+            </summary>
+            <param name="url"></param>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.RestApi.Api.DeleteAsync(System.String)">
+            <summary>
+            call Delete method
+            </summary>
+            <param name="url"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.RestApi.Models.ApiConfig">
+            <summary>
+            configuration
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.ApiConfig.HttpClient">
+            <summary>
+            the ready HttpClient with necessary information e.g. Proxy, Auth, Header
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.ApiConfig.EnableRetry">
+            <summary>
+            indicator whether enable retry (max 3 times) if respons status code is 
+            <see cref="F:System.Net.HttpStatusCode.GatewayTimeout"/>
+            <see cref="F:System.Net.HttpStatusCode.BadGateway"/>
+            <see cref="F:System.Net.HttpStatusCode.BadRequest"/>
+            or timeout exception happen
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.BasicAuth.Username">
+            <summary>
+            username for Basic Authorization, if provided will use Basic Authorization
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.BasicAuth.Password">
+            <summary>
+            password for Basic Authorization, if provided will use Basic Authorization
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpClientConfig.EnableRetry">
+            <summary>
+            indicator whether enable retry (max 3 times) if respons status code is 
+            <see cref="F:System.Net.HttpStatusCode.GatewayTimeout"/>
+            <see cref="F:System.Net.HttpStatusCode.BadGateway"/>
+            <see cref="F:System.Net.HttpStatusCode.BadRequest"/>
+            or timeout exception happen
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpClientConfig.TimeoutSecond">
+            <summary>
+            determine request timeout second, default is 100 seconds, https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.timeout?view=net-7.0
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpClientConfig.securityProtocolType">
+            <summary>
+            default use <see cref="F:System.Net.SecurityProtocolType.Tls12"/> for more secure
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.ProxyConfig.Url">
+            <summary>
+            Url for proxy server
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.ProxyConfig.Username">
+            <summary>
+            Username for connect to proxy, if empty will set <see cref="P:System.Net.WebProxy.UseDefaultCredentials"/> to true
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.ProxyConfig.Password">
+            <summary>
+            Password for connect to proxy
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RequestModel.Url">
+            <summary>
+            request Url contains parameter if parameter pass via Url
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RequestModel.HttpContent">
+            <summary>
+            new StringContent(bodyString, System.Text.Encoding.UTF8, "application/json");
+            </summary>
+        </member>
+        <member name="T:TryIT.RestApi.Models.RetryResult">
+            <summary>
+            retry result
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RetryResult.AttemptNumber">
+            <summary>
+            number of retry
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RetryResult.Result">
+            <summary>
+            response message for each retry
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RetryResult.Exception">
+            <summary>
+            exception for each retry
+            </summary>
+        </member>
+    </members>
+</doc>

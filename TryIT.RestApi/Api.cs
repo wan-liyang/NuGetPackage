@@ -120,10 +120,19 @@ namespace TryIT.RestApi
                            BackoffType = DelayBackoffType.Constant,
                            OnRetry = args =>
                            {
+                               ResultMessage resultMessage = new ResultMessage();
+                               var result = args.Outcome.Result;
+                               if (result != null)
+                               {
+                                   resultMessage.StatusCode = $"{(int)result.StatusCode} - {result.StatusCode.ToString()}";
+                                   resultMessage.ReasonPhrase = result.ReasonPhrase;
+                                   resultMessage.RequestUri = result.RequestMessage.RequestUri;
+                               }
+
                                RetryResults.Add(new RetryResult
                                {
                                    AttemptNumber = args.AttemptNumber,
-                                   Result = args.Outcome.Result,
+                                   Result = resultMessage,
                                    Exception = args.Outcome.Exception
                                });
 

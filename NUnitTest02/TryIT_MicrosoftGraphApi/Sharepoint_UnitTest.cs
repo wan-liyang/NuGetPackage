@@ -77,5 +77,16 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             var response = api.DownloadItems(drive.id, item.id, @"D:\01_NCS_Project\New folder");
         }
+
+        [Test]
+        public void GetFolder()
+        {
+            SharepointApi api = new SharepointApi(config);
+
+            string url = "";
+
+
+            var item = api.GetFolder(url);
+        }
     }
 }
