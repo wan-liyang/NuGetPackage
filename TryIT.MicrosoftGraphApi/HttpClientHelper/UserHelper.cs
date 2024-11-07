@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model.User;
 using TryIT.MicrosoftGraphApi.Request.User;
@@ -322,30 +323,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return false;            
         }
 
-        public byte[] GetPhoto(string email)
-        {
-            // /users/{id | userPrincipalName}/photo
-            var user = GetUserByMail(email);
+        //public byte[] GetPhoto(string email)
+        //{
+        //    // /users/{id | userPrincipalName}/photo
+        //    var user = GetUserByMail(email);
 
-            if (user != null && !string.IsNullOrEmpty(user.id))
-            {
-                string url = $"{GraphApiRootUrl}/users/{user.id}/photo/$value";
-                try
-                {
-                    var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                    CheckStatusCode(response);
+        //    if (user != null && !string.IsNullOrEmpty(user.id))
+        //    {
+        //        string url = $"{GraphApiRootUrl}/users/{user.id}/photo/$value";
+        //        try
+        //        {
+        //            var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+        //            //CheckStatusCode(response);
 
-                    return response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
-                }
-                catch
-                {
-                    throw;
-                }
-            }
-            else
-            {
-                throw new Exception($"user {email} not found");
-            }
-        }
+        //            return response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+        //        }
+        //        catch
+        //        {
+        //            throw;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        throw new Exception($"user {email} not found");
+        //    }
+        //}
     }
 }

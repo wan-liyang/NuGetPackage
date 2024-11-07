@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
@@ -9,9 +11,13 @@ using TryIT.MicrosoftGraphApi.Response.User;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
 {
-    public class UserApi
+    /// <summary>
+    /// 
+    /// </summary>
+    public class UserApi : BaseHelper
     {
         private UserHelper _helper;
+        private HttpClient _httpClient;
 
         /// <summary>
         /// init Teams api with configuration
@@ -19,8 +25,8 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public UserApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new UserHelper(graphHelper.GetHttpClient());
+            _httpClient = new MsGraphHelper(config).GetHttpClient();
+            _helper = new UserHelper(_httpClient);
         }
 
         /// <summary>
@@ -98,14 +104,31 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.DeleteUserByEmail(userEmail);
         }
 
+        ///// <summary>
+        ///// https://learn.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0&tabs=http
+        ///// </summary>
+        ///// <param name="userPrincipalName"></param>
+        ///// <returns></returns>
+        //public async Task<HttpResponseMessage> GetPhoth(string email)
+        //{
+        //    return await _helper.GetPhoto(email);
+        //}
+
         /// <summary>
-        /// https://learn.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0&tabs=http
+        /// get user photo binary data, https://learn.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0&tabs=http
         /// </summary>
-        /// <param name="email"></param>
+        /// <param name="userPrincipalName"></param>
         /// <returns></returns>
-        public byte[] GetPhoth(string email)
+        public async Task<HttpResponseMessage> GetPhotoBinary(string userPrincipalNameOrId)
         {
-            return _helper.GetPhoto(email);
+            if (string.IsNullOrEmpty(userPrincipalNameOrId))
+            {
+                throw new ArgumentNullException(nameof(userPrincipalNameOrId));
+            }
+
+            string url = $"{GraphApiRootUrl}/users/{userPrincipalNameOrId}/photo/$value";
+
+            return await _httpClient.GetAsync(url);
         }
     }
 }

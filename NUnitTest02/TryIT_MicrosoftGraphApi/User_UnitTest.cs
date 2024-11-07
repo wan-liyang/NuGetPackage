@@ -22,6 +22,16 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         }
 
         [Test]
+        public async Task GetPhoto_Test()
+        {
+            UserApi api = new UserApi(_config);
+
+            var result = await api.GetPhotoBinary("");
+
+            Assert.True(1 == 1);
+        }
+
+        [Test]
         public void Group_Test()
         {
             UserApi api = new UserApi(_config);

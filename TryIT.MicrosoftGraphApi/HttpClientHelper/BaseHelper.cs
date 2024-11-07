@@ -7,7 +7,10 @@ using TryIT.MicrosoftGraphApi.Helper;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
-    internal class BaseHelper
+    /// <summary>
+    /// 
+    /// </summary>
+    public class BaseHelper
     {
         /// <summary>
         /// https://graph.microsoft.com/v1.0
@@ -26,6 +29,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             client.DefaultRequestHeaders.Add(headerKey, headerValue);
         }
 
+        /// <summary>
+        /// check response status and throw exception if not success status code
+        /// </summary>
+        /// <param name="responseMessage"></param>
+        /// <param name="retryResults"></param>
+        /// <exception cref="Exception"></exception>
         protected void CheckStatusCode(HttpResponseMessage responseMessage, List<TryIT.RestApi.Models.RetryResult> retryResults)
         {
             if (!responseMessage.IsSuccessStatusCode)
@@ -50,6 +59,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
+        /// <summary>
+        /// check response status and throw exception if not success status code
+        /// </summary>
+        /// <param name="responseMessage"></param>
+        /// <exception cref="Exception"></exception>
         protected void CheckStatusCode(HttpResponseMessage responseMessage)
         {
             if (!responseMessage.IsSuccessStatusCode)
