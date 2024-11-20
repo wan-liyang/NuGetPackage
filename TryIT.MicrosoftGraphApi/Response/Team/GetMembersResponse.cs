@@ -12,6 +12,10 @@ namespace TryIT.MicrosoftGraphApi.Response.Team
 
             [JsonProperty("@odata.count")]
             public int OdataCount { get; set; }
+
+            [JsonProperty("@odata.nextLink")]
+            public string odatanextLink { get; set; }
+
             public List<Member> value { get; set; }
         }
 

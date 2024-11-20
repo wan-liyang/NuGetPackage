@@ -11,18 +11,31 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 {
     internal class Team_UnitTest
     {
+        MsGraphApiConfig config;
+
+        [SetUp]
+        public void Setup()
+        {
+            config = new MsGraphApiConfig
+            {
+                Token = "",
+            };
+        }
+
         [Test]
         public void Test()
         {
-            MsGraphApiConfig apiConfig = new MsGraphApiConfig
-            {
-                //Proxy_Url = AppConfig.ProxyUrl,
-                Token = ""
-            };
-
-            TeamApi teamApi = new TeamApi(apiConfig, "O365-{teamName}-NCS");
+            TeamApi teamApi = new TeamApi(config, "");
 
             teamApi.CreateTeam(new CreateTeamModel { DisplayName = "Test", Description = "Test" });
+        }
+
+        [Test]
+        public void Test2()
+        {
+            TeamApi teamApi = new TeamApi(config);
+
+            var list = teamApi.GetMembers("");
         }
     }
 }

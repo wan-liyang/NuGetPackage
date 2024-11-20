@@ -88,7 +88,20 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <returns></returns>
         public List<GetDriveItemResponse.Item> GetChildren(string driveId, string itemId)
         {
-            return _helper.GetChildren(driveId, itemId);
+            return _helper.GetChildren(driveId, itemId, null);
+        }
+
+        /// <summary>
+        /// List children of a driveItem, with filter expression <paramref name="filterExpression"/>
+        /// <para>https://learn.microsoft.com/en-us/graph/api/driveitem-list-children?view=graph-rest-1.0&tabs=http</para>
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="filterExpression">e.g. startsWith(name, 'abc')</param>
+        /// <returns></returns>
+        public List<GetDriveItemResponse.Item> GetChildren(string driveId, string itemId, string filterExpression)
+        {
+            return _helper.GetChildren(driveId, itemId, filterExpression);
         }
 
         /// <summary>

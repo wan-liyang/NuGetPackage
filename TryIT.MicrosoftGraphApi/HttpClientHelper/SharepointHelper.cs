@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -111,7 +110,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             // if file size < 4 MB, use normal upload, otherwise use upload session
             if (fileContent.Length < 4 * 1024 * 1024)
             {
-                var children = GetChildren(driveId, folderItemId);
+                var children = GetChildren(driveId, folderItemId, null);
 
                 string fileId = children.Where(p => p.name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault()?.id;
 
@@ -239,12 +238,23 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
-
-        private List<GetDriveItemResponse.Item> ChildrenItems;
-        public List<GetDriveItemResponse.Item> GetChildren(string driveId, string itemId)
+        /// <summary>
+        /// get children of <paramref name="itemId"/>, filter with <paramref name="filterExpression"/>
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="filterExpression"></param>
+        /// <returns></returns>
+        public List<GetDriveItemResponse.Item> GetChildren(string driveId, string itemId, string filterExpression)
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/children";
 
+            if (!string.IsNullOrEmpty(filterExpression))
+            {
+                url = $"{url}?$filter={filterExpression}";
+            }
+
+            List<GetDriveItemResponse.Item> childrenItems = new List<GetDriveItemResponse.Item>();
             try
             {
                 var response = api.GetAsync(url).GetAwaiter().GetResult();
@@ -253,15 +263,38 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 string content = response.Content.ReadAsStringAsync().Result;
                 var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
 
-                ChildrenItems = new List<GetDriveItemResponse.Item>();
-                ChildrenItems.AddRange(responseObj.value);
+                childrenItems = new List<GetDriveItemResponse.Item>();
+                childrenItems.AddRange(responseObj.value);
 
                 if (!string.IsNullOrEmpty(responseObj.odatanextLink))
                 {
-                    GetChildrenNextLink(responseObj.odatanextLink);
+                    _getnextlink(responseObj.odatanextLink, childrenItems);
                 }
 
-                return ChildrenItems;
+                return childrenItems;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private void _getnextlink(string nextLink, List<GetDriveItemResponse.Item> list)
+        {
+            try
+            {
+                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+
+                list.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    _getnextlink(responseObj.odatanextLink, list);
+                }
             }
             catch
             {
@@ -273,53 +306,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             var folder = GetFolder(folderAbsoluteUrl);
 
-            string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{folder.id}/children";
-
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
-
-                ChildrenItems = new List<GetDriveItemResponse.Item>();
-                ChildrenItems.AddRange(responseObj.value);
-
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
-                {
-                    GetChildrenNextLink(responseObj.odatanextLink);
-                }
-
-                return ChildrenItems;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        public void GetChildrenNextLink(string nextLink)
-        {
-            try
-            {
-                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
-
-                ChildrenItems.AddRange(responseObj.value);
-
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
-                {
-                    GetChildrenNextLink(responseObj.odatanextLink);
-                }
-            }
-            catch
-            {
-                throw;
-            }
+            return GetChildren(folder.parentReference.driveId, folder.id, null);
         }
 
         /// <summary>

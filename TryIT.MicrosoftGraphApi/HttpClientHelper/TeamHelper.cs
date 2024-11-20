@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model.Team;
 using TryIT.MicrosoftGraphApi.Request.Team;
+using TryIT.MicrosoftGraphApi.Response.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Team;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
@@ -16,6 +17,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     /// </summary>
     internal class TeamHelper : BaseHelper
     {
+        private readonly TryIT.RestApi.Api api;
         private HttpClient _httpClient;
         private string _teamNamePolicy;
 
@@ -28,6 +30,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             if (null == httpClient)
                 throw new ArgumentNullException(nameof(httpClient));
+
+            // use RestApi library and enable retry
+            api = new RestApi.Api(new RestApi.Models.ApiConfig
+            {
+                HttpClient = httpClient,
+                EnableRetry = true,
+            });
 
             _httpClient = httpClient;
         }
@@ -129,6 +138,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public List<GetMembersResponse.Member> GetMembers(string teamName)
         {
+            List<GetMembersResponse.Member> result = new List<GetMembersResponse.Member>();
+
             string teamId = GetTeam(teamName).id;
             string url = $"{GraphApiRootUrl}/teams/{teamId}/members";
 
@@ -138,7 +149,39 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetMembersResponse.Response>().value;
+                var responseObj = content.JsonToObject<GetMembersResponse.Response>();
+
+                result.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    _getnextlink(responseObj.odatanextLink, result);
+                }
+
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private void _getnextlink(string nextLink, List<GetMembersResponse.Member> list)
+        {
+            try
+            {
+                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var responseObj = content.JsonToObject<GetMembersResponse.Response>();
+
+                list.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    _getnextlink(responseObj.odatanextLink, list);
+                }
             }
             catch
             {

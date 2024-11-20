@@ -88,5 +88,17 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             var item = api.GetFolder(url);
         }
+
+        [Test]
+        public void GetChildFilter()
+        {
+            SharepointApi api = new SharepointApi(config);
+
+            string driveId = "";
+            string itemId = "";
+            string filterExpress = "startsWith(name, 'abc')";
+            api.GetChildren(driveId, itemId, filterExpress);
+
+        }
     }
 }
