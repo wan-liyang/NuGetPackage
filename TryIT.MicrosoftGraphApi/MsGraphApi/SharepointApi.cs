@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Sharepoint;
+using TryIT.MicrosoftGraphApi.Request.Batching;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
@@ -16,6 +18,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     public class SharepointApi
     {
         private SharepointHelper _helper;
+        private HttpClient _httpClient;
 
         /// <summary>
         /// init Teams api with configuration
@@ -23,8 +26,8 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public SharepointApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new SharepointHelper(graphHelper.GetHttpClient());
+            _httpClient = new MsGraphHelper(config).GetHttpClient();
+            _helper = new SharepointHelper(_httpClient);
         }
 
         /// <summary>
@@ -131,6 +134,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
             string parentFolderId = folderItemId;
 
+
             for (int i = 0; i < pathList.Count; i++)
             {
                 string subFolderPath = pathList[i];
@@ -144,20 +148,45 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
                     if (stopInherit)
                     {
-                        // for new created folder, do remove permission, so that it will stop inherit permission
-                        var permissions = _helper.ListPermissions(driveId, subFolder.id);
-                        if (permissions != null && permissions.Count > 0)
-                        {
-                            foreach (var permission in permissions)
-                            {
-                                _helper.DeletePermission(driveId, subFolder.id, permission.id);
-                            }
-                        }
+                        // TODO: need find out why first round delete permission not able delete some permission
+                        _stop_inherit_permission(driveId, subFolder.id);
+                        _stop_inherit_permission(driveId, subFolder.id);
                     }
                 }
                 parentFolderId = subFolder.id;
             }
             return listNewFolders;
+        }
+
+        private void _stop_inherit_permission(string driveId, string itemId)
+        {
+            // for new created folder, do remove permission, so that it will stop inherit permission
+
+            var _batchingHelper = new BatchingHelper(_httpClient);
+            var permissions = _helper.ListPermissions(driveId, itemId);
+            if (permissions != null && permissions.Count > 0)
+            {
+                if (permissions.Count > 1)
+                {
+                    BatchingRequest.Body batching = new BatchingRequest.Body();
+
+                    for (int j = 0; j < permissions.Count; j++)
+                    {
+                        batching.requests.Add(new BatchingRequest.Request
+                        {
+                            id = j.ToString(),
+                            method = HttpMethod.Delete.ToString(),
+                            url = $"/drives/{driveId}/items/{itemId}/permissions/{permissions[j].id}"
+                        });
+                    }
+
+                    _batchingHelper.Post(batching);
+                }
+                else
+                {
+                    _helper.DeletePermission(driveId, itemId, permissions[0].id);
+                }
+            }
         }
 
         /// <summary>
