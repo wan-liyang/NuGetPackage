@@ -95,5 +95,15 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             return httpContent;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        protected string EscapeExpression(string expression)
+        {
+            return Uri.EscapeDataString(expression);
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public GetGroupsResponse.Group GetGroup(string name)
         {
-            string url = $"https://api.powerbi.com/v1.0/myorg/groups?$filter=name eq '{name}'";
+            string url = $"https://api.powerbi.com/v1.0/myorg/groups?$filter={EscapeExpression($"name eq '{name}'")}";
 
             try
             {

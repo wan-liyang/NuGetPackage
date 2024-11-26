@@ -63,7 +63,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string siteId = _siteHelper.GetSite(siteName).id;
 
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?$filter=DisplayName eq '{listName}'";
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?$filter={EscapeExpression($"DisplayName eq '{listName}'")}";
 
             try
             {

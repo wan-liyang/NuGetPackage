@@ -73,7 +73,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(userEmail));
             }
          
-            string url = $"{GraphApiRootUrl}/users?$filter=mail eq '{userEmail}'";
+            string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression($"mail eq '{userEmail}'")}";
             try
             {
                 var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
@@ -101,7 +101,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(userEmail));
             }
 
-            string url = $"{GraphApiRootUrl}/users?$filter=mail eq '{userEmail}'";
+            string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression($"mail eq '{userEmail}'")}";
 
             var props = typeof(GetUserResponse.User).GetProperties().Where(p => !p.Name.IsEquals("AdditionalAttributes"));
             if (additionalAttribute != null && additionalAttribute.Length > 0)
@@ -164,7 +164,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            string url = $"{GraphApiRootUrl}/users?$filter={expression}";
+            string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression(expression)}";
             try
             {
                 var props = typeof(T).GetProperties();
@@ -241,7 +241,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(attrKey));
             }
 
-            string url = $"{GraphApiRootUrl}/users?$filter={attrKey} eq '{attrValue}'";
+            string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression($"{attrKey} eq '{attrValue}'")}";
             try
             {
                 var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();

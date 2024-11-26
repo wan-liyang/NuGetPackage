@@ -28,7 +28,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(groupDisplayName));
             }
 
-            string url = $"{GraphApiRootUrl}/groups?$filter=displayName eq '{groupDisplayName}'";
+            string url = $"{GraphApiRootUrl}/groups?$filter={EscapeExpression($"displayName eq '{groupDisplayName}'")}";
 
             try
             {
@@ -144,7 +144,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new Exception($"user '{userEmail}' not found");
             }
 
-            string url = $"{GraphApiRootUrl}/groups/{group.id}/members?$count=true&$filter=mail eq '{userEmail}'";
+            string url = $"{GraphApiRootUrl}/groups/{group.id}/members?$count=true&$filter={EscapeExpression($"mail eq '{userEmail}'")}";
 
             try
             {

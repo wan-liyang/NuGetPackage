@@ -30,7 +30,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(appDisplayName));
             }
 
-            string url = $"{GraphApiRootUrl}/applications?$filter=displayName eq '{appDisplayName}'";
+            string url = $"{GraphApiRootUrl}/applications?$filter={EscapeExpression($"displayName eq '{appDisplayName}'")}";
 
             try
             {
