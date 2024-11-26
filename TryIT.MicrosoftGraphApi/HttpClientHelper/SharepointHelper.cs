@@ -251,7 +251,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (!string.IsNullOrEmpty(filterExpression))
             {
-                url = $"{url}?$filter={filterExpression}";
+                url = $"{url}?$filter={Uri.EscapeDataString(filterExpression)}";
             }
 
             List<GetDriveItemResponse.Item> childrenItems = new List<GetDriveItemResponse.Item>();
