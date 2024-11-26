@@ -27,7 +27,10 @@
                 .Replace("?", "_")
                 .Replace("/", "_")
                 .Replace("\\", "_")
-                .Replace("|", "_");
+                .Replace("|", "_")
+                .Replace("\t", "_")
+                .Replace("\r", "_")
+                .Replace("\n", "_");
 
             if (itemName.EndsWith("."))
             {
