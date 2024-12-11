@@ -407,8 +407,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="copyModes"></param>
         public void CopyData(List<ICopyMode> copyModes)
         {
-            ConsoleLog("CopyData started with list copy mode");
-
             List<Tuple<ICopyMode, List<DbTableStructure>>> tobeCopyModes = new List<Tuple<ICopyMode, List<DbTableStructure>>>();
 
             // validate information
@@ -594,8 +592,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw;
                 }
             }
-
-            ConsoleLog("CopyData completed with list copy mode");
         }
 
         /// <summary>
@@ -606,8 +602,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <exception cref="InvalidOperationException"></exception>
         public void CopyData(ICopyMode iCopyMode)
         {
-            ConsoleLog("CopyData started with single copy mode");
-
             CopyModeBase _copyMode = iCopyMode as CopyModeBase;
 
             if (_copyMode == null)
@@ -776,8 +770,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     throw;
                 }
             }
-
-            ConsoleLog("CopyData completed with single copy mode");
         }
 
         /// <summary>
@@ -1327,7 +1319,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
         private void ConsoleLog(string message)
         {
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")} {message}");
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff");
+            Console.WriteLine($"[{timestamp}] {message}");
         }
     }
 }
