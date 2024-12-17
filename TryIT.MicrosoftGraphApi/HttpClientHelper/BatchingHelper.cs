@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Request.Batching;
 using TryIT.MicrosoftGraphApi.Request.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.DataFactory;
@@ -29,7 +30,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             _httpClient = httpClient;
         }
 
-        public List<string> Post(BatchingRequest.Body requestBody)
+        public async Task<List<string>> Post(BatchingRequest.Body requestBody)
         {
             List<string> results = new List<string>();
             BatchingRequest.Body body = new BatchingRequest.Body();
@@ -41,14 +42,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 batchCount++;
                 if (batchCount == 20)
                 {
-                    string result = _postBatch(body);
+                    string result = await _postBatch(body);
                     results.Add(result);
                     batchCount = 0;
                     body.requests.Clear();
                 }
                 else if (batchCount < 20 && i == requestBody.requests.Count - 1)
                 {
-                    string result = _postBatch(body);
+                    string result = await _postBatch(body);
                     results.Add(result);
                     batchCount = 0;
                     body.requests.Clear();
@@ -58,7 +59,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return results;
         }
 
-        private string _postBatch(BatchingRequest.Body requestBody)
+        private async Task<string> _postBatch(BatchingRequest.Body requestBody)
         {
             string url = $"{GraphApiRootUrl}/$batch";
             try
@@ -67,7 +68,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
                 CheckStatusCode(response, api.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
+                string content = await response.Content.ReadAsStringAsync();
                 return content;
             }
             catch

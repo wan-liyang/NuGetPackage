@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
@@ -149,8 +150,8 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                     if (stopInherit)
                     {
                         // TODO: need find out why first round delete permission not able delete some permission
-                        _stop_inherit_permission(driveId, subFolder.id);
-                        _stop_inherit_permission(driveId, subFolder.id);
+                        _stop_inherit_permission(driveId, subFolder.id).Wait();
+                        _stop_inherit_permission(driveId, subFolder.id).Wait();
                     }
                 }
                 parentFolderId = subFolder.id;
@@ -158,7 +159,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return listNewFolders;
         }
 
-        private void _stop_inherit_permission(string driveId, string itemId)
+        private async Task _stop_inherit_permission(string driveId, string itemId)
         {
             // for new created folder, do remove permission, so that it will stop inherit permission
 
@@ -180,7 +181,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                         });
                     }
 
-                    _batchingHelper.Post(batching);
+                    await _batchingHelper.Post(batching);
                 }
                 else
                 {
