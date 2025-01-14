@@ -984,8 +984,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     case "bit":
                     case "int":
                     case "uniqueidentifier":
-                    case "varbinary":
                         dataType = structure.DATA_TYPE;
+                        break;
+                    case "varbinary":
+                        dataType = "varbinary(max)";
                         break;
                     default:
                         break;
