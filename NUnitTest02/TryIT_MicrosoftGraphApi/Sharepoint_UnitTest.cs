@@ -63,6 +63,24 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         }
 
         [Test]
+        public void CreateFolderStopInherit()
+        {
+            SharepointApi api = new SharepointApi(config);
+
+            string hostname = "";
+            string sitename = "";
+            SiteApi siteApi = new SiteApi(config, hostname);
+            var site = siteApi.GetSite(sitename);
+            var drive = siteApi.GetDrive(site.id);
+
+            string folderPath = @"";
+            var item = api.GetItemByPath(drive.id, folderPath);
+
+            string newFolderPath = @"";
+            var response = api.CreateFolder(drive.id, item.id, newFolderPath, true);
+        }
+
+        [Test]
         public void DownloadFolder()
         {
             SharepointApi api = new SharepointApi(config);

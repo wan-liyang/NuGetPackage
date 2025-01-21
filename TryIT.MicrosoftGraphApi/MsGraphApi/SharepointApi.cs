@@ -149,8 +149,6 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
 
                     if (stopInherit)
                     {
-                        // TODO: need find out why first round delete permission not able delete some permission
-                        _stop_inherit_permission(driveId, subFolder.id).Wait();
                         _stop_inherit_permission(driveId, subFolder.id).Wait();
                     }
                 }
@@ -163,21 +161,28 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         {
             // for new created folder, do remove permission, so that it will stop inherit permission
 
+            // TrackingID#2411250030005352
+            // there is known issue from Microsoft that the list of permission not return all permission
+            // Microsoft is working on that issue, but do not have ETA
+            // interim solution to infinite check permission
+            // check for non-owner permission only
+
             var _batchingHelper = new BatchingHelper(_httpClient);
-            var permissions = _helper.ListPermissions(driveId, itemId);
-            if (permissions != null && permissions.Count > 0)
+
+            var nonOwnerRoles = _get_non_owner_permissions(driveId, itemId);
+            while (nonOwnerRoles != null && nonOwnerRoles.Count > 0)
             {
-                if (permissions.Count > 1)
+                if (nonOwnerRoles.Count > 1)
                 {
                     BatchingRequest.Body batching = new BatchingRequest.Body();
 
-                    for (int j = 0; j < permissions.Count; j++)
+                    for (int j = 0; j < nonOwnerRoles.Count; j++)
                     {
                         batching.requests.Add(new BatchingRequest.Request
                         {
                             id = j.ToString(),
                             method = HttpMethod.Delete.ToString(),
-                            url = $"/drives/{driveId}/items/{itemId}/permissions/{permissions[j].id}"
+                            url = $"/drives/{driveId}/items/{itemId}/permissions/{nonOwnerRoles[j].id}"
                         });
                     }
 
@@ -185,9 +190,18 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 }
                 else
                 {
-                    _helper.DeletePermission(driveId, itemId, permissions[0].id);
+                    _helper.DeletePermission(driveId, itemId, nonOwnerRoles[0].id);
                 }
+
+                // get list of permission again
+                nonOwnerRoles = nonOwnerRoles = _get_non_owner_permissions(driveId, itemId);
             }
+        }
+
+        private List<ListPermissionsResponse.Value> _get_non_owner_permissions(string driveId, string itemId)
+        {
+            var permissions = _helper.ListPermissions(driveId, itemId);
+            return permissions.Where(p => !p.roles.Contains("owner", StringComparer.OrdinalIgnoreCase)).ToList();
         }
 
         /// <summary>
