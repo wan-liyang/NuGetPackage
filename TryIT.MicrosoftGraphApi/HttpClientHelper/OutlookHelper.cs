@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
@@ -96,7 +97,9 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (message.Attachments != null && message.Attachments.Count > 0)
             {
-                foreach (var item in message.Attachments)
+                var validAttachments = message.Attachments.Where(p => !string.IsNullOrEmpty(p.FileName) && p.FileContent != null).ToList();
+
+                foreach (var item in validAttachments)
                 {
                     model.message.attachments.Add(new SendMessageRequest.Attachment
                     {
