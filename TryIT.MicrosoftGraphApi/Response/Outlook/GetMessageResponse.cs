@@ -43,7 +43,7 @@ namespace TryIT.MicrosoftGraphApi.Response.Outlook
             public EmailAddress emailAddress { get; set; }
         }
 
-        public class ToRecipient
+        public class Recipient
         {
             public EmailAddress emailAddress { get; set; }
         }
@@ -76,9 +76,9 @@ namespace TryIT.MicrosoftGraphApi.Response.Outlook
             public Body body { get; set; }
             public Sender sender { get; set; }
             public From from { get; set; }
-            public List<ToRecipient> toRecipients { get; set; }
-            public List<object> ccRecipients { get; set; }
-            public List<object> bccRecipients { get; set; }
+            public List<Recipient> toRecipients { get; set; }
+            public List<Recipient> ccRecipients { get; set; }
+            public List<Recipient> bccRecipients { get; set; }
             public List<object> replyTo { get; set; }
             public Flag flag { get; set; }
         }
