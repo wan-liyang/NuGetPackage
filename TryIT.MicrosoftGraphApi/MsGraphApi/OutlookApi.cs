@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Cryptography;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
@@ -25,6 +26,11 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.GetMessages();
         }
 
+        public List<GetMessageResponse.Message> GetMessages(GetMessageModel getMessageModel)
+        {
+            return _helper.GetMessages(getMessageModel);
+        }
+
         /// <summary>
         /// send message as current user
         /// </summary>
@@ -32,6 +38,12 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public void SendMessage(SendMessageModel message)
         {
             _helper.SendMessage(message);
+        }
+
+
+        public void Move(string messageId, string destinationFolder)
+        {
+
         }
     }
 }

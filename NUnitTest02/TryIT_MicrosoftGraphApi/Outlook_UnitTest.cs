@@ -12,25 +12,43 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 {
     internal class Outlook_UnitTest
     {
-        [Test]
-        public void Group_Test()
+
+        OutlookApi api;
+
+        [SetUp]
+        public void Setup()
         {
             MsGraphApiConfig config = new MsGraphApiConfig
             {
                 Token = "",
             };
 
-            OutlookApi api = new OutlookApi(config);
+           api = new OutlookApi(config);
+        }
 
+        [Test]
+        public void Group_Test()
+        {
             api.SendMessage(new SendMessageModel
             {
-                From = "it-powerapps-noreply@ncs.co",
+                From = "noreply@noreply.com",
                 Subject = $"Test Email {DateTime.Now}",
                 Body = "Test",
                 BodyContentType = BodyContentType.Html,
-                ToRecipients = "liyang.wan2@ncs.co".Split(','),
+                ToRecipients = "".Split(','),
                 CcRecipients = null,
                 Attachments = null
+            });
+
+            Assert.True(1 == 1);
+        }
+
+        [Test]
+        public void Group_Test2()
+        {
+            var result = api.GetMessages(new GetMessageModel
+            {
+
             });
 
             Assert.True(1 == 1);

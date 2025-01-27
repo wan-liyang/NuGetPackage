@@ -12,12 +12,20 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class OutlookHelper : BaseHelper
     {
+        private TryIT.RestApi.Api api;
         private HttpClient _httpClient;
 
         public OutlookHelper(HttpClient httpClient)
         {
             if (null == httpClient) 
                 throw new ArgumentNullException(nameof(httpClient));
+
+            // use RestApi library and enable retry
+            api = new RestApi.Api(new RestApi.Models.ApiConfig
+            {
+                HttpClient = httpClient,
+                EnableRetry = true,
+            });
 
             _httpClient = httpClient;
         }
@@ -39,6 +47,70 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 var result = content.JsonToObject<GetMessageResponse.Response>();
                 return result.value;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// get message from inbox folder
+        /// <para>https://graph.microsoft.com/v1.0/users/{EmailAddress}/mailFolders/{FolderId}/messages?$top={MaxItems}&$filter={Filter}&$select={Select}&$search={Search}&$count={Count}</para>
+        /// </summary>
+        /// <returns></returns>
+        public List<GetMessageResponse.Message> GetMessages(GetMessageModel getMessage)
+        {
+            string mailbox = !string.IsNullOrEmpty(getMessage?.mailbox) ? getMessage?.mailbox : "me";
+            string folder = !string.IsNullOrEmpty(getMessage?.folder) ? getMessage.folder : "inbox";
+
+            string url = $"{GraphApiRootUrl}/{mailbox}/mailFolders/{folder}/messages";
+
+            if (getMessage?.top > 0)
+            {
+                url = $"{url}?$top={getMessage.top}";
+            }
+
+            try
+            {
+                List<GetMessageResponse.Message> messages = new List<GetMessageResponse.Message>();
+
+                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var responseObj = content.JsonToObject<GetMessageResponse.Response>();
+
+                messages.AddRange(responseObj.value);
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    _getnextlink(responseObj.odatanextLink, messages);
+                }
+
+                return responseObj.value;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private void _getnextlink(string nextLink, List<GetMessageResponse.Message> list)
+        {
+            try
+            {
+                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
+                CheckStatusCode(response, api.RetryResults);
+
+                string content = response.Content.ReadAsStringAsync().Result;
+                var responseObj = content.JsonToObject<GetMessageResponse.Response>();
+
+                list.AddRange(responseObj.value);
+
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    _getnextlink(responseObj.odatanextLink, list);
+                }
             }
             catch
             {
@@ -163,6 +235,33 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().Result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    
+        public void Move(MoveMessageModel moveMessage)
+        {
+            // /users/{id | userPrincipalName}/mailFolders/{id}/messages/{id}/move
+            // /users/{id | userPrincipalName}/messages/{id}/move
+
+            string mailbox = !string.IsNullOrEmpty(moveMessage?.mailbox) ? moveMessage?.mailbox : "me";
+
+            string url = $"{GraphApiRootUrl}/{mailbox}/messages/{moveMessage.messageId}/move";
+
+            try
+            {
+                MoveMessageRequest request = new MoveMessageRequest
+                {
+                    destinationId = moveMessage.destinationFolder,
+                };
+
+                HttpContent content = GetJsonHttpContent(request);
+                var response = api.PostAsync(url, content).GetAwaiter().GetResult();
+
+                CheckStatusCode(response, api.RetryResults);
             }
             catch
             {
