@@ -88,7 +88,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                     // if top > 0 and messsages count < top, means need get next page
                     if (getMessage?.top <= 0 || messages.Count < getMessage.top)
                     {
-                        _getnextlink(responseObj.odatanextLink, messages);
+                        _getnextlink(responseObj.odatanextLink, messages, getMessage?.top);
                     }
                 }
 
@@ -100,7 +100,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
-        private void _getnextlink(string nextLink, List<GetMessageResponse.Message> list)
+        private void _getnextlink(string nextLink, List<GetMessageResponse.Message> list, int? top)
         {
             try
             {
@@ -114,7 +114,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
                 if (!string.IsNullOrEmpty(responseObj.odatanextLink))
                 {
-                    _getnextlink(responseObj.odatanextLink, list);
+                    if (top <= 0 || list.Count < top)
+                    {
+                        _getnextlink(responseObj.odatanextLink, list, top);
+                    }                        
                 }
             }
             catch
