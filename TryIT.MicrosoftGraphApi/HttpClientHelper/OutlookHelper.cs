@@ -82,7 +82,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 var responseObj = content.JsonToObject<GetMessageResponse.Response>();
 
                 messages.AddRange(responseObj.value);
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+                if (!string.IsNullOrEmpty(responseObj.odatanextLink) && getMessage?.top <= 0)
                 {
                     _getnextlink(responseObj.odatanextLink, messages);
                 }
