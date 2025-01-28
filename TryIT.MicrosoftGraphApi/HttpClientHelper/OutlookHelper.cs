@@ -84,7 +84,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 messages.AddRange(responseObj.value);
                 if (!string.IsNullOrEmpty(responseObj.odatanextLink) && getMessage?.top <= 0)
                 {
-                    _getnextlink(responseObj.odatanextLink, messages);
+                    // if top <= 0, means get all
+                    // if top > 0 and messsages count < top, means need get next page
+                    if (getMessage?.top <= 0 || messages.Count < getMessage.top)
+                    {
+                        _getnextlink(responseObj.odatanextLink, messages);
+                    }
                 }
 
                 return responseObj.value;
