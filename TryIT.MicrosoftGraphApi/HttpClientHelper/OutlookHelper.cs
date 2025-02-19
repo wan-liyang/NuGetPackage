@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model.Outlook;
 using TryIT.MicrosoftGraphApi.Request.Outlook;
@@ -119,6 +121,77 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                         _getnextlink(responseObj.odatanextLink, list, top);
                     }                        
                 }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> GetMIMEContentAsync(GetMIMEContentModel model)
+        {
+            try
+            {
+                string url = $"{GraphApiRootUrl}/me/messages/{model.messageId}/$value";
+                if (!string.IsNullOrEmpty(model.mailbox))
+                {
+                    url = $"{GraphApiRootUrl}/users/{model.mailbox}/messages/{model.messageId}/$value";
+                }
+
+                HttpResponseMessage response = await _httpClient.GetAsync(url);
+                CheckStatusCode(response);
+
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteMessageAsync(DeleteMessageModel model)
+        {
+            try
+            {
+                string url = $"{GraphApiRootUrl}/me/messages/{model.messageId}";
+                if (!string.IsNullOrEmpty(model.mailbox))
+                {
+                    url = $"{GraphApiRootUrl}/users/{model.mailbox}/messages/{model.messageId}";
+                }
+
+                HttpResponseMessage response = await _httpClient.DeleteAsync(url);
+                CheckStatusCode(response);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<GetMessageResponse.Message> MoveMessageAsync(MoveMessageModel model)
+        {
+            try
+            {
+                string url = $"{GraphApiRootUrl}/me/messages/{model.messageId}/move";
+                if (!string.IsNullOrEmpty(model.mailbox))
+                {
+                    url = $"{GraphApiRootUrl}/users/{model.mailbox}/messages/{model.messageId}/move";
+                }
+
+                MoveMessageRequest request = new MoveMessageRequest
+                {
+                    destinationId = model.destinationFolder
+                };
+
+                HttpContent httpContent = new StringContent(request.ObjectToJson());
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                HttpResponseMessage response = await _httpClient.PostAsync(url, httpContent);
+                CheckStatusCode(response);
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return content.JsonToObject<GetMessageResponse.Message>();
             }
             catch
             {

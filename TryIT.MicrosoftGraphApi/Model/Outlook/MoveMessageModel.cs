@@ -4,13 +4,8 @@ using System.Text;
 
 namespace TryIT.MicrosoftGraphApi.Model.Outlook
 {
-    public class MoveMessageModel
+    public class MoveMessageModel : MessageBaseModel
     {
-        /// <summary>
-        /// leave empty if get from current user
-        /// </summary>
-        public string mailbox { get; set; }
-
         /// <summary>
         /// the id of message to move
         /// </summary>
