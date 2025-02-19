@@ -69,7 +69,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (!string.IsNullOrEmpty(getMessage.mailbox))
             {
-                url = $"{GraphApiRootUrl}/user/{getMessage.mailbox}/mailFolders/{folder}/messages";
+                url = $"{GraphApiRootUrl}/users/{getMessage.mailbox}/mailFolders/{folder}/messages";
             }
 
             if (getMessage?.top > 0)
