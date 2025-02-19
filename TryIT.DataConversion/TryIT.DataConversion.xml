@@ -4,6 +4,11 @@
         <name>TryIT.DataConversion</name>
     </assembly>
     <members>
+        <member name="T:TryIT.DataConversion.ConvertString">
+            <summary>
+            convert string value to other type of value, e.g. convert string date to datetime
+            </summary>
+        </member>
         <member name="M:TryIT.DataConversion.ConvertString.ToDateTimeWithDefault(System.String,System.DateTime,System.String[])">
             <summary>
             Convert string to datetime, return default value if convert failed
@@ -37,6 +42,15 @@
             <param name="value"></param>
             <returns></returns>
         </member>
+        <member name="M:TryIT.DataConversion.ConvertString.TryToInt(System.String)">
+            <summary>
+            convert string value to int, return 0 if convert failed
+            <para>item1: indicator whether convert success, item2: value after convert</para>
+            <para>if value is "0", it will be 0 as well</para>
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
         <member name="M:TryIT.DataConversion.ConvertString.ToEnum``1(System.String,``0)">
             <summary>
             convert string value to Enum item, return defaultEnum if convert failed
@@ -44,6 +58,31 @@
             <typeparam name="T"></typeparam>
             <param name="value"></param>
             <param name="defaultEnum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.DataConversion.ConvertString.ToDecimal(System.String,System.Globalization.NumberStyles)">
+            <summary>
+            try convert string value to decimal value, return null if input value is empty or convert failed, 1% will convert to 0.01
+            </summary>
+            <param name="value"></param>
+            <param name="numberStyles">default to <see cref="F:System.Globalization.NumberStyles.Any"/> for avoid failure for scientific value, e.g. if data from excel 0.0000159515001096899 will become 1.59515001096899E-05</param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.DataConversion.ConvertString.ToBytes(System.String)">
+            <summary>
+            get bytes from string value
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.DataConversion.ConvertString.TryToDecimal(System.String,System.Globalization.NumberStyles)">
+            <summary>
+            try convert string value to decimal value, return Tuple
+            <para>item1: indicator whether convert success, item2: value after convert</para>
+            <para>1% will convert to 0.01</para>
+            </summary>
+            <param name="value"></param>
+            <param name="numberStyles">default to <see cref="F:System.Globalization.NumberStyles.Any"/> for avoid failure for scientific value, e.g. if data from excel 0.0000159515001096899 will become 1.59515001096899E-05</param>
             <returns></returns>
         </member>
     </members>

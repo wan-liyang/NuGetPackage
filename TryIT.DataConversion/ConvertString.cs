@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 
 namespace TryIT.DataConversion
 {
@@ -158,6 +159,16 @@ namespace TryIT.DataConversion
                 }
                 return null;
             }
+        }
+
+        /// <summary>
+        /// get bytes from string value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static byte[] ToBytes(this string value)
+        {
+            return Encoding.Unicode.GetBytes(value);
         }
 
         /// <summary>
