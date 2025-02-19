@@ -16,5 +16,10 @@ namespace TryIT.MicrosoftGraphApi.Model.Outlook
         /// get number of message
         /// </summary>
         public int top { get; set; }
+
+        /// <summary>
+        /// the expression to filter message, it will append to query as $filter=<see cref="filterExpression"/>
+        /// </summary>
+        public string filterExpression { get; set; }
     }
 }

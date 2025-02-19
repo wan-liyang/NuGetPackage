@@ -39,5 +39,37 @@
 
             return itemName.Trim();
         }
+
+        /// <summary>
+        /// append query string into url
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="query">key=value</param>
+        /// <returns></returns>
+        public static string AppendQueryToUrl(this string url, string query)
+        {
+            if (!url.Contains("?"))
+            {
+                url += "?";
+            }
+
+            if (url.EndsWith("?"))
+            {
+                url += query;
+            }
+            else
+            {
+                if (url.EndsWith("&"))
+                {
+                    url += query;
+                }
+                else
+                {
+                    url += $"&{query}";
+                }
+            }
+
+            return url;
+        }
     }
 }

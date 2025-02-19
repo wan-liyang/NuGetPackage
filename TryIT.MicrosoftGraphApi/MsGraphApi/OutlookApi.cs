@@ -34,6 +34,11 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.GetMessages();
         }
 
+        /// <summary>
+        /// get message from the specified user's mailbox
+        /// </summary>
+        /// <param name="getMessageModel"></param>
+        /// <returns></returns>
         public List<GetMessageResponse.Message> GetMessages(GetMessageModel getMessageModel)
         {
             return _helper.GetMessages(getMessageModel);

@@ -70,7 +70,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (getMessage?.top > 0)
             {
-                url = $"{url}?$top={getMessage.top}";
+                url = url.AppendQueryToUrl($"$top={getMessage.top}");
+            }
+
+            if (!string.IsNullOrEmpty(getMessage.filterExpression))
+            {
+                url = url.AppendQueryToUrl($"$filter={EscapeExpression(getMessage.filterExpression)}");
             }
 
             try
