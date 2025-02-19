@@ -63,10 +63,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public List<GetMessageResponse.Message> GetMessages(GetMessageModel getMessage)
         {
-            string mailbox = !string.IsNullOrEmpty(getMessage?.mailbox) ? getMessage?.mailbox : "me";
             string folder = !string.IsNullOrEmpty(getMessage?.folder) ? getMessage.folder : "inbox";
 
-            string url = $"{GraphApiRootUrl}/{mailbox}/mailFolders/{folder}/messages";
+            string url = $"{GraphApiRootUrl}/me/mailFolders/{folder}/messages";
+
+            if (!string.IsNullOrEmpty(getMessage.mailbox))
+            {
+                url = $"{GraphApiRootUrl}/user/{getMessage.mailbox}/mailFolders/{folder}/messages";
+            }
 
             if (getMessage?.top > 0)
             {
