@@ -162,13 +162,23 @@ namespace TryIT.DataConversion
         }
 
         /// <summary>
-        /// get bytes from string value
+        /// get bytes from string value, default encoding UTF8
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="encoding"></param>
         /// <returns></returns>
-        public static byte[] ToBytes(this string value)
+        public static byte[] ToBytes(this string value, Encoding encoding = null)
         {
-            return Encoding.Unicode.GetBytes(value);
+            if(value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            // Default to UTF-8 if no encoding is specified
+            if (encoding == null)
+            {
+                encoding = Encoding.UTF8;
+            }
+
+            return encoding.GetBytes(value);
         }
 
         /// <summary>

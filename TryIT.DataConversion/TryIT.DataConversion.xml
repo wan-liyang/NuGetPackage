@@ -68,11 +68,12 @@
             <param name="numberStyles">default to <see cref="F:System.Globalization.NumberStyles.Any"/> for avoid failure for scientific value, e.g. if data from excel 0.0000159515001096899 will become 1.59515001096899E-05</param>
             <returns></returns>
         </member>
-        <member name="M:TryIT.DataConversion.ConvertString.ToBytes(System.String)">
+        <member name="M:TryIT.DataConversion.ConvertString.ToBytes(System.String,System.Text.Encoding)">
             <summary>
-            get bytes from string value
+            get bytes from string value, default encoding UTF8
             </summary>
             <param name="value"></param>
+            <param name="encoding"></param>
             <returns></returns>
         </member>
         <member name="M:TryIT.DataConversion.ConvertString.TryToDecimal(System.String,System.Globalization.NumberStyles)">
