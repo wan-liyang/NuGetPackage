@@ -20,9 +20,9 @@ namespace TryIT.Jwt
             {
                 throw new ArgumentNullException(nameof(parameter.Issuer));
             }
-            if (string.IsNullOrEmpty(parameter.Audience))
+            if (string.IsNullOrEmpty(parameter.Audience) && (parameter.Audiences == null || parameter.Audiences.Count == 0))
             {
-                throw new ArgumentNullException(nameof(parameter.Audience));
+                throw new ArgumentNullException($"{nameof(parameter.Audience)} and {nameof(parameter.Audiences)} cannot both empty");
             }
             if (parameter.TokenSecret == null || parameter.TokenSecret.Length == 0)
             {
@@ -99,8 +99,8 @@ namespace TryIT.Jwt
                 {
                     ValidIssuer = _parameter.Issuer,
                     ValidAudience = _parameter.Audience,
+                    ValidAudiences = _parameter.Audiences,
                     IssuerSigningKey = new SymmetricSecurityKey(_parameter.TokenSecret),
-                    
 
                     ValidateIssuer = true,
                     ValidateAudience = true,
