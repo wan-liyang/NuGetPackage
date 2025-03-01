@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Response.SiteList;
 
@@ -11,7 +13,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SiteListHelper : BaseHelper
     {
-        private TryIT.RestApi.Api api;
+        private readonly TryIT.RestApi.Api api;
         private readonly SiteHelper _siteHelper;
         public SiteListHelper(HttpClient httpClient, string hostName)
         {
@@ -107,6 +109,64 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw;
             }
         }
+
+        /// <summary>
+        /// https://learn.microsoft.com/en-us/graph/api/listitem-list?view=graph-rest-1.0&tabs=http
+        /// <para></para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="siteId"></param>
+        /// <param name="listId"></param>
+        /// <returns></returns>
+        public async Task<List<T>> GetItems<T>(string siteId, string listId) where T : class
+        {
+            // GET https://graph.microsoft.com/v1.0/sites/{site-id}/lists/{list-id}/items?$expand=fields($select=Name,Color,Quantity)
+
+            var props = typeof(T).GetProperties();
+
+            string fields = string.Join(",", props.Select(p => p.Name));
+
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items?expand=fields(select={fields})";
+
+            var response = await api.GetAsync(url);
+            CheckStatusCode(response, api.RetryResults);
+
+            string content = await response.Content.ReadAsStringAsync();
+
+            var items = content.JsonToObject<GetItemResponse.Response>().value;
+
+            if (items.Count == 0)
+            {
+                return null;
+            }
+
+            List<T> list = new List<T>();
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = content.GetJsonValue<T>($"value[{i}]:fields");
+
+                list.Add(item);
+            }
+
+            return list;
+        }
+
+        private static PropertyInfo[] GetProperties(Type type)
+        {
+            // Check if T is a List<>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                Type elementType = type.GetGenericArguments()[0]; // Get the actual type inside List<T>
+                
+                return elementType.GetProperties();
+            }
+            else
+            {
+                return type.GetProperties();
+            }
+        }
+
 
         /// <summary>
         /// get specific item from list as json string

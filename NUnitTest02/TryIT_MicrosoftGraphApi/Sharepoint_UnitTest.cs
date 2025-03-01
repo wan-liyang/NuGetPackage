@@ -118,5 +118,20 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
             api.GetChildren(driveId, itemId, filterExpress);
 
         }
+
+        [Test]
+        public void GetListItems()
+        {
+        }
+
+        public class ListItem
+        {
+            public string Id { get; set; }
+            public string Title { get; set; }
+            public string Name { get; set; }
+            public string EmployeeId { get; set; }
+            public string CaseId { get; set; }
+            public DateTime? CaseDate { get; set; }
+        }
     }
 }

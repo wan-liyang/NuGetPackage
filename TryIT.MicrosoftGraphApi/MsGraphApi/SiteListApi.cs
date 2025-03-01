@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
@@ -6,15 +7,18 @@ using TryIT.MicrosoftGraphApi.Response.SiteList;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
 {
+    /// <summary>
+    /// sharepoint list api, use to opoerate on sharepoint list
+    /// </summary>
     public class SiteListApi
     {
-        private SiteListHelper _helper;
+        private readonly SiteListHelper _helper;
 
         /// <summary>
         /// init Teams api with configuration
         /// </summary>
-        /// <param name="config"></param>
-        /// <param name="hostName"></param>
+        /// <param name="config">configuration for api request, e.g token, timeout, proxy etc</param>
+        /// <param name="hostName">the host(domain) of the site, use for api request to get site under specific host</param>
         public SiteListApi(MsGraphApiConfig config, string hostName)
         {
             MsGraphHelper graphHelper = new MsGraphHelper(config);
@@ -52,6 +56,18 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public List<GetItemResponse.Item> GetItems(string siteName, string listName)
         {
             return _helper.GetItems(siteName, listName);
+        }
+
+        /// <summary>
+        /// get items as a entity list from a sharepoint list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="siteId"></param>
+        /// <param name="listId"></param>
+        /// <returns></returns>
+        public async Task<List<T>> GetItems<T>(string siteId, string listId) where T : class
+        {
+            return await _helper.GetItems<T>(siteId, listId);
         }
 
         /// <summary>

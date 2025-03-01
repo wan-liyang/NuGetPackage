@@ -5,15 +5,18 @@ using TryIT.MicrosoftGraphApi.Response.Site;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
 {
+    /// <summary>
+    /// sharepoint site api, can use to get sharepoint site and drive information
+    /// </summary>
     public class SiteApi
     {
-        private SiteHelper _helper;
+        private readonly SiteHelper _helper;
 
         /// <summary>
         /// init Teams api with configuration
         /// </summary>
-        /// <param name="config"></param>
-        /// <param name="hostName"></param>
+        /// <param name="config">configuration for api request, e.g token, timeout, proxy etc</param>
+        /// <param name="hostName">the host(domain) of the site, use for api request to get site under specific host</param>
         public SiteApi(MsGraphApiConfig config, string hostName)
         {
             MsGraphHelper graphHelper = new MsGraphHelper(config);
