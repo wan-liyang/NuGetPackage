@@ -64,7 +64,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <typeparam name="T"></typeparam>
         /// <param name="siteId"></param>
         /// <param name="listId"></param>
-        /// <param name="expression">the expression to filter, e.g. title eq 'xxx'</param>
+        /// <param name="expression">the expression to filter, e.g. title eq 'xxx', give null if do not apply filter</param>
         /// <returns></returns>
         public async Task<List<T>> GetItemsAsync<T>(string siteId, string listId, string expression) where T : class
         {
