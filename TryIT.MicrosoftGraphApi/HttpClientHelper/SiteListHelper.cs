@@ -118,7 +118,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="siteId"></param>
         /// <param name="listId"></param>
         /// <returns></returns>
-        public async Task<List<T>> GetItems<T>(string siteId, string listId) where T : class
+        public async Task<List<T>> GetItemsAsync<T>(string siteId, string listId) where T : class
         {
             // GET https://graph.microsoft.com/v1.0/sites/{site-id}/lists/{list-id}/items?$expand=fields($select=Name,Color,Quantity)
 

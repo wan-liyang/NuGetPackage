@@ -65,9 +65,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="siteId"></param>
         /// <param name="listId"></param>
         /// <returns></returns>
-        public async Task<List<T>> GetItems<T>(string siteId, string listId) where T : class
+        public async Task<List<T>> GetItemsAsync<T>(string siteId, string listId) where T : class
         {
-            return await _helper.GetItems<T>(siteId, listId);
+            return await _helper.GetItemsAsync<T>(siteId, listId);
         }
 
         /// <summary>
