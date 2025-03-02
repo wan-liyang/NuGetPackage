@@ -15,15 +15,18 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     {
         private readonly TryIT.RestApi.Api api;
         private readonly SiteHelper _siteHelper;
+        private readonly HttpClient _httpClient;
         public SiteListHelper(HttpClient httpClient, string hostName)
         {
             if (null == httpClient)
                 throw new ArgumentNullException(nameof(httpClient));
 
+            _httpClient = httpClient;
+
             // use RestApi library and enable retry
             api = new RestApi.Api(new RestApi.Models.ApiConfig
             {
-                HttpClient = httpClient,
+                HttpClient = _httpClient,
                 EnableRetry = true,
             });
 
@@ -132,6 +135,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             if (!string.IsNullOrEmpty(expression))
             {
                 url += $"&$filter={EscapeExpression(expression)}";
+
+                AddDefaultRequestHeaders(_httpClient, "Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly");
             }
 
             var response = await api.GetAsync(url);
