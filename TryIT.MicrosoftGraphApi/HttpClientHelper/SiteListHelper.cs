@@ -117,8 +117,9 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <typeparam name="T"></typeparam>
         /// <param name="siteId"></param>
         /// <param name="listId"></param>
+        /// <param name="expression">the expression to filter, e.g. title eq 'xxx'</param>
         /// <returns></returns>
-        public async Task<List<T>> GetItemsAsync<T>(string siteId, string listId) where T : class
+        public async Task<List<T>> GetItemsAsync<T>(string siteId, string listId, string expression) where T : class
         {
             // GET https://graph.microsoft.com/v1.0/sites/{site-id}/lists/{list-id}/items?$expand=fields($select=Name,Color,Quantity)
 
@@ -126,7 +127,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string fields = string.Join(",", props.Select(p => p.Name));
 
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items?expand=fields(select={fields})";
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items?expand=fields($select={fields})";
+
+            if (!string.IsNullOrEmpty(expression))
+            {
+                url += $"&$filter={EscapeExpression(expression)}";
+            }
 
             var response = await api.GetAsync(url);
             CheckStatusCode(response, api.RetryResults);
