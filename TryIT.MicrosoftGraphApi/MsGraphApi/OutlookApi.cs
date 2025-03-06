@@ -13,7 +13,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// </summary>
     public class OutlookApi
     {
-        private static OutlookHelper _helper;
+        private readonly OutlookHelper _helper;
 
         /// <summary>
         /// 
@@ -26,31 +26,22 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
-        /// get message from inbox folder
-        /// </summary>
-        /// <returns></returns>
-        public List<GetMessageResponse.Message> GetMessages()
-        {
-            return _helper.GetMessages();
-        }
-
-        /// <summary>
         /// get message from the specified user's mailbox
         /// </summary>
         /// <param name="getMessageModel"></param>
         /// <returns></returns>
-        public List<GetMessageResponse.Message> GetMessages(GetMessageModel getMessageModel)
+        public async Task<List<GetMessageResponse.Message>> GetMessagesAsync(GetMessageModel getMessageModel)
         {
-            return _helper.GetMessages(getMessageModel);
+            return await _helper.GetMessagesAsync(getMessageModel);
         }
 
         /// <summary>
         /// send message as current user
         /// </summary>
         /// <param name="message"></param>
-        public void SendMessage(SendMessageModel message)
+        public async Task SendMessage(SendMessageModel message)
         {
-            _helper.SendMessage(message);
+            await _helper.SendMessageAsync(message);
         }
 
         /// <summary>
