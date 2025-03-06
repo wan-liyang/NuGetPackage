@@ -39,7 +39,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// send message as current user
         /// </summary>
         /// <param name="message"></param>
-        public async Task SendMessage(SendMessageModel message)
+        public async Task SendMessageAsync(SendMessageModel message)
         {
             await _helper.SendMessageAsync(message);
         }
@@ -72,6 +72,17 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public async Task DeleteMessageAsync(DeleteMessageModel model)
         {
             await _helper.DeleteMessageAsync(model);
+        }
+
+        /// <summary>
+        /// Get the mail folder collection directly under the root folder
+        /// <para>https://learn.microsoft.com/en-us/graph/api/user-list-mailfolders?view=graph-rest-1.0&tabs=http</para>
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public async Task<List<GetMailboxFolderResponse.Folder>> GetMaiboxFoldersAsync(GetMailboxFolderModel model)
+        {
+            return await _helper.GetMailboxFoldersAsync(model);
         }
     }
 }

@@ -66,17 +66,18 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             var responseObj = content.JsonToObject<GetMessageResponse.Response>();
 
             messages.AddRange(responseObj.value);
+
             if (!string.IsNullOrEmpty(responseObj.odatanextLink) 
                 && getMessage?.top <= 0 
                 && (getMessage?.top <= 0 || messages.Count < getMessage.top))
             {
-                await _getnextlink(responseObj.odatanextLink, messages, getMessage?.top);
+                await _getnextlink_messages(responseObj.odatanextLink, messages, getMessage?.top);
             }
 
-            return responseObj.value;
+            return messages;
         }
 
-        private async Task _getnextlink(string nextLink, List<GetMessageResponse.Message> list, int? top)
+        private async Task _getnextlink_messages(string nextLink, List<GetMessageResponse.Message> list, int? top)
         {
             var response = await api.GetAsync(nextLink);
             CheckStatusCode(response, api.RetryResults);
@@ -88,7 +89,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (!string.IsNullOrEmpty(responseObj.odatanextLink) && (top <= 0 || list.Count < top))
             {
-                await _getnextlink(responseObj.odatanextLink, list, top);
+                await _getnextlink_messages(responseObj.odatanextLink, list, top);
             }
         }
 
@@ -275,6 +276,54 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             var response = await api.PostAsync(url, content);
 
             CheckStatusCode(response, api.RetryResults);
+        }
+
+        public async Task<List<GetMailboxFolderResponse.Folder>> GetMailboxFoldersAsync(GetMailboxFolderModel model)
+        {
+            List<GetMailboxFolderResponse.Folder> folders = new List<GetMailboxFolderResponse.Folder>();
+
+            string url = $"{GraphApiRootUrl}/me/mailFolders";
+
+            if (!string.IsNullOrEmpty(model.mailbox))
+            {
+                url = $"{GraphApiRootUrl}/users/{model.mailbox}/mailFolders";
+            }
+
+            if (!string.IsNullOrEmpty(model.filterExpression))
+            {
+                url = url.AppendQueryToUrl($"$filter={EscapeExpression(model.filterExpression)}");
+            }
+
+            var response = await api.GetAsync(url);
+            CheckStatusCode(response);
+
+            string content = await response.Content.ReadAsStringAsync();
+            var responseObj = content.JsonToObject<GetMailboxFolderResponse.Response>();
+
+            folders.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+            {
+                await _getnextlink_folders(responseObj.odatanextLink, folders);
+            }
+
+            return folders;
+        }
+
+        private async Task _getnextlink_folders(string nextLink, List<GetMailboxFolderResponse.Folder> list)
+        {
+            var response = await api.GetAsync(nextLink);
+            CheckStatusCode(response, api.RetryResults);
+
+            string content = await response.Content.ReadAsStringAsync();
+            var responseObj = content.JsonToObject<GetMailboxFolderResponse.Response>();
+
+            list.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+            {
+                await _getnextlink_folders(responseObj.odatanextLink, list);
+            }
         }
     }
 }
