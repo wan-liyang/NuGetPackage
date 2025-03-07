@@ -41,7 +41,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             if (string.IsNullOrEmpty(config.ConnectionString))
             {
-                throw new ArgumentNullException(nameof(config.ConnectionString));
+                throw new ArgumentException($"{nameof(config.ConnectionString)} is null or empty");
             }
             _config = config;
 
@@ -131,7 +131,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         cmd.CommandTimeout = _config.TimeoutSecond;
                         cmd.CommandText = commandText;
                         cmd.CommandType = commandType;
-                        if (parameters != null && parameters.Count() > 0)
+                        if (parameters != null && parameters.Any())
                         {
                             cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
@@ -172,7 +172,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         cmd.CommandTimeout = _config.TimeoutSecond;
                         cmd.CommandText = commandText;
                         cmd.CommandType = commandType;
-                        if (null != parameters && parameters.Count() > 0)
+                        if (null != parameters && parameters.Any())
                         {
                             cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
@@ -218,7 +218,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                         StringBuilder strBuilder = new StringBuilder("SELECT ");
                         strBuilder.Append(function);
-                        if (null != parameters && parameters.Count() > 0)
+                        if (null != parameters && parameters.Any())
                         {
                             cmd.Parameters.AddRange(ClondParameters(parameters));
 
@@ -279,7 +279,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         StringBuilder strBuilder = new StringBuilder("SELECT * FROM ");
                         strBuilder.Append(function);
                         strBuilder.Append("(");
-                        if (null != parameters && parameters.Count() > 0)
+                        if (null != parameters && parameters.Any())
                         {
                             cmd.Parameters.AddRange(ClondParameters(parameters));
                             var parameterNames = parameters.Select(p => p.ParameterName);
@@ -322,7 +322,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                         cmd.CommandText = commandText;
                         cmd.CommandType = commandType;
-                        if (null != parameters && parameters.Count() > 0)
+                        if (null != parameters && parameters.Any())
                         {
                             cmd.Parameters.AddRange(ClondParameters(parameters));
                         }
@@ -337,7 +337,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// </summary>
         /// <param name="originalParameters"></param>
         /// <returns></returns>
-        private SqlParameter[] ClondParameters(SqlParameter[] originalParameters)
+        private static SqlParameter[] ClondParameters(SqlParameter[] originalParameters)
         {
             SqlParameter[] clonedParameters = new SqlParameter[originalParameters.Length];
 
@@ -393,7 +393,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString);
             SqlCommand cmd = new SqlCommand(commandText, sqlConnection);
             cmd.CommandType = CommandType.Text;
-            if (null != parameters && parameters.Count() > 0)
+            if (null != parameters && parameters.Any())
             {
                 cmd.Parameters.AddRange(ClondParameters(parameters));
             }
@@ -416,15 +416,15 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                 if (_copyMode == null)
                 {
-                    throw new ArgumentNullException(nameof(_copyMode));
+                    throw new ArgumentException($"{nameof(_copyMode)} should not be null");
                 }
                 if (string.IsNullOrEmpty(_copyMode.TargetTable))
                 {
-                    throw new ArgumentNullException(nameof(_copyMode.TargetTable));
+                    throw new ArgumentException($"{nameof(_copyMode.TargetTable)} should not be null or empty");
                 }
                 if (_copyMode.TargetTable.Split('.').Length != 2)
                 {
-                    throw new InvalidOperationException($"TargetTable '{_copyMode.TargetTable}' must contains schema and table, e.g schema.table or [schema].[table]");
+                    throw new ArgumentException($"TargetTable '{_copyMode.TargetTable}' must contains schema and table, e.g schema.table or [schema].[table]");
                 }
 
                 // get target table structure first, outside transaction, to avoid other script locked table
@@ -477,13 +477,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                             catch (Exception ex)
                             {
-                                throw new Exception($"PreScript failed, {_copyMode.PreScript}", ex);
+                                throw new InvalidOperationException($"PreScript execution failed - {ex.Message}, {_copyMode.PreScript}", ex);
                             }
                         }
 
                         if (iCopyMode is CopyMode_InsertUpdate)
                         {
-                            var mode = iCopyMode as CopyMode_InsertUpdate;
+                            var mode = (CopyMode_InsertUpdate)iCopyMode;
                             if (mode.SourceData.Rows.Count > 0)
                             {
                                 mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
@@ -498,7 +498,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                     }
                                     catch (Exception ex)
                                     {
-                                        throw new Exception($"Upsert_Encrypted failed", ex);
+                                        throw new InvalidOperationException($"Upsert_Encrypted failed - {ex.Message}", ex);
                                     }
                                 }
                                 else
@@ -509,7 +509,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                     }
                                     catch (Exception ex)
                                     {
-                                        throw new Exception($"Upsert failed", ex);
+                                        throw new InvalidOperationException($"Upsert failed - {ex.Message}", ex);
                                     }
                                 }
                             }
@@ -534,7 +534,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 // PreScript is mandatory for DeleteInsert
                                 if (string.IsNullOrEmpty(mode.PreScript))
                                 {
-                                    throw new ArgumentNullException(nameof(mode.PreScript), $"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
+                                    throw new ArgumentException($"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
                                 }
                             }
 
@@ -546,7 +546,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             {
                                 var map = _copyMode.ColumnMappings.ToArray();
                                 var mapString = string.Join(", ", map.Select(x => $"{x.Key} => {x.Value}"));
-                                throw new Exception($"BulkCopy failed, mapping: [{mapString}]", ex);
+                                throw new InvalidOperationException($"BulkCopy failed - {ex.Message}, mapping: [{mapString}]", ex);
                             }
                         }
 
@@ -562,7 +562,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                             catch (Exception ex)
                             {
-                                throw new Exception($"PostScript failed, {_copyMode.PostScript} ", ex);
+                                throw new InvalidOperationException($"PostScript failed - {ex.Message}, {_copyMode.PostScript} ", ex);
                             }
                         }
 
@@ -575,7 +575,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                             catch (Exception ex)
                             {
-                                throw new Exception($"PostAction failed, {_copyMode.PostAction}", ex);
+                                throw new InvalidOperationException($"PostAction failed - {ex.Message}, {_copyMode.PostAction}", ex);
                             }
                         }
                     }
@@ -606,11 +606,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             if (_copyMode == null)
             {
-                throw new ArgumentNullException(nameof(_copyMode));
+                throw new ArgumentException($"{nameof(_copyMode)} should not be null");
             }
             if (string.IsNullOrEmpty(_copyMode.TargetTable))
             {
-                throw new ArgumentNullException(nameof(_copyMode.TargetTable));
+                throw new ArgumentException($"{nameof(_copyMode.TargetTable)} should not be null or empty");
             }
             if (_copyMode.TargetTable.Split('.').Length != 2)
             {
@@ -656,7 +656,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"PreScript failed, {_copyMode.PreScript}", ex);
+                            throw new InvalidOperationException($"PreScript failed - {ex.Message}, {_copyMode.PreScript}", ex);
                         }
                     }
 
@@ -677,7 +677,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 }
                                 catch (Exception ex)
                                 {
-                                    throw new Exception($"Upsert_Encrypted failed", ex);
+                                    throw new InvalidOperationException($"Upsert_Encrypted failed - {ex.Message}", ex);
                                 }
                             }
                             else
@@ -688,7 +688,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 }
                                 catch (Exception ex)
                                 {
-                                    throw new Exception($"Upsert failed", ex);
+                                    throw new InvalidOperationException($"Upsert failed - {ex.Message}", ex);
                                 }
                             }
                         }
@@ -713,7 +713,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             // PreScript is mandatory for DeleteInsert
                             if (string.IsNullOrEmpty(mode.PreScript))
                             {
-                                throw new ArgumentNullException(nameof(mode.PreScript), $"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
+                                throw new ArgumentException($"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
                             }
                         }
 
@@ -725,7 +725,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         {
                             var map = _copyMode.ColumnMappings.ToArray();
                             var mapString = string.Join(", ", map.Select(x => $"{x.Key} => {x.Value}"));
-                            throw new Exception($"BulkCopy failed, mapping: [{mapString}]", ex);
+                            throw new InvalidOperationException($"BulkCopy failed - {ex.Message}, mapping: [{mapString}]", ex);
                         }
                     }
 
@@ -741,7 +741,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"PostScript failed, {_copyMode.PostScript} ", ex);
+                            throw new InvalidOperationException($"PostScript failed - {ex.Message}, {_copyMode.PostScript} ", ex);
                         }
                     }
 
@@ -754,7 +754,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"PostAction failed, {_copyMode.PostAction}", ex);
+                            throw new InvalidOperationException($"PostAction failed - {ex.Message}, {_copyMode.PostAction}", ex);
                         }
                     }
 
@@ -762,7 +762,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 }
                 catch
                 {
-                    if (transaction != null)
+                    // check connection state to avoid error "This SqlTransaction has completed; it is no longer usable."
+                    if (transaction != null && transaction.Connection != null)
                     {
                         transaction.Rollback();
                     }
@@ -778,12 +779,12 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="tableStructures"></param>
         /// <param name="mapValue"></param>
         /// <returns></returns>
-        private string GetTargetColumn(List<DbTableStructure> tableStructures, string mapValue)
+        private static string GetTargetColumn(List<DbTableStructure> tableStructures, string mapValue)
         {
             var table = tableStructures.FirstOrDefault(p => p.COLUMN_NAME.Equals(mapValue, StringComparison.CurrentCultureIgnoreCase));
             if (table == null)
             {
-                throw new Exception($"column '{mapValue}' not found in target table");
+                throw new ArgumentException($"column '{mapValue}' not found in target table");
             }
             return table.COLUMN_NAME;
         }
@@ -794,7 +795,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="sourceData"></param>
         /// <param name="columnMap"></param>
         /// <returns></returns>
-        private Dictionary<string, string> ResetColumnMap(DataTable sourceData, Dictionary<string, string> columnMap)
+        private static Dictionary<string, string> ResetColumnMap(DataTable sourceData, Dictionary<string, string> columnMap)
         {
             if (columnMap != null && columnMap.Count > 0)
             {
@@ -818,7 +819,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="targetTableStructure"></param>
         /// <param name="columnMap">expected source to target column map, if empty then will skip this validation</param>
         /// <exception cref="Exception"></exception>
-        private void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
+        private static void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
         {
             if (columnMap != null && columnMap.Count > 0)
             {
@@ -832,7 +833,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
                     if (notExists != null && notExists.Count > 0)
                     {
-                        throw new Exception($"column map not found in source data table: {string.Join(", ", notExists)}");
+                        throw new ArgumentException($"column map not found in source data table: {string.Join(", ", notExists)}");
                     }
                 }
 
@@ -843,7 +844,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
                     if (notExists != null && notExists.Count > 0)
                     {
-                        throw new Exception($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
+                        throw new ArgumentException($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
                     }
                 }
             }
@@ -863,7 +864,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         {
             if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
             {
-                throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
+                throw new ArgumentException("Primary Key is mandatory for UpdateInsert copy mode");
             }
 
             // write data into temp table
@@ -880,7 +881,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                 if (string.IsNullOrEmpty(t_col))
                 {
-                    throw new Exception($"Configured primay key column [{s_col}] has no corresponding column in target table {copyMode.TargetTable}");
+                    throw new ArgumentException($"Configured primay key column [{s_col}] has no corresponding column in target table {copyMode.TargetTable}");
                 }
 
                 sql_key += $"S.{SqlHelper.SqlWarpColumn(s_col)} = T.{SqlHelper.SqlWarpColumn(t_col)}";

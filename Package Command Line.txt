@@ -17,7 +17,7 @@ dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:Pack
 dotnet pack ./TryIT.HttpHandler/TryIT.HttpHandler.csproj --output nupkgs -p:PackageVersion=1.0.5
 dotnet pack ./TryIT.Impersonation.Win/TryIT.Impersonation.Win.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.Jwt/TryIT.Jwt.csproj --output nupkgs -p:PackageVersion=1.1.0
-dotnet pack ./TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj --output nupkgs -p:PackageVersion=1.9.0
+dotnet pack ./TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj --output nupkgs -p:PackageVersion=1.9.1
 dotnet pack ./TryIT.ObjectExtension/TryIT.ObjectExtension.csproj --output nupkgs -p:PackageVersion=1.2.7
 dotnet pack ./TryIT.PGP/TryIT.PGP.csproj --output nupkgs -p:PackageVersion=1.0.3
 dotnet pack ./TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj --output nupkgs -p:PackageVersion=1.0.2
