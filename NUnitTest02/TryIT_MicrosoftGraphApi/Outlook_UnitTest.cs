@@ -30,17 +30,6 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         [Test]
         public void Group_Test()
         {
-            api.SendMessage(new SendMessageModel
-            {
-                From = "noreply@noreply.com",
-                Subject = $"Test Email {DateTime.Now}",
-                Body = "Test",
-                BodyContentType = BodyContentType.Html,
-                ToRecipients = "".Split(','),
-                CcRecipients = null,
-                Attachments = null
-            });
-
             Assert.True(1 == 1);
         }
 

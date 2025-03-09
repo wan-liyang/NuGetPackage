@@ -763,7 +763,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 catch
                 {
                     // check connection state to avoid error "This SqlTransaction has completed; it is no longer usable."
-                    if (transaction != null && transaction.Connection != null)
+                    if (transaction != null && transaction.Connection != null && transaction.Connection.State == ConnectionState.Open)
                     {
                         transaction.Rollback();
                     }
