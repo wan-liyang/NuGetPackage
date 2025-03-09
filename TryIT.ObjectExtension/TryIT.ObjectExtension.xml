@@ -328,6 +328,13 @@
             extension method for Object type
             </summary>
         </member>
+        <member name="M:TryIT.ObjectExtension.ObjExtension.ToStringDefaultEmpty(System.Object)">
+            <summary>
+            convert object value to string value, default as empty string if object value is null
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
         <member name="M:TryIT.ObjectExtension.ObjExtension.DeepCopy``1(``0)">
             <summary>
             deep copy by serializing it and then returning a deserialized copy

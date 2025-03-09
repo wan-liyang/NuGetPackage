@@ -13,6 +13,16 @@ namespace TryIT.ObjectExtension
     public static class ObjExtension
     {
         /// <summary>
+        /// convert object value to string value, default as empty string if object value is null
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static string ToStringDefaultEmpty(this object obj)
+        {
+            return obj == null ? string.Empty : obj.ToString();
+        }
+
+        /// <summary>
         /// deep copy by serializing it and then returning a deserialized copy
         /// </summary>
         /// <typeparam name="T"></typeparam>
