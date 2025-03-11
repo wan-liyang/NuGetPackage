@@ -104,16 +104,16 @@ namespace TryIT.RestApi
 
         private void EnableRetry(HttpClientConfig config)
         {
-            if (config.RetryStatusCodes.Any())
+            if (config.RetryProperty.RetryStatusCodes.Any())
             {
                 _pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
                        .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                        {
                            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                                 //.Handle<TaskCanceledException>(result => result.InnerException is TimeoutException) // handle timeout exception
-                                .HandleResult(result => config.RetryStatusCodes.Contains(result.StatusCode)),
-                           Delay = config.RetryDelay,
-                           MaxRetryAttempts = config.RetryCount,
+                                .HandleResult(result => config.RetryProperty.RetryStatusCodes.Contains(result.StatusCode)),
+                           Delay = config.RetryProperty.RetryDelay,
+                           MaxRetryAttempts = config.RetryProperty.RetryCount,
                            BackoffType = DelayBackoffType.Constant,
                            OnRetry = args =>
                            {

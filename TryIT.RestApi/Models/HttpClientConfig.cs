@@ -17,11 +17,13 @@ namespace TryIT.RestApi.Models
         {
             securityProtocolType = SecurityProtocolType.Tls12;
 
-            // defalt number of retry times to 3
-            RetryCount = 3;
-
-            // default delay between each retry to 1 second
-            RetryDelay = TimeSpan.FromSeconds(1);
+            RetryProperty = new RetryProperty
+            {
+                // defalt number of retry times to 3
+                RetryCount = 3,
+                // default delay between each retry to 1 second
+                RetryDelay = TimeSpan.FromSeconds(1),
+            };
         }
 
         /// <summary>
@@ -30,19 +32,9 @@ namespace TryIT.RestApi.Models
         public HttpClient HttpClient { get; set; }
 
         /// <summary>
-        /// the status codes that will be retried
+        /// retry property for the request when meet the condition
         /// </summary>
-        public HashSet<HttpStatusCode> RetryStatusCodes { get; set; }
-
-        /// <summary>
-        /// number of retry times, default 3 times
-        /// </summary>
-        public int RetryCount { get; set; }
-
-        /// <summary>
-        /// delay between each retry, default 1 second
-        /// </summary>
-        public TimeSpan RetryDelay { get; set; }
+        public RetryProperty RetryProperty { get; set; }
 
         /// <summary>
         /// basic auth for the request
