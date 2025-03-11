@@ -94,7 +94,7 @@
         </member>
         <member name="P:TryIT.RestApi.Models.HttpClientConfig.RetryProperty">
             <summary>
-            retry property for the request when meet the condition
+            retry property for the request when meet the condition, this will only effective when <see cref="P:TryIT.RestApi.Models.RetryProperty.RetryStatusCodes"/> is set
             </summary>
         </member>
         <member name="P:TryIT.RestApi.Models.HttpClientConfig.BasicAuth">

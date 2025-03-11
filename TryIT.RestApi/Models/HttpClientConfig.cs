@@ -32,7 +32,7 @@ namespace TryIT.RestApi.Models
         public HttpClient HttpClient { get; set; }
 
         /// <summary>
-        /// retry property for the request when meet the condition
+        /// retry property for the request when meet the condition, this will only effective when <see cref="RetryProperty.RetryStatusCodes"/> is set
         /// </summary>
         public RetryProperty RetryProperty { get; set; }
 
