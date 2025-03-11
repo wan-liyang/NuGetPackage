@@ -155,7 +155,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="httpClient"></param>
         /// <param name="retryProperty"></param>
         /// <returns></returns>
-        protected RestApi.Api GetRestApiInstance(HttpClient httpClient, ApiRetryProperty retryProperty)
+        protected RestApi.Api GetRestApiInstance(HttpClient httpClient, RetryProperty retryProperty)
         {
             var config = new HttpClientConfig
             {
@@ -164,9 +164,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (retryProperty != null)
             {
-                config.RetryCount = retryProperty.RetryCount;
-                config.RetryDelay = retryProperty.RetryDelay;
-                config.RetryStatusCodes = retryProperty.RetryStatusCodes;
+                config.RetryProperty = retryProperty;
             }
 
             return new RestApi.Api(new HttpClientConfig

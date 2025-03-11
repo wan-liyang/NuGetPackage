@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TryIT.RestApi.Models;
 
 namespace TryIT.MicrosoftGraphApi.Model
 {
@@ -22,6 +23,6 @@ namespace TryIT.MicrosoftGraphApi.Model
         /// <summary>
         /// retry mechanism for the request
         /// </summary>
-        public ApiRetryProperty RetryProperty { get; set; }
+        public RetryProperty RetryProperty { get; set; }
     }
 }
