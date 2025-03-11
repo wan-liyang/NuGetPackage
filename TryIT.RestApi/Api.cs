@@ -104,7 +104,9 @@ namespace TryIT.RestApi
 
         private void EnableRetry(HttpClientConfig config)
         {
-            if (config.RetryProperty.RetryStatusCodes.Any())
+            if (config.RetryProperty != null 
+                && config.RetryProperty.RetryStatusCodes  != null 
+                && config.RetryProperty.RetryStatusCodes.Any())
             {
                 _pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
                        .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
