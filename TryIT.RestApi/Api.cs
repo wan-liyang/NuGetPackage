@@ -19,22 +19,18 @@ namespace TryIT.RestApi
     public class Api
     {
         private ResiliencePipeline<HttpResponseMessage> _pipeline;
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
 
+        private List<RetryResult> _retryResults = new List<RetryResult>();
         /// <summary>
         /// retry results, capture each response or exception
         /// </summary>
-        public List<RetryResult> RetryResults = new List<RetryResult>();
-
-        /// <summary>
-        /// init Api instance with HttpClient instance
-        /// </summary>
-        /// <param name="apiConfig"></param>
-        public Api(ApiConfig apiConfig)
+        public List<RetryResult> RetryResults
         {
-            _httpClient = apiConfig.HttpClient;
-
-            EnableRetry(apiConfig.EnableRetry);
+            get
+            {
+                return _retryResults;
+            }
         }
 
         /// <summary>
@@ -49,74 +45,75 @@ namespace TryIT.RestApi
                 throw new ArgumentNullException(nameof(clientConfig));
             }
 
-            HttpClientHandler clientHandler = new HttpClientHandler()
+            HttpClient httpClient = null;
+            if (clientConfig.HttpClient != null)
             {
-                AllowAutoRedirect = true,
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
-            };
-
-            if (clientConfig.Proxy != null)
-            {
-                var proxy = UtliFunction.GetWebProxy(clientConfig.Proxy);
-                if (proxy != null)
-                {
-                    clientHandler.Proxy = proxy;
-                }
+                httpClient = clientConfig.HttpClient;
             }
-            HttpClient client = new HttpClient(clientHandler);
+            else
+            {
+                HttpClientHandler clientHandler = new HttpClientHandler()
+                {
+                    AllowAutoRedirect = true,
+                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+                };
+
+                if (clientConfig.Proxy != null)
+                {
+                    var proxy = UtliFunction.GetWebProxy(clientConfig.Proxy);
+                    if (proxy != null)
+                    {
+                        clientHandler.Proxy = proxy;
+                    }
+                }
+                httpClient = new HttpClient(clientHandler);
+            }
+
+            
 
             if (clientConfig.TimeoutSecond > 0)
             {
-                client.Timeout = TimeSpan.FromSeconds(clientConfig.TimeoutSecond);
+                httpClient.Timeout = TimeSpan.FromSeconds(clientConfig.TimeoutSecond);
             }
 
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             ServicePointManager.SecurityProtocol = clientConfig.securityProtocolType;
 
-            if (clientConfig.BasicAuth != null)
+            // set basic auth when username and password are not empty
+            if (!string.IsNullOrEmpty(clientConfig?.BasicAuth?.Username) && !string.IsNullOrEmpty(clientConfig?.BasicAuth?.Password))
             {
-                if (!string.IsNullOrEmpty(clientConfig.BasicAuth.Username) || !string.IsNullOrEmpty(clientConfig.BasicAuth.Password))
-                {
-                    string basicToken = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{clientConfig.BasicAuth.Username}:{clientConfig.BasicAuth.Password}"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicToken);
-                }
+                string basicToken = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{clientConfig.BasicAuth.Username}:{clientConfig.BasicAuth.Password}"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicToken);
             }
 
             if (clientConfig.Headers != null && clientConfig.Headers.Count > 0)
             {
                 foreach (var item in clientConfig.Headers)
                 {
-                    client.DefaultRequestHeaders.Remove(item.Key);
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
+                    httpClient.DefaultRequestHeaders.Remove(item.Key);
+                    httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
                 }
             }
 
-            _httpClient = client;
+            _httpClient = httpClient;
 
-            EnableRetry(clientConfig.EnableRetry);
+            EnableRetry(clientConfig);
         }
 
-        /// <summary>
-        /// init retry pipeline
-        /// </summary>
-        /// <param name="isEnable"></param>
-        private void EnableRetry(bool isEnable)
+        private void EnableRetry(HttpClientConfig config)
         {
-            if (isEnable)
+            if (config.RetryStatusCodes.Any())
             {
                 _pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
                        .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                        {
                            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                                .Handle<TaskCanceledException>(result => result.InnerException is TimeoutException) // handle timeout exception
-                                .HandleResult(result => result.StatusCode == HttpStatusCode.BadGateway
-                                  || result.StatusCode == HttpStatusCode.GatewayTimeout
-                                  || result.StatusCode == HttpStatusCode.BadRequest), // handle specific response message
-
-                           Delay = TimeSpan.FromSeconds(1),
-                           MaxRetryAttempts = 3,
+                                //.Handle<TaskCanceledException>(result => result.InnerException is TimeoutException) // handle timeout exception
+                                .HandleResult(result => config.RetryStatusCodes.Contains(result.StatusCode)),
+                           Delay = config.RetryDelay,
+                           MaxRetryAttempts = config.RetryCount,
                            BackoffType = DelayBackoffType.Constant,
                            OnRetry = args =>
                            {
@@ -129,7 +126,7 @@ namespace TryIT.RestApi
                                    resultMessage.RequestUri = result.RequestMessage.RequestUri;
                                }
 
-                               RetryResults.Add(new RetryResult
+                               _retryResults.Add(new RetryResult
                                {
                                    AttemptNumber = args.AttemptNumber,
                                    Result = resultMessage,

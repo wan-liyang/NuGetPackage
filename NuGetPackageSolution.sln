@@ -28,8 +28,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileService", "TryIT.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileService.Zip", "TryIT.FileService.Zip\TryIT.FileService.Zip.csproj", "{93E8F39F-994B-416F-BB5A-EB7790E4D279}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.RestApiService", "TryIT.RestApiService\TryIT.RestApiService.csproj", "{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Impersonation.Win", "TryIT.Impersonation.Win\TryIT.Impersonation.Win.csproj", "{BFE27B6F-D79A-437D-A7BE-B59D638D299F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest02", "NUnitTest02\NUnitTest02.csproj", "{A78155D3-C073-4896-BF8A-10E9DB05D3AB}"
@@ -58,7 +56,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.FileExplorer", "TryIT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Csv", "TryIT.Csv\TryIT.Csv.csproj", "{212D0899-9BF1-432B-91E9-902FD91E0455}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.Zip", "TryIT.Zip\TryIT.Zip.csproj", "{3473DA23-1DAF-449D-A65A-54E5A805A942}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Zip", "TryIT.Zip\TryIT.Zip.csproj", "{3473DA23-1DAF-449D-A65A-54E5A805A942}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -118,10 +116,6 @@ Global
 		{93E8F39F-994B-416F-BB5A-EB7790E4D279}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93E8F39F-994B-416F-BB5A-EB7790E4D279}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93E8F39F-994B-416F-BB5A-EB7790E4D279}.Release|Any CPU.Build.0 = Release|Any CPU
-		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{299E84C8-DD31-4496-9EA4-A4D28F76EB2F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFE27B6F-D79A-437D-A7BE-B59D638D299F}.Release|Any CPU.ActiveCfg = Release|Any CPU

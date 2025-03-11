@@ -24,10 +24,24 @@ namespace TryIT.RestApi.Models
         public Exception Exception { get; set; }
     }
 
+    /// <summary>
+    /// retry attempt result
+    /// </summary>
     public class ResultMessage
     {
+        /// <summary>
+        /// the status code of the response
+        /// </summary>
         public string StatusCode { get; set; }
+
+        /// <summary>
+        /// the reason phrase of the response
+        /// </summary>
         public string ReasonPhrase { get; set; }
+
+        /// <summary>
+        /// the uri of the request
+        /// </summary>
         public Uri RequestUri { get; set; }
     }
 }
