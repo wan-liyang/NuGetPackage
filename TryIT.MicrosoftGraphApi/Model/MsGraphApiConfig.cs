@@ -1,17 +1,17 @@
-﻿namespace TryIT.MicrosoftGraphApi.Model
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+
+namespace TryIT.MicrosoftGraphApi.Model
 {
     /// <summary>
     /// Config information use for application perform graph api request
     /// </summary>
-    public class MsGraphApiConfig
+    public class MsGraphApiConfig : BaseApiConfig
     {
-        public string Token { get; set; }
-
         /// <summary>
-        /// determine request timeout second, default is 100 seconds, https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.timeout?view=net-7.0
+        /// bearer token for the request
         /// </summary>
-        public double TimeoutSecond { get; set; }
-
-        public Utility.ProxyModel Proxy { get; set; }
+        public string Token { get; set; }
     }
 }

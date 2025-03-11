@@ -2,21 +2,14 @@
 using System.Linq;
 using System.Net.Http;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.Application;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class ApplicationHelper : BaseHelper
     {
-        private HttpClient _httpClient;
-
-        public ApplicationHelper(HttpClient httpClient)
-        {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            _httpClient = httpClient;
-        }
+        public ApplicationHelper(MsGraphApiConfig config) : base(config) { }
 
         /// <summary>
         /// get application detail
@@ -34,8 +27,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             try
             {
-                _httpClient.DefaultRequestHeaders.Add("ConsistencyLevel", "eventual");
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                HttpClient.DefaultRequestHeaders.Add("ConsistencyLevel", "eventual");
+                var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
                 CheckStatusCode(response);
 
                 string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();

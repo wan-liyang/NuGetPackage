@@ -12,7 +12,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// </summary>
     public class TeamApi
     {
-        private TeamHelper _helper;
+        private readonly TeamHelper _helper;
 
         /// <summary>
         /// init Teams api with configuration
@@ -20,8 +20,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public TeamApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new TeamHelper(graphHelper.GetHttpClient());
+            _helper = new TeamHelper(config);
         }
 
         /// <summary>
@@ -31,8 +30,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="teamNamePolicy">prefix-{teamName}-suffix</param>
         public TeamApi(MsGraphApiConfig config, string teamNamePolicy)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new TeamHelper(graphHelper.GetHttpClient(), teamNamePolicy);
+            _helper = new TeamHelper(config, teamNamePolicy);
         }
 
         /// <summary>

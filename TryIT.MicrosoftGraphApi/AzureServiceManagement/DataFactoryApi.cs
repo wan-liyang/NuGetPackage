@@ -1,5 +1,4 @@
 ﻿using System;
-using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.MsGraphApi;
@@ -13,11 +12,11 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
     /// </summary>
     public class DataFactoryApi
     {
-        private static DataFactoryHelper _helper;
-
+        private DataFactoryHelper _helper;
         private DateTime TokenIssueOn;
         private DateTime TokenExpireOn;
-        private ApiConfig _apiConfig;
+
+        private readonly ApiConfig _apiConfig;
         /// <summary>
         /// init application api with configuration
         /// </summary>
@@ -35,7 +34,7 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
             var tokenResponse = tokenApi.GetToken(config.TokenRequestInfo);
             this.TokenExpireOn = this.TokenIssueOn.AddSeconds(tokenResponse.expires_in);
 
-            AssignGraphHelper(tokenResponse.access_token);
+            InitialGraphHelper(tokenResponse.access_token);
         }
 
         /// <summary>
@@ -53,19 +52,20 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
                 var tokenResponse = tokenApi.GetToken(_apiConfig.TokenRequestInfo);
                 this.TokenExpireOn = this.TokenIssueOn.AddSeconds(tokenResponse.expires_in);
 
-                AssignGraphHelper(tokenResponse.access_token);
+                InitialGraphHelper(tokenResponse.access_token);
             }
         }
 
-        private void AssignGraphHelper(string access_token)
+        private void InitialGraphHelper(string access_token)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(new MsGraphApiConfig
+            var config = new MsGraphApiConfig
             {
                 Proxy = _apiConfig.Proxy,
                 Token = access_token,
                 TimeoutSecond = _apiConfig.TimeoutSecond,
-            });
-            _helper = new DataFactoryHelper(graphHelper.GetHttpClient());
+                RetryProperty = _apiConfig.RetryProperty
+            };
+            _helper = new DataFactoryHelper(config);
         }
 
         /// <summary>

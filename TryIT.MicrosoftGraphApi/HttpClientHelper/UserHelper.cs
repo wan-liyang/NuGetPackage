@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.User;
 using TryIT.MicrosoftGraphApi.Request.User;
 using TryIT.MicrosoftGraphApi.Response.User;
@@ -15,15 +15,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class UserHelper : BaseHelper
     {
-        private HttpClient _httpClient;
-
-        public UserHelper(HttpClient httpClient)
-        {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            _httpClient = httpClient;
-        }
+        public UserHelper(MsGraphApiConfig config) : base(config) { }
 
         /// <summary>
         /// get my info
@@ -47,18 +39,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url = $"{GraphApiRootUrl}/me";
             }
 
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetUserResponse.User>();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetUserResponse.User>();
         }
 
         /// <summary>
@@ -74,18 +59,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
          
             string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression($"mail eq '{userEmail}'")}";
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
         }
 
         /// <summary>
@@ -115,37 +93,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url += select;
             }
 
-            try
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var result = content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
+
+            if (result != null)
             {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+                result.AdditionalAttributes = new Dictionary<string, object>();
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                var result = content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
+                var values = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                JArray jArray = (JArray)values["value"];
+                JObject jObj = (JObject)jArray.First();
 
-                if (result != null)
+                foreach (var item in jObj)
                 {
-                    result.AdditionalAttributes = new Dictionary<string, object>();
-
-                    var values = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
-                    JArray jArray = (JArray)values["value"];
-                    JObject jObj = (JObject)jArray.First();
-
-                    foreach (var item in jObj)
+                    if (!props.Any(p => p.Name.IsEquals(item.Key)))
                     {
-                        if (!props.Any(p => p.Name.IsEquals(item.Key)))
-                        {
-                            result.AdditionalAttributes[item.Key] = item.Value;
-                        }
+                        result.AdditionalAttributes[item.Key] = item.Value;
                     }
                 }
+            }
 
-                return result;
-            }
-            catch
-            {
-                throw;
-            }
+            return result;
         }
 
         /// <summary>
@@ -165,41 +136,35 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
 
             string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression(expression)}";
-            try
+
+            var props = typeof(T).GetProperties();
+            string select = $"&$count=true&$select=";
+            foreach (var item in props)
             {
-                var props = typeof(T).GetProperties();
-                string select = $"&$count=true&$select=";
-                foreach (var item in props)
-                {
-                    select += $"{item.Name},";
-                }
-                select = select.TrimEnd(',');
-
-                url += select;
-
-                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
-
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-                var data = content.GetJsonValue<List<T>>("value");
-                list.AddRange(data);
-
-                string nextLink = content.GetJsonValue<string>("@odata.nextLink");
-
-                if (!string.IsNullOrEmpty(nextLink))
-                {
-                    FilterUserNextLink<T>(nextLink, list);
-                }
-
-                return list;
+                select += $"{item.Name},";
             }
-            catch
+            select = select.TrimEnd(',');
+
+            url += select;
+
+            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            var data = content.GetJsonValue<List<T>>("value");
+            list.AddRange(data);
+
+            string nextLink = content.GetJsonValue<string>("@odata.nextLink");
+
+            if (!string.IsNullOrEmpty(nextLink))
             {
-                throw;
+                FilterUserNextLink<T>(nextLink, list);
             }
+
+            return list;
         }
 
         /// <summary>
@@ -210,7 +175,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="list"></param>
         private void FilterUserNextLink<T>(string nextlink, List<T> list)
         {
-            var response = _httpClient.GetAsync(nextlink).GetAwaiter().GetResult();
+            var response = RestApi.GetAsync(nextlink).GetAwaiter().GetResult();
             CheckStatusCode(response);
 
             string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -242,18 +207,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
 
             string url = $"{GraphApiRootUrl}/users?$filter={EscapeExpression($"{attrKey} eq '{attrValue}'")}";
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
-            }
-            catch
-            {
-                throw;
-            }
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetUserResponse.Response>().value.FirstOrDefault();
         }
 
         /// <summary>
@@ -266,29 +225,23 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         public CreateInvitationResponse.Response CreateInvitation(CreateInvitationModel invitationModel)
         {
             string url = $"{GraphApiRootUrl}/invitations";
-            try
+
+            CreateInvitationRequest.Body request = new CreateInvitationRequest.Body
             {
-                CreateInvitationRequest.Body request = new CreateInvitationRequest.Body
-                {
-                    invitedUserDisplayName = invitationModel.UserDisplayName,
-                    invitedUserEmailAddress= invitationModel.UserEmailAddress,
-                    inviteRedirectUrl = invitationModel.RedirectUrl,
-                    sendInvitationMessage = invitationModel.SendInvitationMessage
-                };
+                invitedUserDisplayName = invitationModel.UserDisplayName,
+                invitedUserEmailAddress = invitationModel.UserEmailAddress,
+                inviteRedirectUrl = invitationModel.RedirectUrl,
+                sendInvitationMessage = invitationModel.SendInvitationMessage
+            };
 
-                HttpContent httpContent = new StringContent(request.ObjectToJson());
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpContent httpContent = new StringContent(request.ObjectToJson());
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<CreateInvitationResponse.Response>();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<CreateInvitationResponse.Response>();
         }
 
 
@@ -307,46 +260,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             if (user != null && !string.IsNullOrEmpty(user.id))
             {
                 string url = $"{GraphApiRootUrl}/users/{user.id}";
-                try
-                {
-                    var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
-                    CheckStatusCode(response);
 
-                    return true;
-                }
-                catch
-                {
-                    throw;
-                }
+                var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response);
+
+                return true;
             }
 
             return false;            
         }
-
-        //public byte[] GetPhoto(string email)
-        //{
-        //    // /users/{id | userPrincipalName}/photo
-        //    var user = GetUserByMail(email);
-
-        //    if (user != null && !string.IsNullOrEmpty(user.id))
-        //    {
-        //        string url = $"{GraphApiRootUrl}/users/{user.id}/photo/$value";
-        //        try
-        //        {
-        //            var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-        //            //CheckStatusCode(response);
-
-        //            return response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
-        //        }
-        //        catch
-        //        {
-        //            throw;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        throw new Exception($"user {email} not found");
-        //    }
-        //}
     }
 }

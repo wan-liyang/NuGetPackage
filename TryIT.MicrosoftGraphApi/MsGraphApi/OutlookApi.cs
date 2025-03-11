@@ -21,8 +21,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public OutlookApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new OutlookHelper(graphHelper.GetHttpClient());
+            _helper = new OutlookHelper(config);
         }
 
         /// <summary>

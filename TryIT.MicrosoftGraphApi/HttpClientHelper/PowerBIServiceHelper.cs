@@ -3,21 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.PowerBIService;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class PowerBIServiceHelper : BaseHelper
     {
-        private HttpClient _httpClient;
-
-        public PowerBIServiceHelper(HttpClient httpClient)
-        {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            _httpClient = httpClient;
-        }
+        public PowerBIServiceHelper(MsGraphApiConfig config) : base(config) { }
 
         /// <summary>
         /// 
@@ -28,18 +21,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"https://api.powerbi.com/v1.0/myorg/groups?$filter={EscapeExpression($"name eq '{name}'")}";
 
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetGroupsResponse.Response>().value.FirstOrDefault();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetGroupsResponse.Response>().value.FirstOrDefault();
         }
 
         public List<GetDatasetsInGroupResponse.Dataset> GetDatasetsInGroup(string groupName)
@@ -48,18 +34,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"https://api.powerbi.com/v1.0/myorg/groups/{group.id}/datasets";
 
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetDatasetsInGroupResponse.Response>().value;
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetDatasetsInGroupResponse.Response>().value;
         }
 
         /// <summary>
@@ -77,21 +56,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"https://api.powerbi.com/v1.0/myorg/groups/{group.id}/datasets/{dataset.id}/refreshes";
 
-            try
-            {
-                HttpContent httpContent = new StringContent("");
+            HttpContent httpContent = new StringContent("");
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                if (response.Headers.Contains("RequestId"))
-                {
-                    return response.Headers.GetValues("RequestId").First();
-                }
-            }
-            catch
+            if (response.Headers.Contains("RequestId"))
             {
-                throw;
+                return response.Headers.GetValues("RequestId").First();
             }
 
             return null;
@@ -112,18 +84,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"https://api.powerbi.com/v1.0/myorg/groups/{group.id}/datasets/{dataset.id}/refreshes";
 
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetRefreshHistoryInGroupResponse.Response>().value;
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetRefreshHistoryInGroupResponse.Response>().value;
         }
     }
 }

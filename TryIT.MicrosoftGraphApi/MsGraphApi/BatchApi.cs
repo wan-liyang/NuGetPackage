@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Request.Batching;
@@ -13,10 +9,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// <summary>
     /// 
     /// </summary>
-    public class BatchApi : BaseHelper
+    public class BatchApi
     {
-        private UserHelper _helper;
-        private HttpClient _httpClient;
+        private readonly BatchingHelper _helper;
 
         /// <summary>
         /// init Teams api with configuration
@@ -24,8 +19,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public BatchApi(MsGraphApiConfig config)
         {
-            _httpClient = new MsGraphHelper(config).GetHttpClient();
-            _helper = new UserHelper(_httpClient);
+            _helper = new BatchingHelper(config);
         }
 
         /// <summary>
@@ -35,8 +29,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <returns></returns>
         public async Task<List<string>> Post(BatchingRequest.Body body)
         {
-            var batching = new BatchingHelper(_httpClient);
-            return await batching.Post(body);
+            return await _helper.Post(body);
         }
     }
 }

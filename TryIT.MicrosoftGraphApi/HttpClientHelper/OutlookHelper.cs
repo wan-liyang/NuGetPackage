@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Outlook;
 using TryIT.MicrosoftGraphApi.Request.Outlook;
 using TryIT.MicrosoftGraphApi.Response.Outlook;
@@ -13,23 +14,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class OutlookHelper : BaseHelper
     {
-        private readonly TryIT.RestApi.Api api;
-        private readonly HttpClient _httpClient;
-
-        public OutlookHelper(HttpClient httpClient)
-        {
-            if (null == httpClient) 
-                throw new ArgumentNullException(nameof(httpClient));
-
-            // use RestApi library and enable retry
-            api = new RestApi.Api(new RestApi.Models.ApiConfig
-            {
-                HttpClient = httpClient,
-                EnableRetry = true,
-            });
-
-            _httpClient = httpClient;
-        }
+        public OutlookHelper(MsGraphApiConfig config) : base(config) { }
 
         /// <summary>
         /// get message from inbox folder
@@ -59,8 +44,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             List<GetMessageResponse.Message> messages = new List<GetMessageResponse.Message>();
 
-            var response = await _httpClient.GetAsync(url);
-            CheckStatusCode(response, api.RetryResults);
+            var response = await RestApi.GetAsync(url);
+            CheckStatusCode(response, RestApi.RetryResults);
 
             string content = await response.Content.ReadAsStringAsync();
             var responseObj = content.JsonToObject<GetMessageResponse.Response>();
@@ -79,8 +64,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         private async Task _getnextlink_messages(string nextLink, List<GetMessageResponse.Message> list, int? top)
         {
-            var response = await api.GetAsync(nextLink);
-            CheckStatusCode(response, api.RetryResults);
+            var response = await RestApi.GetAsync(nextLink);
+            CheckStatusCode(response, RestApi.RetryResults);
 
             string content = await response.Content.ReadAsStringAsync();
             var responseObj = content.JsonToObject<GetMessageResponse.Response>();
@@ -101,7 +86,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url = $"{GraphApiRootUrl}/users/{model.mailbox}/messages/{model.messageId}/$value";
             }
 
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            HttpResponseMessage response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
             return await response.Content.ReadAsStringAsync();
@@ -115,7 +100,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url = $"{GraphApiRootUrl}/users/{model.mailbox}/messages/{model.messageId}";
             }
 
-            HttpResponseMessage response = await _httpClient.DeleteAsync(url);
+            HttpResponseMessage response = await RestApi.DeleteAsync(url);
             CheckStatusCode(response);
         }
 
@@ -135,7 +120,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             HttpContent httpContent = new StringContent(request.ObjectToJson());
             httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync(url, httpContent);
+            HttpResponseMessage response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response);
 
             var content = await response.Content.ReadAsStringAsync();
@@ -254,7 +239,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             HttpContent httpContent = new StringContent(jsonContent);
             httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync(url, httpContent);
+            HttpResponseMessage response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response);
         }
     
@@ -273,9 +258,9 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             };
 
             HttpContent content = GetJsonHttpContent(request);
-            var response = await api.PostAsync(url, content);
+            var response = await RestApi.PostAsync(url, content);
 
-            CheckStatusCode(response, api.RetryResults);
+            CheckStatusCode(response, RestApi.RetryResults);
         }
 
         public async Task<List<GetMailboxFolderResponse.Folder>> GetMailboxFoldersAsync(GetMailboxFolderModel model)
@@ -294,7 +279,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url = url.AppendQueryToUrl($"$filter={EscapeExpression(model.filterExpression)}");
             }
 
-            var response = await api.GetAsync(url);
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
             string content = await response.Content.ReadAsStringAsync();
@@ -312,8 +297,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         private async Task _getnextlink_folders(string nextLink, List<GetMailboxFolderResponse.Folder> list)
         {
-            var response = await api.GetAsync(nextLink);
-            CheckStatusCode(response, api.RetryResults);
+            var response = await RestApi.GetAsync(nextLink);
+            CheckStatusCode(response, RestApi.RetryResults);
 
             string content = await response.Content.ReadAsStringAsync();
             var responseObj = content.JsonToObject<GetMailboxFolderResponse.Response>();

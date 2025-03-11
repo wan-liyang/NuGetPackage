@@ -19,8 +19,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public TokenApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new AppTokenHelper(graphHelper.GetHttpClient());
+            _helper = new AppTokenHelper(config);
         }
 
         /// <summary>

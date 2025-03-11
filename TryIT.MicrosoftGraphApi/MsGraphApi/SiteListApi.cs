@@ -21,8 +21,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="hostName">the host(domain) of the site, use for api request to get site under specific host</param>
         public SiteListApi(MsGraphApiConfig config, string hostName)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new SiteListHelper(graphHelper.GetHttpClient(), hostName);
+            _helper = new SiteListHelper(config, hostName);
         }
 
         /// <summary>

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.User;
@@ -14,10 +12,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// <summary>
     /// 
     /// </summary>
-    public class UserApi : BaseHelper
+    public class UserApi
     {
-        private UserHelper _helper;
-        private HttpClient _httpClient;
+        private readonly UserHelper _helper;
 
         /// <summary>
         /// init Teams api with configuration
@@ -25,8 +22,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public UserApi(MsGraphApiConfig config)
         {
-            _httpClient = new MsGraphHelper(config).GetHttpClient();
-            _helper = new UserHelper(_httpClient);
+            _helper = new UserHelper(config);
         }
 
         /// <summary>
@@ -104,16 +100,6 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.DeleteUserByEmail(userEmail);
         }
 
-        ///// <summary>
-        ///// https://learn.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0&tabs=http
-        ///// </summary>
-        ///// <param name="userPrincipalName"></param>
-        ///// <returns></returns>
-        //public async Task<HttpResponseMessage> GetPhoth(string email)
-        //{
-        //    return await _helper.GetPhoto(email);
-        //}
-
         /// <summary>
         /// get user photo binary data, https://learn.microsoft.com/en-us/graph/api/profilephoto-get?view=graph-rest-1.0&tabs=http
         /// </summary>
@@ -126,9 +112,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 throw new ArgumentNullException(nameof(userPrincipalNameOrId));
             }
 
-            string url = $"{GraphApiRootUrl}/users/{userPrincipalNameOrId}/photo/$value";
+            string url = $"{_helper.GraphApiRootUrl}/users/{userPrincipalNameOrId}/photo/$value";
 
-            return await _httpClient.GetAsync(url);
+            return await _helper.RestApi.GetAsync(url);
         }
     }
 }

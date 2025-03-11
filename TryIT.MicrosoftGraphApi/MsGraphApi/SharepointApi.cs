@@ -18,8 +18,8 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// </summary>
     public class SharepointApi
     {
-        private SharepointHelper _helper;
-        private HttpClient _httpClient;
+        private readonly SharepointHelper _helper;
+        private readonly BatchingHelper _batchingHelper;
 
         /// <summary>
         /// init Teams api with configuration
@@ -27,8 +27,8 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="config"></param>
         public SharepointApi(MsGraphApiConfig config)
         {
-            _httpClient = new MsGraphHelper(config).GetHttpClient();
-            _helper = new SharepointHelper(_httpClient);
+            _helper = new SharepointHelper(config);
+            _batchingHelper = new BatchingHelper(config);
         }
 
         /// <summary>
@@ -166,8 +166,6 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             // Microsoft is working on that issue, but do not have ETA
             // interim solution to infinite check permission
             // check for non-owner permission only
-
-            var _batchingHelper = new BatchingHelper(_httpClient);
 
             var nonOwnerRoles = _get_non_owner_permissions(driveId, itemId);
             while (nonOwnerRoles != null && nonOwnerRoles.Count > 0)

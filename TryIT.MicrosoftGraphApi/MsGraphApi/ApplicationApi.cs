@@ -10,15 +10,14 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// </summary>
     public class ApplicationApi
     {
-        private static ApplicationHelper _helper;
+        private readonly ApplicationHelper _helper;
         /// <summary>
         /// init application api with configuration
         /// </summary>
         /// <param name="config"></param>
         public ApplicationApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new ApplicationHelper(graphHelper.GetHttpClient());
+            _helper = new ApplicationHelper(config);
         }
 
         /// <summary>

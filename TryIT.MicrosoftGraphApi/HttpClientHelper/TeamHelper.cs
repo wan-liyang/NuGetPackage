@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Team;
 using TryIT.MicrosoftGraphApi.Request.Team;
-using TryIT.MicrosoftGraphApi.Response.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Team;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
@@ -17,42 +17,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     /// </summary>
     internal class TeamHelper : BaseHelper
     {
-        private readonly TryIT.RestApi.Api api;
-        private HttpClient _httpClient;
-        private string _teamNamePolicy;
-
-        /// <summary>
-        /// init team api
-        /// </summary>
-        /// <param name="httpClient"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public TeamHelper(HttpClient httpClient)
+        private readonly string _teamNamePolicy;
+        public TeamHelper(MsGraphApiConfig config) : base(config) { }
+        public TeamHelper(MsGraphApiConfig config, string teamNamePolicy) : base(config) 
         {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            // use RestApi library and enable retry
-            api = new RestApi.Api(new RestApi.Models.ApiConfig
-            {
-                HttpClient = httpClient,
-                EnableRetry = true,
-            });
-
-            _httpClient = httpClient;
-        }
-
-        /// <summary>
-        /// init team api
-        /// </summary>
-        /// <param name="httpClient"></param>
-        /// <param name="teamNamePolicy">prefix-{teamName}-suffix</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public TeamHelper(HttpClient httpClient, string teamNamePolicy)
-        {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            _httpClient = httpClient;
             _teamNamePolicy = teamNamePolicy;
         }
 
@@ -64,25 +32,18 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/teams";
 
-            try
+            CreateTeamRequest.Body request = new CreateTeamRequest.Body
             {
-                CreateTeamRequest.Body request = new CreateTeamRequest.Body
-                {
-                    templateodatabind = $"{GraphApiRootUrl}/teamsTemplates('standard')",
-                    displayName = createTeam.DisplayName,
-                    description = createTeam.Description
-                };
+                templateodatabind = $"{GraphApiRootUrl}/teamsTemplates('standard')",
+                displayName = createTeam.DisplayName,
+                description = createTeam.Description
+            };
 
-                HttpContent httpContent = new StringContent(request.ObjectToJson());
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpContent httpContent = new StringContent(request.ObjectToJson());
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-            }
-            catch
-            {
-                throw;
-            }
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
         }
 
         /// <summary>
@@ -99,18 +60,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url = $"{GraphApiRootUrl}/me/joinedTeams";
             }
 
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetJoinedTeamResponse.Response>().value;
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetJoinedTeamResponse.Response>().value;
         }
 
         /// <summary>
@@ -143,49 +97,35 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string teamId = GetTeam(teamName).id;
             string url = $"{GraphApiRootUrl}/teams/{teamId}/members";
 
-            try
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var responseObj = content.JsonToObject<GetMembersResponse.Response>();
+
+            result.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
             {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                var responseObj = content.JsonToObject<GetMembersResponse.Response>();
-
-                result.AddRange(responseObj.value);
-
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
-                {
-                    _getnextlink(responseObj.odatanextLink, result);
-                }
-
-                return result;
+                _getnextlink(responseObj.odatanextLink, result);
             }
-            catch
-            {
-                throw;
-            }
+
+            return result;
         }
 
         private void _getnextlink(string nextLink, List<GetMembersResponse.Member> list)
         {
-            try
+            var response = RestApi.GetAsync(nextLink).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = response.Content.ReadAsStringAsync().Result;
+            var responseObj = content.JsonToObject<GetMembersResponse.Response>();
+
+            list.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
             {
-                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetMembersResponse.Response>();
-
-                list.AddRange(responseObj.value);
-
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
-                {
-                    _getnextlink(responseObj.odatanextLink, list);
-                }
-            }
-            catch
-            {
-                throw;
+                _getnextlink(responseObj.odatanextLink, list);
             }
         }
 
@@ -198,38 +138,32 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string teamId = GetTeam(model.TeamName).id;
             string url = $"{GraphApiRootUrl}/teams/{teamId}/members";
-            try
+
+            AddMemberRequest.Body request = new AddMemberRequest.Body
             {
-                AddMemberRequest.Body request = new AddMemberRequest.Body
-                {
-                    odatatype = "#microsoft.graph.aadUserConversationMember",
-                    userodatabind = $"{GraphApiRootUrl}/users('{model.UserEmail}')"
-                };
+                odatatype = "#microsoft.graph.aadUserConversationMember",
+                userodatabind = $"{GraphApiRootUrl}/users('{model.UserEmail}')"
+            };
 
-                if (model.Role == MemberRoleEnum.owner)
-                {
-                    request.roles = new List<string> { model.Role.ToString() };
-                }
-                else
-                {
-                    request.roles = new List<string> { };
-                }
-
-                string jsonContent = request.ObjectToJson();
-
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<AddMemberResponse.Response>();
-            }
-            catch
+            if (model.Role == MemberRoleEnum.owner)
             {
-                throw;
+                request.roles = new List<string> { model.Role.ToString() };
             }
+            else
+            {
+                request.roles = new List<string> { };
+            }
+
+            string jsonContent = request.ObjectToJson();
+
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().Result;
+            return content.JsonToObject<AddMemberResponse.Response>();
         }
 
         /// <summary>
@@ -241,16 +175,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/teams/{teamId}/members/{membershipId}";
 
-            try
-            {
-                var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-                string content = response.Content.ReadAsStringAsync().Result;
-            }
-            catch
-            {
-                throw;
-            }
+            var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
         }
 
         /// <summary>
@@ -263,19 +189,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string teamId = GetTeam(teamName).id;
             string url = $"{GraphApiRootUrl}/teams/{teamId}/channels";
 
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetChannelResponse.Response>();
-            }
-            catch
-            {
-                throw;
-            }
-
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetChannelResponse.Response>();
         }
 
         /// <summary>
@@ -300,26 +218,19 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string teamId = GetTeam(model.TeamName).id;
             string url = $"{GraphApiRootUrl}/teams/{teamId}/channels";
 
-            try
+            CreateChannelRequest.Body request = new CreateChannelRequest.Body
             {
-                CreateChannelRequest.Body request = new CreateChannelRequest.Body
-                {
-                    displayName = model.ChannelName,
-                    description = model.Description,
-                    membershipType = "standard"
-                };
+                displayName = model.ChannelName,
+                description = model.Description,
+                membershipType = "standard"
+            };
 
-                string jsonContent = request.ObjectToJson();
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            string jsonContent = request.ObjectToJson();
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-            }
-            catch
-            {
-                throw;
-            }
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
         }
 
         /// <summary>
@@ -334,30 +245,23 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/teams/{teamId}/channels/{channelId}/members";
 
-            try
+            AddMemberRequest.Body request = new AddMemberRequest.Body
             {
-                AddMemberRequest.Body request = new AddMemberRequest.Body
-                {
-                    odatatype = "#microsoft.graph.aadUserConversationMember",
-                    roles = new List<string> { model.Role.ToString() },
-                    userodatabind = $"{GraphApiRootUrl}/users('{model.UserEmail}')"
-                };
+                odatatype = "#microsoft.graph.aadUserConversationMember",
+                roles = new List<string> { model.Role.ToString() },
+                userodatabind = $"{GraphApiRootUrl}/users('{model.UserEmail}')"
+            };
 
-                string jsonContent = request.ObjectToJson();
+            string jsonContent = request.ObjectToJson();
 
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-                string content = response.Content.ReadAsStringAsync().Result;
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+            string content = response.Content.ReadAsStringAsync().Result;
 
-                return content.JsonToObject<AddMemberResponse>();
-            }
-            catch
-            {
-                throw;
-            }
+            return content.JsonToObject<AddMemberResponse>();
         }
 
         public GetFilesFolderResponse.Response GetChannelSharepoint(string teamName, string channelName)
@@ -366,18 +270,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string channelId = GetChannel(teamName, channelName).id;
 
             string url = $"{GraphApiRootUrl}/teams/{teamId}/channels/{channelId}/filesFolder";
-            try
-            {
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetFilesFolderResponse.Response>();
-            }
-            catch
-            {
-                throw;
-            }
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetFilesFolderResponse.Response>();
         }
     }
 }

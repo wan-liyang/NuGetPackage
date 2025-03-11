@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.MsGraphApi;
@@ -12,7 +11,7 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
     /// </summary>
     public class PowerBIServiceApi
     {
-        private static PowerBIServiceHelper _helper;
+        private readonly PowerBIServiceHelper _helper;
         /// <summary>
         /// init application api with configuration
         /// </summary>
@@ -26,13 +25,15 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
 
             var tokenResponse = tokenApi.GetToken(config.TokenRequestInfo);
 
-            MsGraphHelper graphHelper = new MsGraphHelper(new MsGraphApiConfig
+            var _msApiConfig = new MsGraphApiConfig
             {
                 Proxy = config.Proxy,
                 Token = tokenResponse.access_token,
                 TimeoutSecond = config.TimeoutSecond,
-            });
-            _helper = new PowerBIServiceHelper(graphHelper.GetHttpClient());
+                RetryProperty = config.RetryProperty
+            };
+
+            _helper = new PowerBIServiceHelper(_msApiConfig);
         }
 
         /// <summary>

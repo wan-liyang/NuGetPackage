@@ -5,20 +5,17 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.Group;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class GroupHelper : BaseHelper
     {
-        private HttpClient _httpClient;
-
-        public GroupHelper(HttpClient httpClient)
+        private readonly UserHelper _userHelper;
+        public GroupHelper(MsGraphApiConfig config) : base(config)
         {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            _httpClient = httpClient;
+            _userHelper = new UserHelper(config);
         }
 
         public GetGroupResponse.Group GetGroup(string groupDisplayName)
@@ -30,20 +27,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/groups?$filter={EscapeExpression($"displayName eq '{groupDisplayName}'")}";
 
-            try
-            {
-                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
+            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
 
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                return content.JsonToObject<GetGroupResponse.Response>().value.FirstOrDefault();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content.JsonToObject<GetGroupResponse.Response>().value.FirstOrDefault();
         }
 
         private List<GetGroupMemberResponse.Member> GroupMembers;
@@ -63,31 +53,24 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members";
 
-            try
+            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            var getMembersResponse = content.JsonToObject<GetGroupMemberResponse.Response>();
+
+            GroupMembers = new List<GetGroupMemberResponse.Member>();
+            GroupMembers.AddRange(getMembersResponse.value);
+
+            if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
             {
-                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
-
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-                var getMembersResponse = content.JsonToObject<GetGroupMemberResponse.Response>();
-
-                GroupMembers = new List<GetGroupMemberResponse.Member>();
-                GroupMembers.AddRange(getMembersResponse.value);
-
-                if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
-                {
-                    GetMembersNextLink(getMembersResponse.odatanextLink);
-                }
-
-                return GroupMembers;
+                GetMembersNextLink(getMembersResponse.odatanextLink);
             }
-            catch
-            {
-                throw;
-            }
+
+            return GroupMembers;
         }
 
         /// <summary>
@@ -97,26 +80,19 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         private void GetMembersNextLink(string nextLink)
         {
-            try
+            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+
+            var response = RestApi.GetAsync(nextLink).GetAwaiter().GetResult();
+            CheckStatusCode(response);
+
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            var getMembersResponse = content.JsonToObject<GetGroupMemberResponse.Response>();
+            GroupMembers.AddRange(getMembersResponse.value);
+
+            if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
             {
-                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
-
-                var response = _httpClient.GetAsync(nextLink).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-                var getMembersResponse = content.JsonToObject<GetGroupMemberResponse.Response>();
-                GroupMembers.AddRange(getMembersResponse.value);
-
-                if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
-                {
-                    GetMembersNextLink(getMembersResponse.odatanextLink);
-                }
-            }
-            catch
-            {
-                throw;
+                GetMembersNextLink(getMembersResponse.odatanextLink);
             }
         }
 
@@ -137,8 +113,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new Exception($"group '{groupDisplayName}' not found");
             }
 
-            UserHelper userHelper = new UserHelper(_httpClient);
-            var user = userHelper.GetUserByMail(userEmail);
+            var user = _userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
                 throw new Exception($"user '{userEmail}' not found");
@@ -146,22 +121,15 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members?$count=true&$filter={EscapeExpression($"mail eq '{userEmail}'")}";
 
-            try
-            {
-                AddDefaultRequestHeaders(_httpClient, "ConsistencyLevel", "eventual");
+            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
 
-                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response);
 
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                var result = content.JsonToObject<GetGroupMemberResponse.Response>();
-                return result.odatacount > 0;
-            }
-            catch
-            {
-                throw;
-            }
+            var result = content.JsonToObject<GetGroupMemberResponse.Response>();
+            return result.odatacount > 0;
         }
 
         /// <summary>
@@ -178,8 +146,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new Exception($"group '{groupDisplayName}' not found");
             }
 
-            UserHelper userHelper = new UserHelper(_httpClient);
-            var user = userHelper.GetUserByMail(userEmail);
+            var user = _userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
                 throw new Exception($"user '{userEmail}' not found");
@@ -192,24 +159,15 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members/$ref";
 
-            try
-            {
-                string jsonContent = newMember.ObjectToJson();
+            string jsonContent = newMember.ObjectToJson();
 
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var response = _httpClient.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response);
-
-                string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            }
-            catch
-            {
-                throw;
-            }
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response);
         }
 
 
@@ -227,8 +185,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new Exception($"group '{groupDisplayName}' not found");
             }
 
-            UserHelper userHelper = new UserHelper(_httpClient);
-            var user = userHelper.GetUserByMail(userEmail);
+            var user = _userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
                 throw new Exception($"user '{userEmail}' not found");
@@ -240,15 +197,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             {
                 string url = $"{GraphApiRootUrl}/groups/{group.id}/members/{user.id}/$ref";
 
-                try
-                {
-                    var response = _httpClient.DeleteAsync(url).GetAwaiter().GetResult();
-                    CheckStatusCode(response);
-                }
-                catch
-                {
-                    throw;
-                }
+                var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+                CheckStatusCode(response);
             }           
         }
 

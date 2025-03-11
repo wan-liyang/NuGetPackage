@@ -11,15 +11,14 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// </summary>
     public class GroupApi
     {
-        private static GroupHelper _helper;
+        private readonly GroupHelper _helper;
         /// <summary>
         /// init application api with configuration
         /// </summary>
         /// <param name="config"></param>
         public GroupApi(MsGraphApiConfig config)
         {
-            MsGraphHelper graphHelper = new MsGraphHelper(config);
-            _helper = new GroupHelper(graphHelper.GetHttpClient());
+            _helper = new GroupHelper(config);
         }
 
         /// <summary>

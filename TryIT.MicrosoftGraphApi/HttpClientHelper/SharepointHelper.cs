@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Sharepoint;
 using TryIT.MicrosoftGraphApi.Request.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
@@ -13,22 +14,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SharepointHelper : BaseHelper
     {
-        private TryIT.RestApi.Api api;
-        private readonly HttpClient _httpClient;
-
-        public SharepointHelper(HttpClient httpClient)
+        private readonly SiteHelper _siteHelper;
+        public SharepointHelper(MsGraphApiConfig config) : base(config) 
         {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            // use RestApi library and enable retry
-            api = new RestApi.Api(new RestApi.Models.ApiConfig
-            {
-                HttpClient = httpClient,
-                EnableRetry = true,
-            });
-
-            _httpClient = httpClient;
+            _siteHelper = new SiteHelper(config, null);
         }
 
         /// <summary>
@@ -36,7 +25,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="folderUrl"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public GetDriveItemResponse.Item GetFolder(string folderUrl)
         {
             string encodedUrl = Base64EncodeUrl(folderUrl);
@@ -45,27 +34,20 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"https://graph.microsoft.com/v1.0/shares/{encodedUrl}/driveItem";
 
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                item = content.JsonToObject<GetDriveItemResponse.Item>();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            item = content.JsonToObject<GetDriveItemResponse.Item>();
 
             if (item == null)
             {
-                throw new Exception($"item not found: {folderUrl}");
+                throw new ArgumentException($"item not found: {folderUrl}");
             }
 
             if (string.IsNullOrEmpty(item.parentReference.siteId))
             {
-                var site = new SiteHelper(_httpClient, null).GetSiteByUrl(folderUrl);
+                var site = _siteHelper.GetSiteByUrl(folderUrl);
                 item.parentReference.siteId = site.id;
             }
 
@@ -82,25 +64,18 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/root:/{itemPath}";
 
-            try
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-
-                if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    return null;
-                }
-
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetDriveItemResponse.Item>();
-                return responseObj;
+                return null;
             }
-            catch
-            {
-                throw;
-            }
+
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = response.Content.ReadAsStringAsync().Result;
+            var responseObj = content.JsonToObject<GetDriveItemResponse.Item>();
+            return responseObj;
         }
 
         public GetDriveItemResponse.Item UploadFile(string driveId, string folderItemId, string fileName, byte[] fileContent)
@@ -112,7 +87,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             {
                 var children = GetChildren(driveId, folderItemId, null);
 
-                string fileId = children.Where(p => p.name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault()?.id;
+                string fileId = children.FirstOrDefault(p => p.name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase))?.id;
 
                 UploadSmallFileModel smallFileModel = new UploadSmallFileModel
                 {
@@ -163,31 +138,24 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url += $"/{fileModel.ParentId}:/{fileName}:/content";
             }
 
+            HttpContent httpContent = new ByteArrayContent(fileContent);
+            string contentType = MIMEType.GetContentType(fileName);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+            var response = RestApi.PutAsync(url, httpContent).GetAwaiter().GetResult();
+
+            // catch error to response with detail file information
             try
             {
-                HttpContent httpContent = new ByteArrayContent(fileContent);
-                string contentType = MIMEType.GetContentType(fileName);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-
-                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
-
-                // catch error to response with detail file information
-                try
-                {
-                    CheckStatusCode(response, api.RetryResults);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Upload failed, fileName: {fileName}, Url: {url}", ex);
-                }
-                string content = response.Content.ReadAsStringAsync().Result;
-
-                return content.JsonToObject<GetDriveItemResponse.Item>();
+                CheckStatusCode(response, RestApi.RetryResults);
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw new Exception($"Upload failed, fileName: {fileName}, Url: {url}", ex);
             }
+            string content = response.Content.ReadAsStringAsync().Result;
+
+            return content.JsonToObject<GetDriveItemResponse.Item>();
         }
 
         private GetDriveItemResponse.Item UploadLargeFile(UploadLargeFileModel fileModel)
@@ -202,13 +170,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
                 httpContent.Headers.ContentRange = new ContentRangeHeaderValue(0, fileModel.FileContent.Length - 1, fileModel.FileContent.Length);
 
-                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+                var response = RestApi.PutAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, RestApi.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<GetDriveItemResponse.Item>();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Uploaded large file failed, file: '{fileModel.FileName}' ", ex);
             }
@@ -225,14 +193,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                     Name = fileModel.FileName
                 };
 
-                HttpContent httpContent = this.GetJsonHttpContent(requestBody);
-                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+                HttpContent httpContent = GetJsonHttpContent(requestBody);
+                var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+                CheckStatusCode(response, RestApi.RetryResults);
 
                 string content = response.Content.ReadAsStringAsync().Result;
                 return content.JsonToObject<CreateUploadSessionResponse.Response>();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Create Upload Session faild, file '{fileModel.FileName}' ", ex);
             }
@@ -255,50 +223,37 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
 
             List<GetDriveItemResponse.Item> childrenItems = new List<GetDriveItemResponse.Item>();
-            try
+
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = response.Content.ReadAsStringAsync().Result;
+            var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+
+            childrenItems = new List<GetDriveItemResponse.Item>();
+            childrenItems.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
             {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
-
-                childrenItems = new List<GetDriveItemResponse.Item>();
-                childrenItems.AddRange(responseObj.value);
-
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
-                {
-                    _getnextlink(responseObj.odatanextLink, childrenItems);
-                }
-
-                return childrenItems;
+                _getnextlink(responseObj.odatanextLink, childrenItems);
             }
-            catch
-            {
-                throw;
-            }
+
+            return childrenItems;
         }
 
         private void _getnextlink(string nextLink, List<GetDriveItemResponse.Item> list)
         {
-            try
+            var response = RestApi.GetAsync(nextLink).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = response.Content.ReadAsStringAsync().Result;
+            var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
+
+            list.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
             {
-                var response = api.GetAsync(nextLink).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
-
-                string content = response.Content.ReadAsStringAsync().Result;
-                var responseObj = content.JsonToObject<GetDriveItemResponse.Response>();
-
-                list.AddRange(responseObj.value);
-
-                if (!string.IsNullOrEmpty(responseObj.odatanextLink))
-                {
-                    _getnextlink(responseObj.odatanextLink, list);
-                }
-            }
-            catch
-            {
-                throw;
+                _getnextlink(responseObj.odatanextLink, list);
             }
         }
 
@@ -320,42 +275,26 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             var folder = GetFolder(folderAbsoluteUrl);
             var files = GetChildren(folderAbsoluteUrl);
 
-            var file = files.Where(p => p.name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+            var file = files.FirstOrDefault(p => p.name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase));
 
             string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{file.id}/content";
-            try
-            {
-                // for resolve "The underlying connection was closed: An unexpected error occurred on a send" error
-                // ServicePointManager.SecurityProtocol = GetSecurityProtocol();
 
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+            byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
 
-                return content;
-            }
-            catch
-            {
-                throw;
-            }
+            return content;
         }
 
         public byte[] GetFileContent(string graphdownloadUrl)
         {
-            try
-            {
-                var response = api.GetAsync(graphdownloadUrl).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(graphdownloadUrl).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+            byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
 
-                return content;
-            }
-            catch
-            {
-                throw;
-            }
+            return content;
         }
 
         /// <summary>
@@ -376,24 +315,17 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{folderItemId}/children";
 
-            try
-            {
-                string jsonContent = model.ObjectToJson();
+            string jsonContent = model.ObjectToJson();
 
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                var item = content.JsonToObject<GetDriveItemResponse.Item>();
-                return item;
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            var item = content.JsonToObject<GetDriveItemResponse.Item>();
+            return item;
         }
 
         /// <summary>
@@ -409,36 +341,29 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{sourceFileId}";
 
-            try
+            MoveItemRequest.Body requestBody = new MoveItemRequest.Body
             {
-                MoveItemRequest.Body requestBody = new MoveItemRequest.Body
+                parentReference = new MoveItemRequest.ParentReference
                 {
-                    parentReference = new MoveItemRequest.ParentReference
-                    {
-                        id = folder.id
-                    },
-                    name = targetFileName
-                };
+                    id = folder.id
+                },
+                name = targetFileName
+            };
 
-                string jsonContent = requestBody.ObjectToJson();
+            string jsonContent = requestBody.ObjectToJson();
 
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
+            var response = RestApi.PutAsync(url, httpContent).GetAwaiter().GetResult();
 
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                {
-                    return true;
-                }
-
-                CheckStatusCode(response, api.RetryResults);
-                return false;
-            }
-            catch
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                throw;
+                return true;
             }
+
+            CheckStatusCode(response, RestApi.RetryResults);
+            return false;
         }
 
         public bool DeleteItem(string folderUrl, string itemName)
@@ -453,20 +378,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{children.id}";
 
-            try
+            var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                var response = api.DeleteAsync(url).GetAwaiter().GetResult();
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                {
-                    return true;
-                }
-                CheckStatusCode(response, api.RetryResults);
-                return false;
+                return true;
             }
-            catch
-            {
-                throw;
-            }
+            CheckStatusCode(response, RestApi.RetryResults);
+            return false;
         }
 
         /// <summary>
@@ -479,20 +397,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}";
 
-            try
+            var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                var response = api.DeleteAsync(url).GetAwaiter().GetResult();
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                {
-                    return true;
-                }
-                CheckStatusCode(response, api.RetryResults);
-                return false;
+                return true;
             }
-            catch
-            {
-                throw;
-            }
+            CheckStatusCode(response, RestApi.RetryResults);
+            return false;
         }
 
 
@@ -508,7 +419,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         public GetDriveItemResponse.Item Rename(string folderUrl, string itemOldName, string itemNewName)
         {
             var folder = GetFolder(folderUrl);
-            var children = GetChildren(folderUrl).Where(p => p.name.IsEquals(itemOldName)).FirstOrDefault();
+            var children = GetChildren(folderUrl).FirstOrDefault(p => p.name.IsEquals(itemOldName));
             if (children == null)
             {
                 throw new Exception($"'{itemOldName}' not found");
@@ -516,29 +427,22 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/drives/{folder.parentReference.driveId}/items/{children.id}";
 
-            try
+            string cleanName = UtilityHelper.CleanItemName(itemNewName);
+            RenameItemRequest.Body requestBody = new RenameItemRequest.Body
             {
-                string cleanName = UtilityHelper.CleanItemName(itemNewName);
-                RenameItemRequest.Body requestBody = new RenameItemRequest.Body
-                {
-                    Name = cleanName
-                };
-                string jsonContent = requestBody.ObjectToJson();
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                Name = cleanName
+            };
+            string jsonContent = requestBody.ObjectToJson();
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.PutAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                var item = content.JsonToObject<GetDriveItemResponse.Item>();
+            string content = response.Content.ReadAsStringAsync().Result;
+            var item = content.JsonToObject<GetDriveItemResponse.Item>();
 
-                return item;
-            }
-            catch
-            {
-                throw;
-            }
+            return item;
         }
 
         /// <summary>
@@ -553,32 +457,25 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}";
 
-            try
+            string cleanName = UtilityHelper.CleanItemName(newName);
+            RenameItemRequest.Body requestBody = new RenameItemRequest.Body
             {
-                string cleanName = UtilityHelper.CleanItemName(newName);
-                RenameItemRequest.Body requestBody = new RenameItemRequest.Body
-                {
-                    Name = cleanName
-                };
-                string jsonContent = requestBody.ObjectToJson();
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                Name = cleanName
+            };
+            string jsonContent = requestBody.ObjectToJson();
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = api.PutAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.PutAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                var item = content.JsonToObject<GetDriveItemResponse.Item>();
+            string content = response.Content.ReadAsStringAsync().Result;
+            var item = content.JsonToObject<GetDriveItemResponse.Item>();
 
-                return item;
-            }
-            catch
-            {
-                throw;
-            }
+            return item;
         }
 
-        private string Base64EncodeUrl(string url)
+        private static string Base64EncodeUrl(string url)
         {
             string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url));
             string encodedUrl = "u!" + base64Value.TrimEnd('=').Replace('/', '_').Replace('+', '-');
@@ -597,20 +494,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/permissions";
 
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                var item = content.JsonToObject<ListPermissionsResponse.Response>();
+            string content = response.Content.ReadAsStringAsync().Result;
+            var item = content.JsonToObject<ListPermissionsResponse.Response>();
 
-                return item.value;
-            }
-            catch
-            {
-                throw;
-            }
+            return item.value;
         }
 
         /// <summary>
@@ -624,34 +514,27 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/invite";
 
-            try
+            AddPermissionRequest.Body requestBody = new AddPermissionRequest.Body
             {
-                AddPermissionRequest.Body requestBody = new AddPermissionRequest.Body
-                {
-                    recipients = new List<AddPermissionRequest.Recipient>
+                recipients = new List<AddPermissionRequest.Recipient>
                     {
                         new AddPermissionRequest.Recipient {email = addPermissionModel.email}
                     },
-                    roles = new List<string> { addPermissionModel.role.ToString() },
-                    sendInvitation = addPermissionModel.sendInvitation,
-                    requireSignIn = true
-                };
-                string jsonContent = requestBody.ObjectToJson();
-                HttpContent httpContent = new StringContent(jsonContent);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                roles = new List<string> { addPermissionModel.role.ToString() },
+                sendInvitation = addPermissionModel.sendInvitation,
+                requireSignIn = true
+            };
+            string jsonContent = requestBody.ObjectToJson();
+            HttpContent httpContent = new StringContent(jsonContent);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                var item = content.JsonToObject<AddPermissionResponse.Response>();
+            string content = response.Content.ReadAsStringAsync().Result;
+            var item = content.JsonToObject<AddPermissionResponse.Response>();
 
-                return item.value;
-            }
-            catch
-            {
-                throw;
-            }
+            return item.value;
         }
 
         /// <summary>
@@ -664,20 +547,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         public bool DeletePermission(string driveId, string itemId, string permissionId)
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/permissions/{permissionId}";
-            try
+
+            var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                var response = api.DeleteAsync(url).GetAwaiter().GetResult();
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                {
-                    return true;
-                }
-                CheckStatusCode(response, api.RetryResults);
-                return false;
+                return true;
             }
-            catch
-            {
-                throw;
-            }
+            CheckStatusCode(response, RestApi.RetryResults);
+            return false;
         }
         #endregion
     }

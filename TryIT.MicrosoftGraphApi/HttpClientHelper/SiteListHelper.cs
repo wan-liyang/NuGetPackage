@@ -1,36 +1,21 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
+using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.SiteList;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SiteListHelper : BaseHelper
     {
-        private readonly TryIT.RestApi.Api api;
         private readonly SiteHelper _siteHelper;
-        private readonly HttpClient _httpClient;
-        public SiteListHelper(HttpClient httpClient, string hostName)
+
+        public SiteListHelper(MsGraphApiConfig config, string hostName) : base(config) 
         {
-            if (null == httpClient)
-                throw new ArgumentNullException(nameof(httpClient));
-
-            _httpClient = httpClient;
-
-            // use RestApi library and enable retry
-            api = new RestApi.Api(new RestApi.Models.ApiConfig
-            {
-                HttpClient = _httpClient,
-                EnableRetry = true,
-            });
-
-            _siteHelper = new SiteHelper(httpClient, hostName);
+            _siteHelper = new SiteHelper(config, hostName);
         }
 
         /// <summary>
@@ -44,18 +29,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists";
 
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetListResponse.Response>().value;
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            return content.JsonToObject<GetListResponse.Response>().value;
         }
 
         /// <summary>
@@ -70,20 +48,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?$filter={EscapeExpression($"DisplayName eq '{listName}'")}";
 
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                var lists = content.JsonToObject<GetListResponse.Response>().value;
+            string content = response.Content.ReadAsStringAsync().Result;
+            var lists = content.JsonToObject<GetListResponse.Response>().value;
 
-                return lists.Where(p => p.displayName.IsEquals(listName)).FirstOrDefault();
-            }
-            catch
-            {
-                throw;
-            }
+            return lists.FirstOrDefault(p => p.displayName.IsEquals(listName));
         }
 
         /// <summary>
@@ -99,18 +70,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items?expand=fields";
 
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetItemResponse.Response>().value;
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            return content.JsonToObject<GetItemResponse.Response>().value;
         }
 
         /// <summary>
@@ -136,11 +100,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             {
                 url += $"&$filter={EscapeExpression(expression)}";
 
-                AddDefaultRequestHeaders(_httpClient, "Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly");
+                AddDefaultRequestHeaders(this.HttpClient, "Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly");
             }
 
-            var response = await api.GetAsync(url);
-            CheckStatusCode(response, api.RetryResults);
+            var response = await RestApi.GetAsync(url);
+            CheckStatusCode(response, RestApi.RetryResults);
 
             string content = await response.Content.ReadAsStringAsync();
 
@@ -163,22 +127,6 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return list;
         }
 
-        private static PropertyInfo[] GetProperties(Type type)
-        {
-            // Check if T is a List<>
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-            {
-                Type elementType = type.GetGenericArguments()[0]; // Get the actual type inside List<T>
-                
-                return elementType.GetProperties();
-            }
-            else
-            {
-                return type.GetProperties();
-            }
-        }
-
-
         /// <summary>
         /// get specific item from list as json string
         /// </summary>
@@ -194,18 +142,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/{id}";
 
-            try
-            {
-                var response = api.GetAsync(url).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.GetJsonValue<T>("fields");
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            return content.GetJsonValue<T>("fields");
         }
 
         /// <summary>
@@ -222,20 +163,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/";
 
-            try
-            {
-                HttpContent httpContent = new StringContent(jsonBody);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = api.PostAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            HttpContent httpContent = new StringContent(jsonBody);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetItemResponse.Item>();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            return content.JsonToObject<GetItemResponse.Item>();
         }
 
         /// <summary>
@@ -253,20 +187,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/{itemId}/fields";
 
-            try
-            {
-                HttpContent httpContent = new StringContent(jsonBody);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = api.PatchAsync(url, httpContent).GetAwaiter().GetResult();
-                CheckStatusCode(response, api.RetryResults);
+            HttpContent httpContent = new StringContent(jsonBody);
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            var response = RestApi.PatchAsync(url, httpContent).GetAwaiter().GetResult();
+            CheckStatusCode(response, RestApi.RetryResults);
 
-                string content = response.Content.ReadAsStringAsync().Result;
-                return content.JsonToObject<GetItemResponse.Fields>();
-            }
-            catch
-            {
-                throw;
-            }
+            string content = response.Content.ReadAsStringAsync().Result;
+            return content.JsonToObject<GetItemResponse.Fields>();
         }
     }
 }
