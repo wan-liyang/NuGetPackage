@@ -18,7 +18,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
         /// <summary>
         /// get message from inbox folder
-        /// <para>https://graph.microsoft.com/v1.0/users/{EmailAddress}/mailFolders/{FolderId}/messages?$top={MaxItems}&$filter={Filter}&$select={Select}&$search={Search}&$count={Count}</para>
+        /// <para>https://graph.microsoft.com/v1.0/users/{EmailAddress}/mailFolders/{FolderId}/messages?$top={MaxItems}&amp;$filter={Filter}&amp;$select={Select}&amp;$search={Search}&amp;$count={Count}</para>
         /// </summary>
         /// <returns></returns>
         public async Task<List<GetMessageResponse.Message>> GetMessagesAsync(GetMessageModel getMessage)
@@ -32,11 +32,6 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 url = $"{GraphApiRootUrl}/users/{getMessage.mailbox}/mailFolders/{folder}/messages";
             }
 
-            if (getMessage?.top > 0)
-            {
-                url = url.AppendQueryToUrl($"$top={getMessage.top}");
-            }
-
             if (!string.IsNullOrEmpty(getMessage.filterExpression))
             {
                 url = url.AppendQueryToUrl($"$filter={EscapeExpression(getMessage.filterExpression)}");
@@ -44,19 +39,33 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             List<GetMessageResponse.Message> messages = new List<GetMessageResponse.Message>();
 
-            var response = await RestApi.GetAsync(url);
-            CheckStatusCode(response, RestApi.RetryResults);
+            // graph api max $top is 1000, when request to get greater than 1000, it will return 1000 items only
+            // in order to get expected items, here submit multiple request use $top and $skip query parameter
 
-            string content = await response.Content.ReadAsStringAsync();
-            var responseObj = content.JsonToObject<GetMessageResponse.Response>();
-
-            messages.AddRange(responseObj.value);
-
-            if (!string.IsNullOrEmpty(responseObj.odatanextLink) 
-                && getMessage?.top <= 0 
-                && (getMessage?.top <= 0 || messages.Count < getMessage.top))
+            while (messages.Count < getMessage?.top 
+                || (messages.Count == 0 && getMessage?.top == 0))
             {
-                await _getnextlink_messages(responseObj.odatanextLink, messages, getMessage?.top);
+                // every request need reset $top and $skip query parameter
+                string requestUrl = url;
+
+                if (getMessage?.top > 0)
+                {
+                    requestUrl = requestUrl.AppendQueryToUrl($"$top={getMessage.top - messages.Count}");
+                }
+                requestUrl = requestUrl.AppendQueryToUrl($"$skip={messages.Count}");
+
+                var response = await RestApi.GetAsync(requestUrl);
+                CheckStatusCode(response, RestApi.RetryResults);
+
+                string content = await response.Content.ReadAsStringAsync();
+                var responseObj = content.JsonToObject<GetMessageResponse.Response>();
+
+                messages.AddRange(responseObj.value);
+
+                if (string.IsNullOrEmpty(responseObj.odatanextLink))
+                {
+                    break;
+                }
             }
 
             return messages;

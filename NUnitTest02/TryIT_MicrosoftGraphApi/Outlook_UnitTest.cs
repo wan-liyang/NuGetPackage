@@ -30,18 +30,6 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         [Test]
         public void Group_Test()
         {
-            Assert.True(1 == 1);
-        }
-
-        [Test]
-        public void Group_Test2()
-        {
-            string url = "https://abc.com";
-
-            url = UtilityHelper.AppendQueryToUrl(url, "$a=a");
-            url = UtilityHelper.AppendQueryToUrl(url, "$b=c");
-
-            Assert.True(1 == 1);
         }
     }
 }
