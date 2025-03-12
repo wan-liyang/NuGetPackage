@@ -723,9 +723,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                         catch (Exception ex)
                         {
-                            var map = _copyMode.ColumnMappings.ToArray();
-                            var mapString = string.Join(", ", map.Select(x => $"{x.Key} => {x.Value}"));
-                            throw new InvalidOperationException($"BulkCopy failed - {ex.Message}, mapping: [{mapString}]", ex);
+                            throw new InvalidOperationException($"BulkCopy failed - {ex.Message}", ex);
                         }
                     }
 
