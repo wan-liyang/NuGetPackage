@@ -18,6 +18,8 @@ namespace TryIT.RestApi
     /// </summary>
     public class Api
     {
+        private const string _HttpMethod = "HttpMethod";
+
         private ResiliencePipeline<HttpResponseMessage> _pipeline;
         private readonly HttpClient _httpClient;
 
@@ -112,8 +114,11 @@ namespace TryIT.RestApi
                        .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                        {
                            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                                //.Handle<TaskCanceledException>(result => result.InnerException is TimeoutException) // handle timeout exception
-                                .HandleResult(result => config.RetryProperty.RetryStatusCodes.Contains(result.StatusCode)),
+                                .HandleResult(result => config.RetryProperty.RetryStatusCodes.Contains(result.StatusCode))
+                                .Handle<Exception>(ex =>
+                                {
+                                    return IsSafeToRetry(ex, config.RetryProperty.RetryExceptions);
+                                }),
                            Delay = config.RetryProperty.RetryDelay,
                            MaxRetryAttempts = config.RetryProperty.RetryCount,
                            BackoffType = DelayBackoffType.Constant,
@@ -146,6 +151,25 @@ namespace TryIT.RestApi
             }
         }
 
+        private static bool IsSafeToRetry(Exception ex, List<RetryExceptionConfig> retryExceptions)
+        {
+            var httpMethod = ex.Data[_HttpMethod] as string;
+
+            if (httpMethod == HttpMethod.Get.Method 
+                && retryExceptions.Any(retryEx => retryEx.ExceptionType.IsInstanceOfType(ex) 
+                && (
+                    string.IsNullOrEmpty(retryEx.MessageKeyword) 
+                    || ex.Message.ToUpper().Contains(retryEx.MessageKeyword.ToUpper())
+                   ))
+                )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
         /// <summary>
         /// call Get method
         /// </summary>
@@ -155,7 +179,15 @@ namespace TryIT.RestApi
         {
             return await _pipeline.ExecuteAsync(async exec =>
             {
-                return await _httpClient.GetAsync(url);
+                try
+                {
+                    return await _httpClient.GetAsync(url);
+                }
+                catch (Exception ex)
+                {
+                    ex.Data.Add(_HttpMethod, HttpMethod.Get.Method);
+                    throw;
+                }
             });
         }
 
@@ -169,26 +201,34 @@ namespace TryIT.RestApi
         {
             return await _pipeline.ExecuteAsync(async exec =>
             {
-                string paras = string.Empty;
-
-                if (paras != null && paras.Length > 0)
+                try
                 {
-                    paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
+                    string paras = string.Empty;
+
+                    if (paras != null && paras.Length > 0)
+                    {
+                        paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
+                    }
+
+                    if (!string.IsNullOrEmpty(paras))
+                    {
+                        if (url.Contains("?"))
+                        {
+                            url = $"{url}&{paras}";
+                        }
+                        else
+                        {
+                            url = $"{url}?{paras}";
+                        }
+                    }
+
+                    return await _httpClient.GetAsync(url);
                 }
-
-                if (!string.IsNullOrEmpty(paras))
+                catch (Exception ex)
                 {
-                    if (url.Contains("?"))
-                    {
-                        url = $"{url}&{paras}";
-                    }
-                    else
-                    {
-                        url = $"{url}?{paras}";
-                    }
-                }                
-
-                return await _httpClient.GetAsync(url);
+                    ex.Data.Add(_HttpMethod, HttpMethod.Get.Method);
+                    throw;
+                }
             });
         }
 

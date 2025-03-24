@@ -157,6 +157,11 @@
             the status codes that will be retried
             </summary>
         </member>
+        <member name="P:TryIT.RestApi.Models.RetryProperty.RetryExceptions">
+            <summary>
+            the exceptions that will be retried, this only applicable for GET method
+            </summary>
+        </member>
         <member name="P:TryIT.RestApi.Models.RetryProperty.RetryCount">
             <summary>
             number of retry times, default 3 times
@@ -165,6 +170,16 @@
         <member name="P:TryIT.RestApi.Models.RetryProperty.RetryDelay">
             <summary>
             delay between each retry, default 1 second
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RetryExceptionConfig.ExceptionType">
+            <summary>
+            E.g., typeof(HttpRequestException)
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.RetryExceptionConfig.MessageKeyword">
+            <summary>
+            E.g., "SSL connection"
             </summary>
         </member>
         <member name="T:TryIT.RestApi.Models.RetryResult">
