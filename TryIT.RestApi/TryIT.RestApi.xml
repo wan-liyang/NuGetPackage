@@ -67,6 +67,11 @@
             <param name="url"></param>
             <returns></returns>
         </member>
+        <member name="T:TryIT.RestApi.Models.BasicAuth">
+            <summary>
+            basic auth proper
+            </summary>
+        </member>
         <member name="P:TryIT.RestApi.Models.BasicAuth.Username">
             <summary>
             username for Basic Authorization, if provided will use Basic Authorization
@@ -122,6 +127,11 @@
             default use <see cref="F:System.Net.SecurityProtocolType.Tls12"/> for more secure
             </summary>
         </member>
+        <member name="T:TryIT.RestApi.Models.ProxyConfig">
+            <summary>
+            proxy config for the api
+            </summary>
+        </member>
         <member name="P:TryIT.RestApi.Models.ProxyConfig.Url">
             <summary>
             Url for proxy server
@@ -135,16 +145,6 @@
         <member name="P:TryIT.RestApi.Models.ProxyConfig.Password">
             <summary>
             Password for connect to proxy
-            </summary>
-        </member>
-        <member name="P:TryIT.RestApi.Models.RequestModel.Url">
-            <summary>
-            request Url contains parameter if parameter pass via Url
-            </summary>
-        </member>
-        <member name="P:TryIT.RestApi.Models.RequestModel.HttpContent">
-            <summary>
-            new StringContent(bodyString, System.Text.Encoding.UTF8, "application/json");
             </summary>
         </member>
         <member name="T:TryIT.RestApi.Models.RetryProperty">
@@ -170,6 +170,11 @@
         <member name="P:TryIT.RestApi.Models.RetryProperty.RetryDelay">
             <summary>
             delay between each retry, default 1 second
+            </summary>
+        </member>
+        <member name="T:TryIT.RestApi.Models.RetryExceptionConfig">
+            <summary>
+            exception config for retry
             </summary>
         </member>
         <member name="P:TryIT.RestApi.Models.RetryExceptionConfig.ExceptionType">

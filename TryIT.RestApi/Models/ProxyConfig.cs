@@ -5,6 +5,9 @@ using System.Text;
 
 namespace TryIT.RestApi.Models
 {
+    /// <summary>
+    /// proxy config for the api
+    /// </summary>
     public class ProxyConfig
     {
         /// <summary>

@@ -3,6 +3,9 @@ using System.Security;
 
 namespace TryIT.RestApi.Models
 {
+    /// <summary>
+    /// basic auth proper
+    /// </summary>
     public class BasicAuth
     {
         /// <summary>

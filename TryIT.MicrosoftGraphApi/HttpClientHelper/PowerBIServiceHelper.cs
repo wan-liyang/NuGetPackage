@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.PowerBIService;
@@ -17,27 +18,27 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="name">workspace name</param>
         /// <returns></returns>
-        public GetGroupsResponse.Group GetGroup(string name)
+        public async Task<GetGroupsResponse.Group> GetGroupAsync(string name)
         {
             string url = $"https://api.powerbi.com/v1.0/myorg/groups?$filter={EscapeExpression($"name eq '{name}'")}";
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetGroupsResponse.Response>().value.FirstOrDefault();
         }
 
-        public List<GetDatasetsInGroupResponse.Dataset> GetDatasetsInGroup(string groupName)
+        public async Task<List<GetDatasetsInGroupResponse.Dataset>> GetDatasetsInGroupAsync(string groupName)
         {
-            var group = GetGroup(groupName);
+            var group = await GetGroupAsync(groupName);
 
             string url = $"https://api.powerbi.com/v1.0/myorg/groups/{group.id}/datasets";
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetDatasetsInGroupResponse.Response>().value;
         }
 
@@ -47,10 +48,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="groupName"></param>
         /// <param name="datasetName"></param>
         /// <returns></returns>
-        public string RefreshDatasetInGroup(string groupName, string datasetName)
+        public async Task<string> RefreshDatasetInGroupAsync(string groupName, string datasetName)
         {
-            var group = GetGroup(groupName);
-            var datasets = GetDatasetsInGroup(groupName);
+            var group = await GetGroupAsync(groupName);
+            var datasets = await GetDatasetsInGroupAsync(groupName);
 
             var dataset = datasets.First(p => p.name.Equals(datasetName, StringComparison.OrdinalIgnoreCase));
 
@@ -58,7 +59,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             HttpContent httpContent = new StringContent("");
 
-            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response);
 
             if (response.Headers.Contains("RequestId"))
@@ -75,19 +76,19 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="groupName"></param>
         /// <param name="datasetName"></param>
         /// <returns></returns>
-        public List<GetRefreshHistoryInGroupResponse.RefreshHistory> GetRefreshHistoryInGroup(string groupName, string datasetName)
+        public async Task<List<GetRefreshHistoryInGroupResponse.RefreshHistory>> GetRefreshHistoryInGroupAsync(string groupName, string datasetName)
         {
-            var group = GetGroup(groupName);
-            var datasets = GetDatasetsInGroup(groupName);
+            var group = await GetGroupAsync(groupName);
+            var datasets = await GetDatasetsInGroupAsync(groupName);
 
             var dataset = datasets.First(p => p.name.Equals(datasetName, StringComparison.OrdinalIgnoreCase));
 
             string url = $"https://api.powerbi.com/v1.0/myorg/groups/{group.id}/datasets/{dataset.id}/refreshes";
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetRefreshHistoryInGroupResponse.Response>().value;
         }
     }

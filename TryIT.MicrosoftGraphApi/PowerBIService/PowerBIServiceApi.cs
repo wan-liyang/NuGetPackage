@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.MsGraphApi;
@@ -41,9 +42,9 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public GetGroupsResponse.Group GetGroup(string name)
+        public async Task<GetGroupsResponse.Group> GetGroupAsync(string name)
         {
-            return _helper.GetGroup(name);
+            return await _helper.GetGroupAsync(name);
         }
 
         /// <summary>
@@ -51,9 +52,9 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
         /// </summary>
         /// <param name="groupName"></param>
         /// <returns></returns>
-        public List<GetDatasetsInGroupResponse.Dataset> GetDatasetsInGroup(string groupName)
+        public async Task<List<GetDatasetsInGroupResponse.Dataset>> GetDatasetsInGroupAsync(string groupName)
         {
-            return _helper.GetDatasetsInGroup(groupName);
+            return await _helper.GetDatasetsInGroupAsync(groupName);
         }
 
         /// <summary>
@@ -61,9 +62,9 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
         /// </summary>
         /// <param name="groupName"></param>
         /// <param name="datasetName"></param>
-        public string RefreshDatasetInGroup(string groupName, string datasetName)
+        public async Task<string> RefreshDatasetInGroupAsync(string groupName, string datasetName)
         {
-            return _helper.RefreshDatasetInGroup(groupName, datasetName);
+            return await _helper.RefreshDatasetInGroupAsync(groupName, datasetName);
         }
 
 
@@ -73,9 +74,9 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
         /// <param name="groupName"></param>
         /// <param name="datasetName"></param>
         /// <returns></returns>
-        public List<GetRefreshHistoryInGroupResponse.RefreshHistory> GetRefreshHistoryInGroup(string groupName, string datasetName)
+        public async Task<List<GetRefreshHistoryInGroupResponse.RefreshHistory>> GetRefreshHistoryInGroupAsync(string groupName, string datasetName)
         {
-            return _helper.GetRefreshHistoryInGroup(groupName, datasetName);
+            return await _helper.GetRefreshHistoryInGroupAsync(groupName, datasetName);
         }
     }
 }

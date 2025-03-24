@@ -31,6 +31,9 @@ namespace TryIT.RestApi.Models
         public TimeSpan RetryDelay { get; set; }
     }
 
+    /// <summary>
+    /// exception config for retry
+    /// </summary>
     public class RetryExceptionConfig
     {
         /// <summary>
