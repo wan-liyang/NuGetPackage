@@ -18,7 +18,9 @@ namespace TryIT.RestApi
     /// </summary>
     public class Api
     {
-        private const string _HttpMethod = "HttpMethod";
+        private const string EXCEPTION_DATA_HTTP_METHOD = "HttpMethod";
+        private const string EXCEPTION_DATA_HTTP_URI = "RequestUri";
+        private const string EXCEPTION_DATA_RETRY_ATTEMPTS = "RetryAttempts";
 
         private ResiliencePipeline _pipeline;
         private readonly HttpClient _httpClient;
@@ -71,7 +73,7 @@ namespace TryIT.RestApi
                 httpClient = new HttpClient(clientHandler);
             }
 
-            
+
 
             if (clientConfig.TimeoutSecond > 0)
             {
@@ -150,7 +152,8 @@ namespace TryIT.RestApi
             {
                 _isRetryEnabled = true;
 
-                builder.HandleResult(result => {
+                builder.HandleResult(result =>
+                {
                     if (result is HttpResponseMessage httpResponse)
                     {
                         return retryProperty.RetryStatusCodes.Contains(httpResponse.StatusCode);
@@ -163,9 +166,9 @@ namespace TryIT.RestApi
             {
                 _isRetryEnabled = true;
 
-                builder.Handle<Exception>(ex =>
+                builder.Handle<Exception>((Func<Exception, bool>)(ex =>
                 {
-                    var httpMethod = ex.Data[_HttpMethod] as string;
+                    var httpMethod = ex.Data[(object)Api.EXCEPTION_DATA_HTTP_METHOD] as string;
 
                     if (httpMethod == HttpMethod.Get.Method
                         && retryProperty.RetryExceptions.Any(
@@ -180,7 +183,7 @@ namespace TryIT.RestApi
                     }
 
                     return false;
-                });
+                }));
             }
 
             return (_isRetryEnabled, builder);
@@ -202,9 +205,29 @@ namespace TryIT.RestApi
             _retryResults.Add(new RetryResult
             {
                 AttemptNumber = args.AttemptNumber,
+                Timestamp = DateTime.Now,
                 Result = resultMessage,
                 Exception = args.Outcome.Exception
             });
+        }
+
+        /// <summary>
+        /// add extra data into exception
+        /// <para>Uri</para>
+        /// <para>Method</para>
+        /// <para>RetryResults</para>
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="url"></param>
+        private void AddExcetionData(Exception ex, string url)
+        {
+            ex.Data[EXCEPTION_DATA_HTTP_URI] = url;
+            ex.Data[EXCEPTION_DATA_HTTP_METHOD] = HttpMethod.Get.Method;
+
+            if (RetryResults.Any())
+            {
+                ex.Data[EXCEPTION_DATA_RETRY_ATTEMPTS] = RetryResults;
+            }
         }
 
         /// <summary>
@@ -214,18 +237,26 @@ namespace TryIT.RestApi
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetAsync(string url)
         {
-            return await _pipeline.ExecuteAsync(async exec =>
+            try
             {
-                try
-                {
-                    return await _httpClient.GetAsync(url);
-                }
-                catch (Exception ex)
-                {
-                    ex.Data.Add(_HttpMethod, HttpMethod.Get.Method);
-                    throw;
-                }
-            });
+                return await _pipeline.ExecuteAsync(async exec =>
+                    {
+                        try
+                        {
+                            return await _httpClient.GetAsync(url);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.Data.Add((object)Api.EXCEPTION_DATA_HTTP_METHOD, HttpMethod.Get.Method);
+                            throw;
+                        }
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex, url);
+                throw;
+            }
         }
 
         /// <summary>
@@ -236,37 +267,45 @@ namespace TryIT.RestApi
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> parameters)
         {
-            return await _pipeline.ExecuteAsync(async exec =>
+            try
             {
-                try
-                {
-                    string paras = string.Empty;
-
-                    if (paras != null && paras.Length > 0)
+                return await _pipeline.ExecuteAsync(async exec =>
                     {
-                        paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
-                    }
-
-                    if (!string.IsNullOrEmpty(paras))
-                    {
-                        if (url.Contains("?"))
+                        try
                         {
-                            url = $"{url}&{paras}";
-                        }
-                        else
-                        {
-                            url = $"{url}?{paras}";
-                        }
-                    }
+                            string paras = string.Empty;
 
-                    return await _httpClient.GetAsync(url);
-                }
-                catch (Exception ex)
-                {
-                    ex.Data.Add(_HttpMethod, HttpMethod.Get.Method);
-                    throw;
-                }
-            });
+                            if (paras != null && paras.Length > 0)
+                            {
+                                paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
+                            }
+
+                            if (!string.IsNullOrEmpty(paras))
+                            {
+                                if (url.Contains("?"))
+                                {
+                                    url = $"{url}&{paras}";
+                                }
+                                else
+                                {
+                                    url = $"{url}?{paras}";
+                                }
+                            }
+
+                            return await _httpClient.GetAsync(url);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.Data.Add((object)Api.EXCEPTION_DATA_HTTP_METHOD, HttpMethod.Get.Method);
+                            throw;
+                        }
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex, url);
+                throw;
+            }
         }
 
         /// <summary>
@@ -277,10 +316,18 @@ namespace TryIT.RestApi
         /// <returns></returns>
         public async Task<HttpResponseMessage> PostAsync(string url, HttpContent content)
         {
-            return await _pipeline.ExecuteAsync(async exec =>
+            try
             {
-                return await _httpClient.PostAsync(url, content);
-            });
+                return await _pipeline.ExecuteAsync(async exec =>
+                    {
+                        return await _httpClient.PostAsync(url, content);
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex, url);
+                throw;
+            }
         }
 
         /// <summary>
@@ -291,10 +338,18 @@ namespace TryIT.RestApi
         /// <returns></returns>
         public async Task<HttpResponseMessage> PutAsync(string url, HttpContent content)
         {
-            return await _pipeline.ExecuteAsync(async exec =>
+            try
             {
-                return await _httpClient.PutAsync(url, content);
-            });
+                return await _pipeline.ExecuteAsync(async exec =>
+                    {
+                        return await _httpClient.PutAsync(url, content);
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex, url); 
+                throw;
+            }
         }
 
         /// <summary>
@@ -305,13 +360,21 @@ namespace TryIT.RestApi
         /// <returns></returns>
         public async Task<HttpResponseMessage> PatchAsync(string url, HttpContent content)
         {
-            return await _pipeline.ExecuteAsync(async exec =>
+            try
             {
-                var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-                request.Content = content;
+                return await _pipeline.ExecuteAsync(async exec =>
+                    {
+                        var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
+                        request.Content = content;
 
-                return await _httpClient.SendAsync(request);
-            });
+                        return await _httpClient.SendAsync(request);
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex, url);
+                throw;
+            }
         }
 
         /// <summary>
@@ -321,10 +384,18 @@ namespace TryIT.RestApi
         /// <returns></returns>
         public async Task<HttpResponseMessage> DeleteAsync(string url)
         {
-            return await _pipeline.ExecuteAsync(async exec =>
+            try
             {
-                return await _httpClient.DeleteAsync(url);
-            });
+                return await _pipeline.ExecuteAsync(async exec =>
+                    {
+                        return await _httpClient.DeleteAsync(url);
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex, url);
+                throw;
+            }
         }
     }
 }
