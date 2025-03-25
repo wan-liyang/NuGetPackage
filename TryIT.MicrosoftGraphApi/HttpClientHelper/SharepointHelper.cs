@@ -15,7 +15,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     internal class SharepointHelper : BaseHelper
     {
         private readonly SiteHelper _siteHelper;
-        public SharepointHelper(MsGraphApiConfig config) : base(config) 
+        public SharepointHelper(MsGraphApiConfig config) : base(config)
         {
             _siteHelper = new SiteHelper(config, null);
         }
@@ -34,7 +34,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"https://graph.microsoft.com/v1.0/shares/{encodedUrl}/driveItem";
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = DoGetAsync(async () =>
+            {
+                return await RestApi.GetAsync(url);
+
+            }).GetAwaiter().GetResult();
+
             CheckStatusCode(response, RestApi.RetryResults);
 
             string content = response.Content.ReadAsStringAsync().Result;

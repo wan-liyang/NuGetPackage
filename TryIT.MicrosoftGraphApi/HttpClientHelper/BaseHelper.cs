@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Response.Utlity;
 using TryIT.RestApi.Models;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
@@ -70,6 +72,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             client.DefaultRequestHeaders.Remove(headerKey);
             client.DefaultRequestHeaders.Add(headerKey, headerValue);
+        }
+
+        /// <summary>
+        /// do get and retry once when api return error with retryAfterSeconds
+        /// <para>{"error":{"code":"serviceNotAvailable","message":"Service unavailable","retryAfterSeconds":15}}</para>
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        protected static async Task<HttpResponseMessage> DoGetAsync(Func<Task<HttpResponseMessage>> func)
+        {
+            var response = await func();
+
+            // if not success status code, check if response contain retryAfterSeconds, then wait and retry once
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var errorContent = content.JsonToObject<ServiceNotAvailableResponse.Response>();
+                if (errorContent != null && errorContent.error?.retryAfterSeconds > 0)
+                {
+                    Task.Delay(TimeSpan.FromSeconds(errorContent.error.retryAfterSeconds)).Wait();
+                    response = await func();
+                }
+            }
+            return response;
         }
 
         /// <summary>
