@@ -20,7 +20,7 @@ namespace TryIT.RestApi
     {
         private const string _HttpMethod = "HttpMethod";
 
-        private ResiliencePipeline<HttpResponseMessage> _pipeline;
+        private ResiliencePipeline _pipeline;
         private readonly HttpClient _httpClient;
 
         private List<RetryResult> _retryResults = new List<RetryResult>();
@@ -106,40 +106,20 @@ namespace TryIT.RestApi
 
         private void EnableRetry(HttpClientConfig config)
         {
-            if (config.RetryProperty != null 
-                && config.RetryProperty.RetryStatusCodes  != null 
-                && config.RetryProperty.RetryStatusCodes.Any())
+            var Builder = GetBuilder(config.RetryProperty);
+
+            if (Builder.EnableRetry)
             {
-                _pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
-                       .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                _pipeline = new ResiliencePipelineBuilder()
+                       .AddRetry(new RetryStrategyOptions
                        {
-                           ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                                .HandleResult(result => config.RetryProperty.RetryStatusCodes.Contains(result.StatusCode))
-                                .Handle<Exception>(ex =>
-                                {
-                                    return IsSafeToRetry(ex, config.RetryProperty.RetryExceptions);
-                                }),
+                           ShouldHandle = Builder.RetryBuilder,
                            Delay = config.RetryProperty.RetryDelay,
                            MaxRetryAttempts = config.RetryProperty.RetryCount,
                            BackoffType = DelayBackoffType.Constant,
                            OnRetry = args =>
                            {
-                               ResultMessage resultMessage = new ResultMessage();
-                               var result = args.Outcome.Result;
-                               if (result != null)
-                               {
-                                   resultMessage.StatusCode = $"{(int)result.StatusCode} - {result.StatusCode.ToString()}";
-                                   resultMessage.ReasonPhrase = result.ReasonPhrase;
-                                   resultMessage.RequestUri = result.RequestMessage.RequestUri;
-                               }
-
-                               _retryResults.Add(new RetryResult
-                               {
-                                   AttemptNumber = args.AttemptNumber,
-                                   Result = resultMessage,
-                                   Exception = args.Outcome.Exception
-                               });
-
+                               UpdateRetryResult(args);
                                return default;
                            }
                        })
@@ -147,28 +127,85 @@ namespace TryIT.RestApi
             }
             else
             {
-                _pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>().Build();
+                _pipeline = new ResiliencePipelineBuilder().Build();
             }
         }
 
-        private static bool IsSafeToRetry(Exception ex, List<RetryExceptionConfig> retryExceptions)
+        /// <summary>
+        /// get retry builder based on retry property
+        /// </summary>
+        /// <param name="retryProperty"></param>
+        /// <returns></returns>
+        private static (bool EnableRetry, PredicateBuilder RetryBuilder) GetBuilder(RetryProperty retryProperty)
         {
-            var httpMethod = ex.Data[_HttpMethod] as string;
-
-            if (httpMethod == HttpMethod.Get.Method 
-                && retryExceptions.Any(retryEx => retryEx.ExceptionType.IsInstanceOfType(ex) 
-                && (
-                    string.IsNullOrEmpty(retryEx.MessageKeyword) 
-                    || ex.Message.ToUpper().Contains(retryEx.MessageKeyword.ToUpper())
-                   ))
-                )
+            if (retryProperty == null)
             {
-                return true;
+                return (false, null);
             }
 
-            return false;
+            bool _isRetryEnabled = false;
+
+            var builder = new PredicateBuilder();
+            if (retryProperty.RetryStatusCodes != null && retryProperty.RetryStatusCodes.Any())
+            {
+                _isRetryEnabled = true;
+
+                builder.HandleResult(result => {
+                    if (result is HttpResponseMessage httpResponse)
+                    {
+                        return retryProperty.RetryStatusCodes.Contains(httpResponse.StatusCode);
+                    }
+                    return false;
+                });
+            }
+
+            if (retryProperty.RetryExceptions != null && retryProperty.RetryExceptions.Any())
+            {
+                _isRetryEnabled = true;
+
+                builder.Handle<Exception>(ex =>
+                {
+                    var httpMethod = ex.Data[_HttpMethod] as string;
+
+                    if (httpMethod == HttpMethod.Get.Method
+                        && retryProperty.RetryExceptions.Any(
+                            retryEx => retryEx.ExceptionType.IsInstanceOfType(ex)
+                            && (
+                                string.IsNullOrEmpty(retryEx.MessageKeyword)
+                                || ex.Message.ToUpper().Contains(retryEx.MessageKeyword.ToUpper())
+                                ))
+                        )
+                    {
+                        return true;
+                    }
+
+                    return false;
+                });
+            }
+
+            return (_isRetryEnabled, builder);
         }
 
+        private void UpdateRetryResult(OnRetryArguments<object> args)
+        {
+            ResultMessage resultMessage = null;
+            var result = args.Outcome.Result;
+
+            if (result is HttpResponseMessage httpResponse)
+            {
+                resultMessage = new ResultMessage();
+                resultMessage.StatusCode = $"{(int)httpResponse.StatusCode} - {httpResponse.StatusCode.ToString()}";
+                resultMessage.ReasonPhrase = httpResponse.ReasonPhrase;
+                resultMessage.RequestUri = httpResponse.RequestMessage.RequestUri;
+            }
+
+            _retryResults.Add(new RetryResult
+            {
+                AttemptNumber = args.AttemptNumber,
+                Result = resultMessage,
+                Exception = args.Outcome.Exception
+            });
+        }
 
         /// <summary>
         /// call Get method

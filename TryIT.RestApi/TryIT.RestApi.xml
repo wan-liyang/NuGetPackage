@@ -21,6 +21,13 @@
             <param name="clientConfig"></param>
             <exception cref="T:System.ArgumentNullException"></exception>
         </member>
+        <member name="M:TryIT.RestApi.Api.GetBuilder(TryIT.RestApi.Models.RetryProperty)">
+            <summary>
+            get retry builder based on retry property
+            </summary>
+            <param name="retryProperty"></param>
+            <returns></returns>
+        </member>
         <member name="M:TryIT.RestApi.Api.GetAsync(System.String)">
             <summary>
             call Get method
