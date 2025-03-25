@@ -9,40 +9,54 @@ namespace TryIT.ObjectExtension
     public static class ExceptionExtension
     {
         /// <summary>
-        /// convert Exception object to Customize String
-        /// <para>return <paramref name="ex"/> + <paramref name="ex"/>.InnerException + <paramref name="ex"/>.InnerExeption.InnerException</para>
+        /// structure exception detail to string, inlcude inner exception and data
         /// </summary>
         /// <param name="ex"></param>
         /// <returns></returns>
         public static string ToCustomizeString(this Exception ex)
         {
+            if (ex == null)
+                return string.Empty;
+
             StringBuilder sb = new StringBuilder();
-            if (null != ex)
+
+            sb.AppendLine("Exception Detail:");
+            AppendExceptionMessage(sb, ex);
+            AppendExceptionData(sb, ex);
+
+            // Iterate through all inner exceptions
+            Exception inner = ex.InnerException;
+            int innerLevel = 1;
+            while (inner != null)
             {
-                sb.AppendLine("Exception Detail:");
-                sb.AppendLine("Error Message : " + ex.Message);
-                sb.AppendLine("Exception Type : " + ex.GetType());
-                sb.AppendLine("Stack Trace : " + ex.StackTrace);
+                sb.AppendLine($"Inner Exception Level {innerLevel} Detail:");
+                AppendExceptionMessage(sb, inner);
+                AppendExceptionData(sb, ex);
 
-                if (null != ex.InnerException)
+                inner = inner.InnerException;
+                innerLevel++;
+            }
+
+            return sb.ToString();
+        }
+
+        private static void AppendExceptionMessage(StringBuilder sb, Exception ex)
+        {
+            sb.AppendLine($"\tError Message: {ex.Message}");
+            sb.AppendLine($"\tException Type: {ex.GetType()}");
+            sb.AppendLine($"\tStack Trace: {ex.StackTrace}");
+        }
+
+        private static void AppendExceptionData(StringBuilder sb, Exception ex)
+        {
+            if (ex.Data.Count > 0)
+            {
+                sb.AppendLine("\tException Data:");
+                foreach (var key in ex.Data.Keys)
                 {
-                    var ex1 = ex.InnerException;
-                    sb.AppendLine("Inner Exception Detail:");
-                    sb.AppendLine((string)("Error Message : " + ex1.Message));
-                    sb.AppendLine("Exception Type : " + ex1.GetType());
-                    sb.AppendLine((string)("Stack Trace : " + ex1.StackTrace));
-
-                    if (null != ex1.InnerException)
-                    {
-                        var ex2 = ex1.InnerException;
-                        sb.AppendLine("Inner Exception Detail:");
-                        sb.AppendLine((string)("Error Message : " + ex2.Message));
-                        sb.AppendLine("Exception Type : " + ex2.GetType());
-                        sb.AppendLine((string)("Stack Trace : " + ex2.StackTrace));
-                    }
+                    sb.AppendLine($"\t{key} : {ex.Data[key]}");
                 }
             }
-            return sb.ToString();
         }
     }
 }

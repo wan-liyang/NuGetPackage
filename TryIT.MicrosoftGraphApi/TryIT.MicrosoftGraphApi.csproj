@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="TryIT.RestApi" Version="1.1.6" />
+    <PackageReference Include="TryIT.RestApi" Version="1.1.7" />
   </ItemGroup>
   
   <ItemGroup>

@@ -276,8 +276,7 @@
         </member>
         <member name="M:TryIT.ObjectExtension.ExceptionExtension.ToCustomizeString(System.Exception)">
             <summary>
-            convert Exception object to Customize String
-            <para>return <paramref name="ex"/> + <paramref name="ex"/>.InnerException + <paramref name="ex"/>.InnerExeption.InnerException</para>
+            structure exception detail to string, inlcude inner exception and data
             </summary>
             <param name="ex"></param>
             <returns></returns>
