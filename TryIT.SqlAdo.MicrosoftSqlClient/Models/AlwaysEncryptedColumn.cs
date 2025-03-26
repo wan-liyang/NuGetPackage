@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
+﻿namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
 {
+    /// <summary>
+    /// always encrypted column
+    /// </summary>
     public class AlwaysEncryptedColumn
     {
         public string TableName { get; set; }

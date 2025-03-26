@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
 {
@@ -13,6 +11,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
         /// number of retry
         /// </summary>
         public int AttemptNumber { get; set; }
+
+        /// <summary>
+        /// timestamp of the retry
+        /// </summary>
+        public DateTime Timestamp { get; set; }
 
         /// <summary>
         /// exception for each retry

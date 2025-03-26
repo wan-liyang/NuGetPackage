@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
+﻿namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
 {
     /// <summary>
     /// azure key vault provide information

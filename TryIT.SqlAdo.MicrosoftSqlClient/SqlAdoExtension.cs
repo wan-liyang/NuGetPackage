@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient
 {
     /// <summary>
     /// extension method
     /// </summary>
-    public class SqlAdoExtension
+    public static class SqlAdoExtension
     {
         /// <summary>
         /// convert value to <see cref="DBNull.Value"/> if <paramref name="value"/> is NULL or Empty
@@ -32,12 +30,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         public static object ToDBNull(Nullable<int> value, params int[] nullValues)
         {
-            if (value.HasValue)
+            if (value.HasValue 
+                && (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value)))
             {
-                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value))
-                {
-                    return value.Value;
-                }
+                return value.Value;
             }
             return DBNull.Value;
         }
@@ -50,12 +46,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         public static object ToDBNull(Nullable<decimal> value, params decimal[] nullValues)
         {
-            if (value.HasValue)
+            if (value.HasValue 
+                && (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value)))
             {
-                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value))
-                {
-                    return value.Value;
-                }
+                return value.Value;
             }
             return DBNull.Value;
         }

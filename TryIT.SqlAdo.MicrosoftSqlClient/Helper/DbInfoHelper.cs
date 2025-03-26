@@ -3,13 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 {
+    /// <summary>
+    /// helper class for get database information
+    /// </summary>
     public static class DbInfoHelper
     {
+        /// <summary>
+        /// get table identity column name
+        /// </summary>
+        /// <param name="dbConnector"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         public static string GetIdentityColumnName(this DbConnector dbConnector, string tableName)
         {
             string sql = $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName AND COLUMNPROPERTY(OBJECT_ID(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1";
@@ -22,6 +30,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             return dbConnector.ExecuteScalar<string>(sql, CommandType.Text, parameters);
         }
 
+        /// <summary>
+        /// get table structure
+        /// </summary>
+        /// <param name="dbConnector"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static List<DbTableStructure> GetDbTableStructure(this DbConnector dbConnector, string tableName)
         {
             string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";
@@ -48,6 +63,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                   }).ToList();
         }
 
+        /// <summary>
+        /// get temp table structure
+        /// </summary>
+        /// <param name="dbConnector"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static List<DbTableStructure> GetDbTableStructure_TempDb(this DbConnector dbConnector, string tableName)
         {
             string sql = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM Tempdb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA + '.' + TABLE_NAME = @tableName";

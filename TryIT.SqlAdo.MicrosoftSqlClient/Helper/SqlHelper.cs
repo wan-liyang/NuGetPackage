@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net.NetworkInformation;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
@@ -93,12 +92,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <returns></returns>
         public static object ToDBNull(this string value, bool nullIfEmpty = false)
         {
-            if (!nullIfEmpty)
+            if (!nullIfEmpty && value == string.Empty)
             {
-                if (value == string.Empty)
-                {
-                    return value;
-                }
+                return value;
             }
 
             if (string.IsNullOrEmpty(value))
@@ -116,12 +112,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <returns></returns>
         public static object ToDBNull(this string value, params string[] nullValues)
         {
-            if (!string.IsNullOrEmpty(value))
+            if (!string.IsNullOrEmpty(value) 
+                && (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value)))
             {
-                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value))
-                {
-                    return value;
-                }
+                return value;
             }
             return DBNull.Value;
         }
@@ -135,12 +129,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <returns></returns>
         public static object ToDBNull(this Nullable<int> value, params int[] nullValues)
         {
-            if (value.HasValue)
+            if (value.HasValue 
+                && (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value)))
             {
-                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value))
-                {
-                    return value.Value;
-                }
+                return value.Value;
             }
             return DBNull.Value;
         }
@@ -153,12 +145,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <returns></returns>
         public static object ToDBNull(this Nullable<decimal> value, params decimal[] nullValues)
         {
-            if (value.HasValue)
+            if (value.HasValue 
+                && (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value)))
             {
-                if (nullValues == null || nullValues.Length == 0 || !nullValues.Contains(value.Value))
-                {
-                    return value.Value;
-                }
+                return value.Value;
             }
             return DBNull.Value;
         }
@@ -186,16 +176,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             // before: 51e3aaa4-6ff6-475a-8f0f-78cac597b6c3
             // after: FBVDRRREGWWGEHFRIWAWHITRTFJHSGTD
             return string.Concat(Guid.NewGuid().ToString("N").Select(c => (char)(c + 17))).ToUpper();
-        }
-
-        /// <summary>
-        /// warp column, Column1 to [Column1]
-        /// </summary>
-        /// <param name="column"></param>
-        /// <returns></returns>
-        public static string SqlWarpColumn(string column)
-        {
-            return column.StartsWith("[") ? column : $"[{column}]";
         }
 
         /// <summary>
@@ -259,6 +239,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <summary>
         /// warp column, Column1 to [Column1]
         /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public static string SqlWarpColumn(string column)
+        {
+            return column.StartsWith("[") ? column : $"[{column}]";
+        }
+
+        /// <summary>
+        /// warp column, Column1 to [Column1]
+        /// </summary>
         /// <param name="columns"></param>
         /// <returns></returns>
         public static List<string> SqlWarpColumn(IEnumerable<string> columns)
@@ -280,8 +270,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         {
             return param.Replace(" ", "").Replace("[", "").Replace("]", "");
         }
-
-
 
         /*
             https://learn.microsoft.com/en-us/sql/relational-databases/security/encryption/develop-using-always-encrypted-with-net-framework-data-provider?view=sql-server-2017#inserting-data-example

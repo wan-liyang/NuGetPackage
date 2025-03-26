@@ -19,13 +19,22 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
     /// </summary>
     public class DbConnector
     {
+        private const string EXCEPTION_DATA_RETRY_ATTEMPTS = "RetryAttempts";
         private readonly ResiliencePipeline _pipeline;
-        private ConnectorConfig _config;
-
+        private readonly ConnectorConfig _config;
+        
+        private List<RetryResult> _retryResults = new List<RetryResult>();
+        
         /// <summary>
         /// retry results
         /// </summary>
-        public List<RetryResult> RetryResults = new List<RetryResult>();
+        public List<RetryResult> RetryResults
+        {
+            get
+            {
+                return _retryResults;
+            }
+        }
 
         /// <summary>
         /// initial database connector
@@ -45,38 +54,21 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
             _config = config;
 
-            if (config.EnableRetry)
-            {
-                var builder = new PredicateBuilder();
-                if (config.RetryOn.SqlTimeout)
-                {
-                    builder.Handle<SqlException>(result => result.Number == -2);
-                }
-                if (config.RetryOn.EstablishConnection)
-                {
-                    builder.Handle<SqlException>(result => result.Message.StartsWith(config.RetryOn.EstablishConnnectionErrorMessage));
-                }
-                if (config.RetryOn.Deadlock)
-                {
-                    builder.Handle<SqlException>(result => result.Message.Contains(config.RetryOn.DeadlockErrorMessage));
-                }
+            var Buider = GetBuilder(config.RetryProperty);
 
+            if (Buider.EnableRetry)
+            {
                 _pipeline = new ResiliencePipelineBuilder()
                            .AddRetry(new RetryStrategyOptions
                            {
-                               ShouldHandle = builder,
+                               ShouldHandle = Buider.RetryBuilder,
 
-                               Delay = TimeSpan.FromSeconds(1),
-                               MaxRetryAttempts = 3,
+                               Delay = config.RetryProperty.RetryDelay,
+                               MaxRetryAttempts = config.RetryProperty.RetryCount,
                                BackoffType = DelayBackoffType.Constant,
                                OnRetry = args =>
                                {
-                                   RetryResults.Add(new RetryResult
-                                   {
-                                       AttemptNumber = args.AttemptNumber,
-                                       Exception = args.Outcome.Exception
-                                   });
-
+                                   UpdateRetryResult(args);
                                    return default;
                                }
                            })
@@ -85,6 +77,71 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             else
             {
                 _pipeline = new ResiliencePipelineBuilder().Build();
+            }
+        }
+
+        /// <summary>
+        /// get retry builder based on retry property
+        /// </summary>
+        /// <param name="retryProperty"></param>
+        /// <returns></returns>
+        private static (bool EnableRetry, PredicateBuilder RetryBuilder) GetBuilder(RetryProperty retryProperty)
+        {
+            if (retryProperty == null)
+            {
+                return (false, null);
+            }
+
+            bool _isRetryEnabled = false;
+
+            var builder = new PredicateBuilder();
+
+            if (retryProperty.RetryExceptions != null && retryProperty.RetryExceptions.Any())
+            {
+                _isRetryEnabled = true;
+
+                builder.Handle<Exception>((Func<Exception, bool>)(ex =>
+                {
+                    if (retryProperty.RetryExceptions.Any(
+                            retryEx => retryEx.ExceptionType.IsInstanceOfType(ex)
+                            && (
+                                string.IsNullOrEmpty(retryEx.MessageKeyword)
+                                || ex.Message.ToUpper().Contains(retryEx.MessageKeyword.ToUpper())
+                                ))
+                        )
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }));
+            }
+
+            return (_isRetryEnabled, builder);
+        }
+
+        private void UpdateRetryResult(OnRetryArguments<object> args)
+        {
+            _retryResults.Add(new RetryResult
+            {
+                AttemptNumber = args.AttemptNumber,
+                Timestamp = DateTime.Now,
+                Exception = args.Outcome.Exception
+            });
+        }
+
+        /// <summary>
+        /// add extra data into exception
+        /// <para>Uri</para>
+        /// <para>Method</para>
+        /// <para>RetryResults</para>
+        /// </summary>
+        /// <param name="ex"></param>
+        private void AddExcetionData(Exception ex)
+        {
+            if (RetryResults.Any())
+            {
+                ex.Data[EXCEPTION_DATA_RETRY_ATTEMPTS] = RetryResults;
             }
         }
 
@@ -121,30 +178,38 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(commandText));
             }
 
-            return _pipeline.Execute(exec =>
+            try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-                {
-                    sqlConnection.Open();
-                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                return _pipeline.Execute(exec =>
                     {
-                        cmd.CommandTimeout = _config.TimeoutSecond;
-                        cmd.CommandText = commandText;
-                        cmd.CommandType = commandType;
-                        if (parameters != null && parameters.Any())
+                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                         {
-                            cmd.Parameters.AddRange(ClondParameters(parameters));
-                        }
+                            sqlConnection.Open();
+                            using (SqlCommand cmd = sqlConnection.CreateCommand())
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.CommandText = commandText;
+                                cmd.CommandType = commandType;
+                                if (parameters != null && parameters.Any())
+                                {
+                                    cmd.Parameters.AddRange(ClondParameters(parameters));
+                                }
 
-                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(cmd))
-                        {
-                            DataTable dataTable = new DataTable();
-                            sqlDataAdapter.Fill(dataTable);
-                            return dataTable;
+                                using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(cmd))
+                                {
+                                    DataTable dataTable = new DataTable();
+                                    sqlDataAdapter.Fill(dataTable);
+                                    return dataTable;
+                                }
+                            }
                         }
-                    }
-                }
-            });
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -162,29 +227,37 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(commandText));
             }
 
-            return _pipeline.Execute(exec =>
+            try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-                {
-                    sqlConnection.Open();
-                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                return _pipeline.Execute(exec =>
                     {
-                        cmd.CommandTimeout = _config.TimeoutSecond;
-                        cmd.CommandText = commandText;
-                        cmd.CommandType = commandType;
-                        if (null != parameters && parameters.Any())
+                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                         {
-                            cmd.Parameters.AddRange(ClondParameters(parameters));
+                            sqlConnection.Open();
+                            using (SqlCommand cmd = sqlConnection.CreateCommand())
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.CommandText = commandText;
+                                cmd.CommandType = commandType;
+                                if (null != parameters && parameters.Any())
+                                {
+                                    cmd.Parameters.AddRange(ClondParameters(parameters));
+                                }
+                                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                                {
+                                    DataSet ds = new DataSet();
+                                    adapter.Fill(ds);
+                                    return ds;
+                                }
+                            }
                         }
-                        using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                        {
-                            DataSet ds = new DataSet();
-                            adapter.Fill(ds);
-                            return ds;
-                        }
-                    }
-                }
-            });
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -206,46 +279,54 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new InvalidOperationException($"Function '{function}' must contains schema and fucntionName, e.g schema.fucntionName or [schema].[fucntionName]");
             }
 
-            return _pipeline.Execute(exec =>
+            try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-                {
-                    sqlConnection.Open();
-                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                return _pipeline.Execute(exec =>
                     {
-                        cmd.CommandTimeout = _config.TimeoutSecond;
-                        cmd.CommandType = CommandType.Text;
-
-                        StringBuilder strBuilder = new StringBuilder("SELECT ");
-                        strBuilder.Append(function);
-                        if (null != parameters && parameters.Any())
+                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                         {
-                            cmd.Parameters.AddRange(ClondParameters(parameters));
-
-                            strBuilder.Append("(");
-                            for (int i = 0; i < parameters.Count(); i++)
+                            sqlConnection.Open();
+                            using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
-                                if (i > 0)
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.CommandType = CommandType.Text;
+
+                                StringBuilder strBuilder = new StringBuilder("SELECT ");
+                                strBuilder.Append(function);
+                                if (null != parameters && parameters.Any())
                                 {
-                                    strBuilder.Append(",");
+                                    cmd.Parameters.AddRange(ClondParameters(parameters));
+
+                                    strBuilder.Append("(");
+                                    for (int i = 0; i < parameters.Count(); i++)
+                                    {
+                                        if (i > 0)
+                                        {
+                                            strBuilder.Append(",");
+                                        }
+                                        strBuilder.Append(parameters[i].ParameterName);
+                                    }
+                                    strBuilder.Append(")");
                                 }
-                                strBuilder.Append(parameters[i].ParameterName);
+                                else
+                                {
+                                    strBuilder.Append("()");
+                                }
+
+                                cmd.CommandText = strBuilder.ToString();
+
+                                object result = cmd.ExecuteScalar();
+
+                                return SqlHelper.ConvertValue<T>(result);
                             }
-                            strBuilder.Append(")");
                         }
-                        else
-                        {
-                            strBuilder.Append("()");
-                        }
-
-                        cmd.CommandText = strBuilder.ToString();
-
-                        object result = cmd.ExecuteScalar();
-
-                        return SqlHelper.ConvertValue<T>(result);
-                    }
-                }
-            });
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -266,36 +347,44 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new InvalidOperationException($"Function '{function}' must contains schema and fucntionName, e.g schema.fucntionName or [schema].[fucntionName]");
             }
 
-            return _pipeline.Execute(exec =>
+            try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-                {
-                    sqlConnection.Open();
-                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                return _pipeline.Execute(exec =>
                     {
-                        cmd.CommandTimeout = _config.TimeoutSecond;
-                        cmd.CommandType = CommandType.Text;
+                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        {
+                            sqlConnection.Open();
+                            using (SqlCommand cmd = sqlConnection.CreateCommand())
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.CommandType = CommandType.Text;
 
-                        StringBuilder strBuilder = new StringBuilder("SELECT * FROM ");
-                        strBuilder.Append(function);
-                        strBuilder.Append("(");
-                        if (null != parameters && parameters.Any())
-                        {
-                            cmd.Parameters.AddRange(ClondParameters(parameters));
-                            var parameterNames = parameters.Select(p => p.ParameterName);
-                            strBuilder.Append(string.Join(",", parameterNames));
+                                StringBuilder strBuilder = new StringBuilder("SELECT * FROM ");
+                                strBuilder.Append(function);
+                                strBuilder.Append("(");
+                                if (null != parameters && parameters.Any())
+                                {
+                                    cmd.Parameters.AddRange(ClondParameters(parameters));
+                                    var parameterNames = parameters.Select(p => p.ParameterName);
+                                    strBuilder.Append(string.Join(",", parameterNames));
+                                }
+                                strBuilder.Append(")");
+                                cmd.CommandText = strBuilder.ToString();
+                                DataTable dt = new DataTable();
+                                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                                {
+                                    adapter.Fill(dt);
+                                }
+                                return dt;
+                            }
                         }
-                        strBuilder.Append(")");
-                        cmd.CommandText = strBuilder.ToString();
-                        DataTable dt = new DataTable();
-                        using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                        {
-                            adapter.Fill(dt);
-                        }
-                        return dt;
-                    }
-                }
-            });
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -311,25 +400,33 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(commandText));
             }
 
-            return _pipeline.Execute(exec =>
+            try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-                {
-                    sqlConnection.Open();
-                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                return _pipeline.Execute(exec =>
                     {
-                        cmd.CommandTimeout = _config.TimeoutSecond;
-
-                        cmd.CommandText = commandText;
-                        cmd.CommandType = commandType;
-                        if (null != parameters && parameters.Any())
+                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                         {
-                            cmd.Parameters.AddRange(ClondParameters(parameters));
+                            sqlConnection.Open();
+                            using (SqlCommand cmd = sqlConnection.CreateCommand())
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+
+                                cmd.CommandText = commandText;
+                                cmd.CommandType = commandType;
+                                if (null != parameters && parameters.Any())
+                                {
+                                    cmd.Parameters.AddRange(ClondParameters(parameters));
+                                }
+                                return cmd.ExecuteNonQuery();
+                            }
                         }
-                        return cmd.ExecuteNonQuery();
-                    }
-                }
-            });
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -360,26 +457,34 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         public T ExecuteScalar<T>(string commandText, CommandType commandType, params SqlParameter[] parameters)
         {
-            return _pipeline.Execute(exec =>
+            try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-                {
-                    sqlConnection.Open();
-                    using (SqlCommand cmd = sqlConnection.CreateCommand())
+                return _pipeline.Execute(exec =>
                     {
-                        cmd.CommandTimeout = _config.TimeoutSecond;
-                        cmd.CommandText = commandText;
-                        cmd.CommandType = commandType;
-                        if (null != parameters && parameters.Count() > 0)
+                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
                         {
-                            cmd.Parameters.AddRange(ClondParameters(parameters));
-                        }
-                        object result = cmd.ExecuteScalar();
+                            sqlConnection.Open();
+                            using (SqlCommand cmd = sqlConnection.CreateCommand())
+                            {
+                                cmd.CommandTimeout = _config.TimeoutSecond;
+                                cmd.CommandText = commandText;
+                                cmd.CommandType = commandType;
+                                if (null != parameters && parameters.Any())
+                                {
+                                    cmd.Parameters.AddRange(ClondParameters(parameters));
+                                }
+                                object result = cmd.ExecuteScalar();
 
-                        return SqlHelper.ConvertValue<T>(result);
-                    }
-                }
-            });
+                                return SqlHelper.ConvertValue<T>(result);
+                            }
+                        }
+                    });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
         }
 
         /// <summary>
