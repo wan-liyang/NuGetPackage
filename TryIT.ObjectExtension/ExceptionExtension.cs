@@ -54,7 +54,7 @@ namespace TryIT.ObjectExtension
                 sb.AppendLine("\tException Data:");
                 foreach (var key in ex.Data.Keys)
                 {
-                    sb.AppendLine($"\t{key} : {ex.Data[key]}");
+                    sb.AppendLine($"\t\t{key} : {ex.Data[key]}");
                 }
             }
         }

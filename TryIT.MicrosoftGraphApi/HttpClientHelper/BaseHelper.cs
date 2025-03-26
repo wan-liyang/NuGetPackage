@@ -16,7 +16,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     /// </summary>
     public class BaseHelper
     {
-        private readonly TryIT.RestApi.Api api;
+        private readonly TryIT.RestApi.Api _restApi;
         private readonly HttpClient _httpClient;
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         {
             get
             {
-                return api;
+                return _restApi;
             }
         }
 
@@ -59,7 +59,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(config));
             }
             _httpClient = new MsGraphHelper(config).GetHttpClient();
-            api = GetRestApiInstance(_httpClient, config.RetryProperty);
+            _restApi = GetRestApiInstance(_httpClient, config.RetryProperty);
         }
 
         /// <summary>
@@ -193,10 +193,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 config.RetryProperty = retryProperty;
             }
 
-            return new RestApi.Api(new HttpClientConfig
-            {
-                HttpClient = httpClient,
-            });
+            return new RestApi.Api(config);
         }
     }
 }
