@@ -50,7 +50,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 
             if (table == null || table.Rows.Count == 0)
             {
-                throw new Exception($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
+                throw new InvalidOperationException($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
             }
 
             return table.Rows.OfType<DataRow>().Select(k =>
@@ -83,7 +83,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 
             if (table == null || table.Rows.Count == 0)
             {
-                throw new Exception($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
+                throw new InvalidOperationException($"get target table structure failed, please ensure target table '{tableName}' exists and account has permission");
             }
 
             return table.Rows.OfType<DataRow>().Select(k =>

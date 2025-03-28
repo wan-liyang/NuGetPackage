@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
@@ -508,11 +509,35 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
         /// <summary>
         /// copy data from one source to multiple target table (within same target db)
+        /// <para>the retry is not applicable for this, because this may invoke external action <see cref="CopyModeBase.PostAction"/></para>
         /// </summary>
         /// <param name="copyModes"></param>
         public void CopyData(List<ICopyMode> copyModes)
         {
-            List<Tuple<ICopyMode, List<DbTableStructure>>> tobeCopyModes = new List<Tuple<ICopyMode, List<DbTableStructure>>>();
+            DoDataCopy(copyModes);
+        }
+
+        /// <summary>
+        /// copy data from <see cref="CopyModeBase.SourceData"/> into <see cref="CopyModeBase.TargetTable"/>
+        /// <para>the retry is not applicable for this, because this may invoke external action <see cref="CopyModeBase.PostAction"/></para>
+        /// </summary>
+        /// <param name="iCopyMode"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void CopyData(ICopyMode iCopyMode)
+        {
+            DoDataCopy(new List<ICopyMode> { iCopyMode });
+        }
+
+        internal class DataCopyInfo
+        {
+            public ICopyMode CopyMode { get; set; }
+            public List<DbTableStructure> TableStructures { get; set; }
+        }
+
+        private void DoDataCopy(List<ICopyMode> copyModes)
+        {
+            List<DataCopyInfo> tobeCopyModes = new List<DataCopyInfo>();
 
             // validate information
             foreach (var item in copyModes)
@@ -547,9 +572,12 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 _copyMode.ColumnMappings = ResetColumnMap(_copyMode.SourceData, _copyMode.ColumnMappings);
                 ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
 
-                tobeCopyModes.Add(new Tuple<ICopyMode, List<DbTableStructure>>(item, targetTableStructure));
+                tobeCopyModes.Add(new DataCopyInfo
+                {
+                    CopyMode = item,
+                    TableStructures = targetTableStructure
+                });
             }
-
 
             using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
             {
@@ -563,10 +591,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                     string transName = SqlHelper.GetGuid();
                     transaction = sqlConnection.BeginTransaction(transName);
 
-                    foreach (var doCopyMode in tobeCopyModes)
+                    foreach (var item in tobeCopyModes)
                     {
-                        ICopyMode iCopyMode = doCopyMode.Item1;
-                        List<DbTableStructure> targetTableStructure = doCopyMode.Item2;
+                        ICopyMode iCopyMode = item.CopyMode;
+                        List<DbTableStructure> targetTableStructure = item.TableStructures;
 
                         CopyModeBase _copyMode = iCopyMode as CopyModeBase;
 
@@ -582,13 +610,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                             catch (Exception ex)
                             {
-                                throw new InvalidOperationException($"PreScript execution failed - {ex.Message}, {_copyMode.PreScript}", ex);
+                                throw new InvalidOperationException($"PreScript failed - {ex.Message}, {_copyMode.PreScript}", ex);
                             }
                         }
 
                         if (iCopyMode is CopyMode_InsertUpdate)
                         {
-                            var mode = (CopyMode_InsertUpdate)iCopyMode;
+                            var mode = iCopyMode as CopyMode_InsertUpdate;
                             if (mode.SourceData.Rows.Count > 0)
                             {
                                 mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
@@ -649,9 +677,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                             catch (Exception ex)
                             {
-                                var map = _copyMode.ColumnMappings.ToArray();
-                                var mapString = string.Join(", ", map.Select(x => $"{x.Key} => {x.Value}"));
-                                throw new InvalidOperationException($"BulkCopy failed - {ex.Message}, mapping: [{mapString}]", ex);
+                                throw new InvalidOperationException($"BulkCopy failed - {ex.Message}", ex);
                             }
                         }
 
@@ -683,194 +709,25 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 throw new InvalidOperationException($"PostAction failed - {ex.Message}, {_copyMode.PostAction}", ex);
                             }
                         }
-                    }
 
-                    transaction.Commit();
+                        transaction.Commit();
+                    }
                 }
-                catch (Exception)
+                catch(Exception ex)
                 {
-                    if (transaction != null)
+                    try
                     {
-                        transaction.Rollback();
-                    }
-
-                    throw;
-                }
-            }
-        }
-
-        /// <summary>
-        /// copy data from <see cref="CopyModeBase.SourceData"/> into <see cref="CopyModeBase.TargetTable"/>
-        /// </summary>
-        /// <param name="iCopyMode"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        public void CopyData(ICopyMode iCopyMode)
-        {
-            CopyModeBase _copyMode = iCopyMode as CopyModeBase;
-
-            if (_copyMode == null)
-            {
-                throw new ArgumentException($"{nameof(_copyMode)} should not be null");
-            }
-            if (string.IsNullOrEmpty(_copyMode.TargetTable))
-            {
-                throw new ArgumentException($"{nameof(_copyMode.TargetTable)} should not be null or empty");
-            }
-            if (_copyMode.TargetTable.Split('.').Length != 2)
-            {
-                throw new InvalidOperationException($"TargetTable '{_copyMode.TargetTable}' must contains schema and table, e.g schema.table or [schema].[table]");
-            }
-
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
-            {
-                sqlConnection.Open();
-
-                SqlTransaction transaction = null;
-                try
-                {
-                    string transName = SqlHelper.GetGuid();
-
-                    // get target table structure first, outside transaction, to avoid other script locked table
-                    var targetTableStructure = this.GetDbTableStructure(_copyMode.TargetTable);
-
-                    /*
-                     reset column map info
-                    1. if provided: will use provided map to validate
-                    2. if not provided: will reset to source table column, then do validate
-                     
-                    this is to ensure source data are valid against target table, also source data map to correct target column, 
-                    e.g. source data column sequence may different with target table column sequence, if not provide column map, then program will use source table column as default map to ensure source column map to correct target column
-
-                     */
-                    _copyMode.ColumnMappings = ResetColumnMap(_copyMode.SourceData, _copyMode.ColumnMappings);
-                    ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
-
-                    // put unique transaction name to avoid any conflict
-                    transaction = sqlConnection.BeginTransaction(transName);
-
-                    if (!string.IsNullOrEmpty(_copyMode.PreScript))
-                    {
-                        try
+                        // check connection state to avoid error "This SqlTransaction has completed; it is no longer usable."
+                        if (transaction != null && transaction.Connection != null && transaction.Connection.State == ConnectionState.Open)
                         {
-                            using (SqlCommand cmd = new SqlCommand(_copyMode.PreScript, sqlConnection, transaction))
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.ExecuteNonQuery();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException($"PreScript failed - {ex.Message}, {_copyMode.PreScript}", ex);
+                            transaction.Rollback();
                         }
                     }
-
-                    if (iCopyMode is CopyMode_InsertUpdate)
+                    catch (Exception rollbackEx)
                     {
-                        var mode = iCopyMode as CopyMode_InsertUpdate;
-                        if (mode.SourceData.Rows.Count > 0)
-                        {
-                            mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
-
-                            var alwaysEncryptedColumns = this.GetAlwaysEncryptedColumns(mode.TargetTable);
-
-                            if (!alwaysEncryptedColumns.IsNullOrEmpty())
-                            {
-                                try
-                                {
-                                    Upsert_Encrypted(mode, sqlConnection, transaction, alwaysEncryptedColumns);
-                                }
-                                catch (Exception ex)
-                                {
-                                    throw new InvalidOperationException($"Upsert_Encrypted failed - {ex.Message}", ex);
-                                }
-                            }
-                            else
-                            {
-                                try
-                                {
-                                    Upsert(mode, sqlConnection, transaction, targetTableStructure);
-                                }
-                                catch (Exception ex)
-                                {
-                                    throw new InvalidOperationException($"Upsert failed - {ex.Message}", ex);
-                                }
-                            }
-                        }
+                        ex.Data["RollbackException"] = rollbackEx;
                     }
-                    else
-                    {
-                        if (iCopyMode is CopyMode_TruncateInsert)
-                        {
-                            var mode = (CopyMode_TruncateInsert)iCopyMode;
-                            // truncate table before load
-                            string cmdText = $"TRUNCATE TABLE {SqlHelper.SqlWarpTable(mode.TargetTable)};";
-                            using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.ExecuteNonQuery();
-                            }
-                        }
-                        else if (iCopyMode is CopyMode_DeleteInsert)
-                        {
-                            var mode = (CopyMode_DeleteInsert)iCopyMode;
-
-                            // PreScript is mandatory for DeleteInsert
-                            if (string.IsNullOrEmpty(mode.PreScript))
-                            {
-                                throw new ArgumentException($"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
-                            }
-                        }
-
-                        try
-                        {
-                            BulkCopy(_copyMode.SourceData, _copyMode.TargetTable, targetTableStructure, _copyMode.ColumnMappings, sqlConnection, transaction);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException($"BulkCopy failed - {ex.Message}", ex);
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(_copyMode.PostScript))
-                    {
-                        try
-                        {
-                            using (SqlCommand cmd = new SqlCommand(_copyMode.PostScript, sqlConnection, transaction))
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.ExecuteNonQuery();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException($"PostScript failed - {ex.Message}, {_copyMode.PostScript} ", ex);
-                        }
-                    }
-
-                    // if PostAction is not null, execute the action before commit transaction
-                    if (_copyMode.PostAction != null)
-                    {
-                        try
-                        {
-                            _copyMode.PostAction(sqlConnection, transaction);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException($"PostAction failed - {ex.Message}, {_copyMode.PostAction}", ex);
-                        }
-                    }
-
-                    transaction.Commit();
-                }
-                catch
-                {
-                    // check connection state to avoid error "This SqlTransaction has completed; it is no longer usable."
-                    if (transaction != null && transaction.Connection != null && transaction.Connection.State == ConnectionState.Open)
-                    {
-                        transaction.Rollback();
-                    }
-
+                    ExceptionDispatchInfo.Capture(ex).Throw();
                     throw;
                 }
             }
@@ -927,29 +784,35 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             if (columnMap != null && columnMap.Count > 0)
             {
                 // validate column mapping appear in source table
-                {
-                    List<string> sourceColumns = new List<string>();
-                    foreach (DataColumn item in sourceTable.Columns)
-                    {
-                        sourceColumns.Add(item.ColumnName);
-                    }
-                    var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
-                    if (notExists != null && notExists.Count > 0)
-                    {
-                        throw new ArgumentException($"column map not found in source data table: {string.Join(", ", notExists)}");
-                    }
-                }
+                ValidateColumnMap_Source(sourceTable, columnMap);
 
                 // validate column mapping appear in target table
-                {
-                    string targetTable = targetTableStructure.First().TABLE_NAME;
+                ValidateColumnMap_Target(targetTableStructure, columnMap);
+            }
+        }
 
-                    var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
-                    if (notExists != null && notExists.Count > 0)
-                    {
-                        throw new ArgumentException($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
-                    }
-                }
+        private static void ValidateColumnMap_Source(DataTable sourceTable, Dictionary<string, string> columnMap)
+        {
+            List<string> sourceColumns = new List<string>();
+            foreach (DataColumn item in sourceTable.Columns)
+            {
+                sourceColumns.Add(item.ColumnName);
+            }
+            var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
+            if (notExists != null && notExists.Count > 0)
+            {
+                throw new ArgumentException($"column map not found in source data table: {string.Join(", ", notExists)}");
+            }
+        }
+
+        private static void ValidateColumnMap_Target(List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
+        {
+            string targetTable = targetTableStructure[0].TABLE_NAME;
+
+            var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
+            if (notExists != null && notExists.Count > 0)
+            {
+                throw new ArgumentException($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
             }
         }
 
@@ -1132,7 +995,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         {
             if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
             {
-                throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
+                throw new ArgumentException("Primary Key is mandatory for UpdateInsert copy mode");
             }
 
             ConsoleLog("upsert with always encrypted started");
@@ -1192,13 +1055,14 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 }
             }
 
+            /*
+             * below assign value may cause deadlock issue
+             * sqlCommand.CommandText = sql;
+             * sqlCommand.Connection = sqlConnection; 
+             * sqlCommand.Transaction = transaction;             
+             */
             using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, transaction))
             {
-                // below assign value may cause deadlock issue
-                //sqlCommand.CommandText = sql;
-                //sqlCommand.Connection = sqlConnection; 
-                //sqlCommand.Transaction = transaction;
-
                 sqlCommand.CommandType = CommandType.Text;
 
                 int row = 0;
@@ -1249,12 +1113,12 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="columnName"></param>
         /// <param name="alwaysEncryptedColumns"></param>
         /// <returns></returns>
-        private AlwaysEncryptedColumn GetAlwaysEncryptedColumn(string columnName, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
+        private static AlwaysEncryptedColumn GetAlwaysEncryptedColumn(string columnName, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
         {
-            return alwaysEncryptedColumns.Where(p => p.ColumnName.Equals(columnName)).FirstOrDefault();
+            return alwaysEncryptedColumns.FirstOrDefault(p => p.ColumnName.Equals(columnName));
         }
 
-        private void PostIntoDb(SqlConnection sqlConnection, SqlTransaction sqlTransaction, string sql, SqlParameter[] sqlParameters)
+        private static void PostIntoDb(SqlConnection sqlConnection, SqlTransaction sqlTransaction, string sql, SqlParameter[] sqlParameters)
         {
             using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, sqlTransaction))
             {
@@ -1263,125 +1127,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 sqlCommand.Parameters.AddRange(sqlParameters);
                 sqlCommand.ExecuteNonQuery();
             }
-        }
-
-
-        /// <summary>
-        /// reduce database connection times
-        /// </summary>
-        /// <param name="copyMode"></param>
-        /// <param name="sqlConnection"></param>
-        /// <param name="transaction"></param>
-        /// <param name="alwaysEncryptedColumns"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        private void Upsert_Encrypted2(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
-        {
-            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
-            {
-                throw new ArgumentNullException(nameof(copyMode.PrimaryKeys), "Primary Key is mandatory for UpdateInsert copy mode");
-            }
-
-            ConsoleLog("upsert with always encrypted v2 started");
-
-            DataTable dt = copyMode.SourceData;
-
-            // if target table has identity column, then check the column map has that column or not, if has, then warp with IdentityInsert, otherwise not need warp
-            bool identityHasMap = false;
-            string identityColumn = this.GetIdentityColumnName(copyMode.TargetTable);
-            if (!string.IsNullOrEmpty(identityColumn))
-            {
-                var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-                if (!map.IsNullOrEmpty())
-                {
-                    identityHasMap = true;
-                }
-            }
-
-            int row = 0;
-            int paramNumber = 0;
-            StringBuilder stringBuilder = new StringBuilder();
-            List<SqlParameter> sqlParameters = new List<SqlParameter>();
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                // prepare where condition sql
-                string sql_where = "";
-                for (int k = 0; k < copyMode.PrimaryKeys.Count; k++)
-                {
-                    if (k > 0)
-                    {
-                        sql_where += " AND ";
-                    }
-
-                    string t_col = copyMode.PrimaryKeys[k];
-                    string s_col = copyMode.ColumnMappings.First(p => p.Value.Equals(t_col, StringComparison.CurrentCultureIgnoreCase)).Key;
-                    string t_col_param = $"param_{i}_{t_col}";
-                    object t_col_value = dt.Rows[i][s_col];
-                    AlwaysEncryptedColumn encrypted = GetAlwaysEncryptedColumn(t_col, alwaysEncryptedColumns);
-
-                    sql_where += $"{SqlHelper.SqlWarpColumn(t_col)} = @{SqlHelper.SqlParamName(t_col_param)}";
-
-                    //sqlParameters.Add(SqlHelper.GetParameter(t_col_param, t_col_value, encrypted));
-                    //paramNumber += 1;
-                }
-
-                // prepare columns to be update sql
-                string sql_set = "";
-                string sql_insert_columns = "";
-                string sql_insert_params = "";
-
-                var tobeUpdateColumns = copyMode.ColumnMappings.ToList();//.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToList();
-                for (int c = 0; c < tobeUpdateColumns.Count; c++)
-                {
-                    string s_col = tobeUpdateColumns[c].Key;
-                    string t_col = tobeUpdateColumns[c].Value;
-
-                    string t_col_set = SqlHelper.SqlWarpColumn(t_col);
-                    string t_col_param = $"param_{i}_{t_col}";
-                    object t_col_value = dt.Rows[i][s_col];
-                    AlwaysEncryptedColumn encrypted = GetAlwaysEncryptedColumn(t_col, alwaysEncryptedColumns);
-
-                    sql_set += $"{t_col_set} = @{SqlHelper.SqlParamName(t_col_param)},";
-                    sql_insert_columns += $"{t_col_set},";
-                    sql_insert_params += $"@{t_col_param},";
-
-                    sqlParameters.Add(SqlHelper.GetParameter(t_col_param, t_col_value, encrypted));
-                    paramNumber += 1;
-                }
-                sql_set = sql_set.TrimEnd(',');
-                sql_insert_columns = sql_insert_columns.TrimEnd(',');
-                sql_insert_params = sql_insert_params.TrimEnd(',');
-
-                //string sql = $"DELETE FROM {copyMode.TargetTable} WHERE {sql_where}; INSERT INTO {copyMode.TargetTable}({sql_insert_columns}) VALUES ({sql_insert_params});";
-                string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
-
-                string sql = $"IF EXISTS (SELECT 1 FROM {warppedTable} WHERE {sql_where}) BEGIN UPDATE {warppedTable} SET {sql_set} WHERE {sql_where} END ELSE BEGIN INSERT INTO {warppedTable}({sql_insert_columns}) VALUES ({sql_insert_params}) END;";
-
-                stringBuilder.AppendLine(sql);
-
-                if (paramNumber > 2000 || i == dt.Rows.Count - 1)
-                {
-                    if (identityHasMap)
-                    {
-                        sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
-                    }
-
-                    PostIntoDb(sqlConnection, transaction, stringBuilder.ToString(), sqlParameters.ToArray());
-
-                    stringBuilder.Clear();
-                    sqlParameters.Clear();
-                    paramNumber = 0;
-                }
-
-                row++;
-                if (row % 2000 == 0)
-                {
-                    ConsoleLog($"{row} exec posted");
-                }
-            }
-
-            ConsoleLog($"{copyMode.SourceData.Rows.Count} exec posted");
-            ConsoleLog("upsert with always encrypted v2 completed");
         }
         #endregion
 
@@ -1424,7 +1169,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
-        private void ConsoleLog(string message)
+        private static void ConsoleLog(string message)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff");
             Console.WriteLine($"[{timestamp}] {message}");
