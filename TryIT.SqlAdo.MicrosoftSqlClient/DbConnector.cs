@@ -709,9 +709,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 throw new InvalidOperationException($"PostAction failed - {ex.Message}, {_copyMode.PostAction}", ex);
                             }
                         }
-
-                        transaction.Commit();
                     }
+
+                    transaction.Commit();
                 }
                 catch(Exception ex)
                 {
