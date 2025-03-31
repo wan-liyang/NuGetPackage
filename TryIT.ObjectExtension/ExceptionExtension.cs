@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections;
 using System.Text;
 
 namespace TryIT.ObjectExtension
@@ -52,11 +54,24 @@ namespace TryIT.ObjectExtension
             if (ex.Data.Count > 0)
             {
                 sb.AppendLine("\tException Data:");
-                foreach (var key in ex.Data.Keys)
+                foreach (DictionaryEntry entry in ex.Data)
                 {
-                    sb.AppendLine($"\t\t{key} : {ex.Data[key]}");
+                    sb.AppendLine($"\t\t{entry.Key}: {FormatDataValue(entry.Value)}");
                 }
             }
+        }
+
+        private static string FormatDataValue(object value)
+        {
+            if (value == null)
+            {
+                return "null";
+            }
+            if (value is IEnumerable && !(value is string))
+            {
+                return JsonConvert.SerializeObject(value, Formatting.Indented);
+            }
+            return value.ToString();
         }
     }
 }
