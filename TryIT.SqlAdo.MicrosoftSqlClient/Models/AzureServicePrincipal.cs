@@ -3,7 +3,7 @@
     /// <summary>
     /// azure key vault provide information
     /// </summary>
-    public class AzureKeyVaultProvider
+    public class AzureServicePrincipal
     {
         /// <summary>
         /// tenant id

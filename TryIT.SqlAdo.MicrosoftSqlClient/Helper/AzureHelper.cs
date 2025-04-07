@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Azure.Identity;
+using Microsoft.Identity.Client;
 using System;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
@@ -13,7 +14,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         /// <param name="azureKeyVaultProvider"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static TokenCredential GetClientSecretCredential(AzureKeyVaultProvider azureKeyVaultProvider)
+        public static TokenCredential GetClientSecretCredential(AzureServicePrincipal azureKeyVaultProvider)
         {
             if (azureKeyVaultProvider == null)
             {

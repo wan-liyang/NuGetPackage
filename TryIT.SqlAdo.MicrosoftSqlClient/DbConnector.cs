@@ -151,7 +151,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <para>IMPORTANT: please call this method once only during program starting, otherwise may encounter 'key store providers cannot be set more than once.' error</para>
         /// </summary>
         /// <param name="azureKeyVaultProvider"></param>
-        public static void RegisterColumnEncryptionKeyStore_AKV(AzureKeyVaultProvider azureKeyVaultProvider)
+        public static void RegisterColumnEncryptionKeyStore_AKV(AzureServicePrincipal azureKeyVaultProvider)
         {
             var credential = AzureHelper.GetClientSecretCredential(azureKeyVaultProvider);
             SqlColumnEncryptionAzureKeyVaultProvider akvProvider = new SqlColumnEncryptionAzureKeyVaultProvider(credential);
@@ -161,6 +161,23 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 {
                     { SqlColumnEncryptionAzureKeyVaultProvider.ProviderName, akvProvider}
                 });
+        }
+
+        /// <summary>
+        /// open new SqlConnection
+        /// </summary>
+        /// <returns></returns>
+        private SqlConnection OpenConection()
+        {
+            var conn = new SqlConnection(_config.ConnectionString);
+
+            if (!string.IsNullOrEmpty(_config.AccessToken))
+            {
+                conn.AccessToken = _config.AccessToken;
+            }
+            conn.Open();
+            
+            return conn;
         }
 
         /// <summary>
@@ -183,9 +200,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 return _pipeline.Execute(exec =>
                     {
-                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        using (SqlConnection sqlConnection = OpenConection())
                         {
-                            sqlConnection.Open();
                             using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -232,9 +248,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 return _pipeline.Execute(exec =>
                     {
-                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        using (SqlConnection sqlConnection = OpenConection())
                         {
-                            sqlConnection.Open();
                             using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -284,9 +299,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 return _pipeline.Execute(exec =>
                     {
-                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        using (SqlConnection sqlConnection = OpenConection())
                         {
-                            sqlConnection.Open();
                             using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -352,9 +366,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 return _pipeline.Execute(exec =>
                     {
-                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        using (SqlConnection sqlConnection = OpenConection())
                         {
-                            sqlConnection.Open();
                             using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -405,9 +418,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 return _pipeline.Execute(exec =>
                     {
-                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        using (SqlConnection sqlConnection = OpenConection())
                         {
-                            sqlConnection.Open();
                             using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -462,9 +474,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 return _pipeline.Execute(exec =>
                     {
-                        using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+                        using (SqlConnection sqlConnection = OpenConection())
                         {
-                            sqlConnection.Open();
                             using (SqlCommand cmd = sqlConnection.CreateCommand())
                             {
                                 cmd.CommandTimeout = _config.TimeoutSecond;
@@ -496,7 +507,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         public SqlDataReader ExecuteReader(string commandText, params SqlParameter[] parameters)
         {
-            SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString);
+            SqlConnection sqlConnection = OpenConection();
             SqlCommand cmd = new SqlCommand(commandText, sqlConnection);
             cmd.CommandType = CommandType.Text;
             if (null != parameters && parameters.Any())
@@ -579,12 +590,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 });
             }
 
-            using (SqlConnection sqlConnection = new SqlConnection(_config.ConnectionString))
+            using (SqlConnection sqlConnection = OpenConection())
             {
-                sqlConnection.Open();
-
                 SqlTransaction transaction = null;
-
                 try
                 {
                     // put unique transaction name to avoid any conflict

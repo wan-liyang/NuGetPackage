@@ -34,5 +34,10 @@
         /// retry property for the action when meet the condition
         /// </summary>
         public RetryProperty RetryProperty { get; set; }
+
+        /// <summary>
+        /// access token use for Azure AD authentication when connect to Azure SQL, can get via <see cref="Helper.AzureSqlTokenHelper.GetToken(AzureServicePrincipal)"/>
+        /// </summary>
+        public string AccessToken { get; set; }
     }
 }
