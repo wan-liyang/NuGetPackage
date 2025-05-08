@@ -12,9 +12,9 @@ namespace TryIT.EPPlus
     public class ExcelSheetReaderConfig
     {
         /// <summary>
-        /// the worksheet to read data
+        /// the worksheet index to read data, start from 1
         /// </summary>
-        public ExcelWorksheet Worksheet { get; set; }
+        public int SheetIndex { get; set; } = 1;
 
         /// <summary>
         /// the rows skip from excel while read data, 
@@ -32,7 +32,7 @@ namespace TryIT.EPPlus
         /// <summary>
         /// excel package after load file
         /// </summary>
-        public ExcelPackage ExcelPackage { get; set; }
+        private ExcelPackage _excelPackage { get; set; }
 
         /// <summary>
         /// initial excel package from a file
@@ -44,7 +44,8 @@ namespace TryIT.EPPlus
             FileInfo fileInfo = new FileInfo(fileNameAndPath);
             if (File.Exists(fileNameAndPath))
             {
-                ExcelPackage = new ExcelPackage(fileInfo);
+                _excelPackage = new ExcelPackage(fileInfo);
+                _excelPackage.Compatibility.IsWorksheets1Based = true;
             }
             else
             {
@@ -126,10 +127,9 @@ namespace TryIT.EPPlus
         /// </summary>
         /// <param name="sheetReaderConfig"></param>
         /// <returns></returns>
-        public static DataTable GetDataTable(ExcelSheetReaderConfig sheetReaderConfig)
+        public DataTable GetDataTable(ExcelSheetReaderConfig sheetReaderConfig)
         {
-            ExcelWorksheet worksheet = sheetReaderConfig.Worksheet;
-
+            var worksheet = _excelPackage.Workbook.Worksheets[sheetReaderConfig.SheetIndex];
 
             DataTable dt = new DataTable();
             //check if the worksheet is completely empty
@@ -237,9 +237,9 @@ namespace TryIT.EPPlus
         /// </summary>
         public void Dispose()
         {
-            if (ExcelPackage != null)
+            if (_excelPackage != null)
             {
-                ExcelPackage.Dispose();
+                _excelPackage.Dispose();
             }
         }
     }

@@ -9,9 +9,9 @@
             configuration for read excel file for a worksheet
             </summary>
         </member>
-        <member name="P:TryIT.EPPlus.ExcelSheetReaderConfig.Worksheet">
+        <member name="P:TryIT.EPPlus.ExcelSheetReaderConfig.SheetIndex">
             <summary>
-            the worksheet to read data
+            the worksheet index to read data, start from 1
             </summary>
         </member>
         <member name="P:TryIT.EPPlus.ExcelSheetReaderConfig.SkipHeaderRows">
@@ -26,7 +26,7 @@
             
             </summary>
         </member>
-        <member name="P:TryIT.EPPlus.EPPlusLib.ExcelPackage">
+        <member name="P:TryIT.EPPlus.EPPlusLib._excelPackage">
             <summary>
             excel package after load file
             </summary>
