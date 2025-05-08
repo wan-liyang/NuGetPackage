@@ -58,6 +58,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Csv", "TryIT.Csv\TryI
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Zip", "TryIT.Zip\TryIT.Zip.csproj", "{3473DA23-1DAF-449D-A65A-54E5A805A942}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.EPPlus", "TryIT.EPPlus\TryIT.EPPlus.csproj", "{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -176,6 +178,10 @@ Global
 		{3473DA23-1DAF-449D-A65A-54E5A805A942}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3473DA23-1DAF-449D-A65A-54E5A805A942}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3473DA23-1DAF-449D-A65A-54E5A805A942}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

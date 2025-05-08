@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TryIT.EPPlus</name>
+    </assembly>
+    <members>
+        <member name="T:TryIT.EPPlus.ExcelSheetReaderConfig">
+            <summary>
+            configuration for read excel file for a worksheet
+            </summary>
+        </member>
+        <member name="P:TryIT.EPPlus.ExcelSheetReaderConfig.Worksheet">
+            <summary>
+            the worksheet to read data
+            </summary>
+        </member>
+        <member name="P:TryIT.EPPlus.ExcelSheetReaderConfig.SkipHeaderRows">
+            <summary>
+            the rows skip from excel while read data, 
+            <para>defualt 0, it will not skip any row, take row 1 as header, read from row 2 as data</para>
+            <para>if set to 1, it will skip row 1, take row 2 as header, read from row 3 as data</para>
+            </summary>
+        </member>
+        <member name="T:TryIT.EPPlus.EPPlusLib">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:TryIT.EPPlus.EPPlusLib.ExcelPackage">
+            <summary>
+            excel package after load file
+            </summary>
+        </member>
+        <member name="M:TryIT.EPPlus.EPPlusLib.#ctor(System.String)">
+            <summary>
+            initial excel package from a file
+            </summary>
+            <param name="fileNameAndPath"></param>
+            <exception cref="T:System.IO.FileNotFoundException"></exception>
+        </member>
+        <member name="M:TryIT.EPPlus.EPPlusLib.IsNumberFormat(OfficeOpenXml.ExcelRangeBase)">
+            <summary>
+            determine cell is number format
+            </summary>
+            <param name="cell"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.EPPlus.EPPlusLib.GetDataTable(TryIT.EPPlus.ExcelSheetReaderConfig)">
+            <summary>
+            get data from a worksheet as <see cref="T:System.Data.DataTable"/>
+            </summary>
+            <param name="sheetReaderConfig"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.EPPlus.EPPlusLib.Dispose">
+            <summary>
+            release resource
+            </summary>
+        </member>
+    </members>
+</doc>
