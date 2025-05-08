@@ -26,6 +26,11 @@
             
             </summary>
         </member>
+        <member name="P:TryIT.EPPlus.EPPlusLib.ExcelPackage">
+            <summary>
+            excel package instance after load file, this is to allow consumer do customize action as need
+            </summary>
+        </member>
         <member name="P:TryIT.EPPlus.EPPlusLib._excelPackage">
             <summary>
             excel package after load file

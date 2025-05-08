@@ -30,6 +30,17 @@ namespace TryIT.EPPlus
     public sealed class EPPlusLib : IDisposable
     {
         /// <summary>
+        /// excel package instance after load file, this is to allow consumer do customize action as need
+        /// </summary>
+        public ExcelPackage ExcelPackage
+        {
+            get
+            {
+                return _excelPackage;
+            }
+        }
+
+        /// <summary>
         /// excel package after load file
         /// </summary>
         private ExcelPackage _excelPackage { get; set; }
