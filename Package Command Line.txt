@@ -25,7 +25,7 @@ dotnet pack ./TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj --output nupkgs -p:
 dotnet pack ./TryIT.RestApi/TryIT.RestApi.csproj --output nupkgs -p:PackageVersion=1.1.7
 dotnet pack ./TryIT.SFTP/TryIT.SFTP.csproj --output nupkgs -p:PackageVersion=1.0.1
 dotnet pack ./TryIT.SqlAdoService/TryIT.SqlAdoService.csproj --output nupkgs -p:PackageVersion=1.0.2
-dotnet pack ./TryIT.SqlAdo.MicrosoftSqlClient/TryIT.SqlAdo.MicrosoftSqlClient.csproj --output nupkgs -p:PackageVersion=1.6.8
+dotnet pack ./TryIT.SqlAdo.MicrosoftSqlClient/TryIT.SqlAdo.MicrosoftSqlClient.csproj --output nupkgs -p:PackageVersion=1.6.9
 dotnet pack ./TryIT.TableauApi/TryIT.TableauApi.csproj --output nupkgs -p:PackageVersion=1.1.9
 dotnet pack ./TryIT.WindowService/TryIT.WindowService.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.Zip/TryIT.Zip.csproj --output nupkgs -p:PackageVersion=1.0.3

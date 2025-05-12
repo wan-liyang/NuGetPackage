@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.AlwaysEncrypted.AzureKeyVaultProvider;
-using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Retry;
 using System;
@@ -631,7 +630,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                                 var alwaysEncryptedColumns = this.GetAlwaysEncryptedColumns(mode.TargetTable);
 
-                                if (!alwaysEncryptedColumns.IsNullOrEmpty())
+                                if (alwaysEncryptedColumns != null && alwaysEncryptedColumns.Count > 0)
                                 {
                                     try
                                     {
@@ -767,7 +766,9 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         {
             if (columnMap != null && columnMap.Count > 0)
             {
-                return columnMap.Where(p => !p.Key.IsNullOrEmpty() && !p.Value.IsNullOrEmpty()).ToDictionary(x => x.Key, x => x.Value);
+                return columnMap
+                    .Where(p => !string.IsNullOrEmpty(p.Key) && !string.IsNullOrEmpty(p.Value))
+                    .ToDictionary(x => x.Key, x => x.Value);
             }
 
             Dictionary<string, string> map = new Dictionary<string, string>();
@@ -913,8 +914,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             if (!string.IsNullOrEmpty(identityColumn))
             {
                 var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-                if (!map.IsNullOrEmpty())
+                if (map != null && map.Count > 0)
                 {
                     sql_upsert = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql_upsert);
                 }                
@@ -1057,7 +1057,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
-                if (!map.IsNullOrEmpty())
+                if (map != null && map.Count > 0)
                 {
                     sql = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql);
                 }
