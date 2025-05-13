@@ -10,6 +10,9 @@ namespace TryIT.MicrosoftGraphApi.Response.Application
         {
             [JsonProperty("@odata.context")]
             public string odatacontext { get; set; }
+
+            [JsonProperty("@odata.nextLink")]
+            public string odatanextLink { get; set; }
             public List<Appliation> value { get; set; }
         }
 

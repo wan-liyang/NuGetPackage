@@ -1,4 +1,5 @@
-﻿using TryIT.MicrosoftGraphApi.Helper;
+﻿using System.Collections.Generic;
+using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.Application;
@@ -28,6 +29,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public GetAppliationResponse.Appliation GetApplication(string appDisplayName)
         {
             return _helper.GetApplication(appDisplayName);
+        }
+
+        /// <summary>
+        /// get owned applications by user id
+        /// </summary>
+        /// <param name="userId">userPrincipalName or objectId</param>
+        /// <returns></returns>
+        public List<GetAppliationResponse.Appliation> GetOwnedApplications(string userId)
+        {
+            return _helper.GetOwnedApplications(userId);
         }
     }
 }
