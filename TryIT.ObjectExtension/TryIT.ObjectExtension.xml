@@ -175,6 +175,43 @@
             <param name="keysMap"></param>
             <returns></returns>
         </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToJsonArray(System.Data.DataTable)">
+            <summary>
+            convert <paramref name="dt"/> to a JSON array, each row is a JSON object
+            </summary>
+            <param name="dt"></param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToJsonObject(System.Data.DataTable,Newtonsoft.Json.Linq.JObject[])">
+            <summary>
+            convert <paramref name="dt"/> to a JSON object, each column is a property of the object, if <paramref name="extraProperties"/> is provided, those properties will be merged into the result object
+            </summary>
+            <param name="dt"></param>
+            <param name="extraProperties">
+            <para>1. call <see cref="M:TryIT.ObjectExtension.DataTableExtension.ToWrappedArray(System.Data.DataTable,System.String)"/> to get JSON array as extra property</para>
+            <para>2. call <see cref="M:TryIT.ObjectExtension.DataTableExtension.ToWrappedObject(System.Data.DataTable,System.String)"/> to get JSON object as extra property</para>
+            <para>3. call <code>new JObject { "propertyName" = propertyValue }</code> to get JSON property as extra property</para>
+            </param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToWrappedArray(System.Data.DataTable,System.String)">
+            <summary>
+            convert <paramref name="table"/> to a JSON object with a single property named <paramref name="propertyName"/>, the value is a JSON array containing all rows of the table
+            </summary>
+            <param name="table"></param>
+            <param name="propertyName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.ObjectExtension.DataTableExtension.ToWrappedObject(System.Data.DataTable,System.String)">
+            <summary>
+            convert <paramref name="table"/> to a JSON object with a single property named <paramref name="propertyName"/>, the value is a JSON object containing the first row of the table
+            </summary>
+            <param name="table"></param>
+            <param name="propertyName"></param>
+            <returns></returns>
+        </member>
         <member name="T:TryIT.ObjectExtension.FiscalYear">
             <summary>
             fiscal year information

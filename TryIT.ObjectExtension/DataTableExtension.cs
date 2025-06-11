@@ -1,9 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 
@@ -678,6 +680,114 @@ namespace TryIT.ObjectExtension
         private static string GetCompositeKey(DataRow row, Dictionary<string, string> keysMap)
         {
             return string.Join("_", keysMap.Select(kvp => row.Field<object>(kvp.Key)?.ToString().GetHashCode()));
+        }
+
+        /// <summary>
+        /// convert <paramref name="dt"/> to a JSON array, each row is a JSON object
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static JArray ToJsonArray(this DataTable dt)
+        {
+            if (dt == null)
+            {
+                throw new ArgumentNullException(nameof(dt), "DataTable cannot be null");
+            }
+
+            JArray array = new JArray();
+            foreach (DataRow row in dt.Rows)
+            {
+                JObject obj = new JObject();
+                foreach (DataColumn col in dt.Columns)
+                {
+                    obj[col.ColumnName] = JToken.FromObject(row[col]);
+                }
+                array.Add(obj);
+            }
+
+            return array;
+        }
+
+        /// <summary>
+        /// convert <paramref name="dt"/> to a JSON object, each column is a property of the object, if <paramref name="extraProperties"/> is provided, those properties will be merged into the result object
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="extraProperties">
+        /// <para>1. call <see cref="ToWrappedArray(DataTable, string)"/> to get JSON array as extra property</para>
+        /// <para>2. call <see cref="ToWrappedObject(DataTable, string)"/> to get JSON object as extra property</para>
+        /// <para>3. call <code>new JObject { "propertyName" = propertyValue }</code> to get JSON property as extra property</para>
+        /// </param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static JObject ToJsonObject(this DataTable dt, params JObject[] extraProperties)
+        {
+            if (dt == null)
+            {
+                throw new ArgumentNullException(nameof(dt), "DataTable cannot be null");
+            }
+
+            var row = dt.Rows[0];
+
+            var dic = row.Table.Columns.Cast<DataColumn>()
+                .ToDictionary(col => col.ColumnName, col => row[col.ColumnName]);
+
+            JObject obj = JObject.FromObject(dic);
+
+            if (extraProperties != null && extraProperties.Length > 0)
+            {
+                foreach (var extraProperty in extraProperties)
+                {
+                    obj.Merge(extraProperty);
+                }
+            }
+
+            return obj;
+        }
+
+        /// <summary>
+        /// convert <paramref name="table"/> to a JSON object with a single property named <paramref name="propertyName"/>, the value is a JSON array containing all rows of the table
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static JObject ToWrappedArray(this DataTable table, string propertyName)
+        {
+            JArray array = new JArray();
+
+            foreach (DataRow row in table.Rows)
+            {
+                JObject obj = new JObject();
+                foreach (DataColumn col in table.Columns)
+                {
+                    obj[col.ColumnName] = JToken.FromObject(row[col]);
+                }
+                array.Add(obj);
+            }
+
+            return new JObject { [propertyName] = array };
+        }
+
+        /// <summary>
+        /// convert <paramref name="table"/> to a JSON object with a single property named <paramref name="propertyName"/>, the value is a JSON object containing the first row of the table
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static JObject ToWrappedObject(this DataTable table, string propertyName)
+        {
+            // Build the object part
+            JObject jObj = new JObject();
+            if (table.Rows.Count > 0)
+            {
+                DataRow row = table.Rows[0];
+                foreach (DataColumn col in table.Columns)
+                {
+                    jObj[col.ColumnName] = JToken.FromObject(row[col]);
+                }
+            }
+
+            return new JObject { [propertyName] = jObj };
         }
     }
 }

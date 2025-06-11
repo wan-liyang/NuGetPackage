@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using TryIT.ExcelService;
 using System.Diagnostics;
+using Newtonsoft.Json.Linq;
 
 namespace NUnitTest02.TryIT_ObjectExtension
 {
@@ -506,6 +507,105 @@ namespace NUnitTest02.TryIT_ObjectExtension
         class TableToList2
         {
             public string Col1 { get; set; }
+        }
+
+        [Test]
+        public void DataTable_ToJsonArray_Test()
+        {
+            // Arrange: create a DataTable with various types
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("Col1", typeof(string));
+            dataTable.Columns.Add("Col2", typeof(int));
+            dataTable.Columns.Add("Col3", typeof(object));
+            dataTable.Columns.Add("Col4", typeof(int));
+
+            DataRow row1 = dataTable.NewRow();
+            row1["Col1"] = "abc";
+            row1["Col2"] = 123;
+            row1["Col3"] = "def";
+            row1["Col4"] = 456;
+            dataTable.Rows.Add(row1);
+
+            DataRow row2 = dataTable.NewRow();
+            row2["Col1"] = "xyz";
+            row2["Col2"] = 789;
+            row2["Col3"] = DBNull.Value;
+            row2["Col4"] = DBNull.Value;
+            dataTable.Rows.Add(row2);
+
+            // Act
+            JArray jsonArray = dataTable.ToJsonArray();
+
+            // Assert
+            Assert.That(jsonArray.Count, Is.EqualTo(2));
+            Assert.That(jsonArray[0]["Col1"].ToString(), Is.EqualTo("abc"));
+            Assert.That(jsonArray[0]["Col2"].ToObject<int>(), Is.EqualTo(123));
+            Assert.That(jsonArray[0]["Col3"].ToString(), Is.EqualTo("def"));
+            Assert.That(jsonArray[0]["Col4"].ToObject<int>(), Is.EqualTo(456));
+
+            Assert.That(jsonArray[1]["Col1"].ToString(), Is.EqualTo("xyz"));
+            Assert.That(jsonArray[1]["Col2"].ToObject<int>(), Is.EqualTo(789));
+            Assert.That(jsonArray[1]["Col3"].Type, Is.EqualTo(JTokenType.Null));
+            Assert.That(jsonArray[1]["Col4"].Type, Is.EqualTo(JTokenType.Null));
+
+            // Edge: empty DataTable
+            DataTable emptyTable = new DataTable();
+            emptyTable.Columns.Add("Col1");
+            JArray emptyArray = emptyTable.ToJsonArray();
+            Assert.That(emptyArray.Count, Is.EqualTo(0));
+
+            // Edge: null DataTable throws
+            DataTable nullTable = null;
+            Assert.Throws<ArgumentNullException>(() => nullTable.ToJsonArray());
+        }
+
+        [Test]
+        public void DataTable_ToJsonObject_WithWrappedArray_And_WrappedObject_ExtraProperties()
+        {
+            // Arrange: main table
+            DataTable mainTable = new DataTable();
+            mainTable.Columns.Add("Id", typeof(int));
+            mainTable.Columns.Add("Name", typeof(string));
+            mainTable.Rows.Add(1, "Main");
+
+            // Arrange: extra table for array
+            DataTable arrayTable = new DataTable();
+            arrayTable.Columns.Add("Value", typeof(string));
+            arrayTable.Rows.Add("A");
+            arrayTable.Rows.Add("B");
+
+            // Arrange: extra table for object
+            DataTable objectTable = new DataTable();
+            objectTable.Columns.Add("Key", typeof(string));
+            objectTable.Columns.Add("Data", typeof(int));
+            objectTable.Rows.Add("K1", 100);
+
+            // Create extra properties using ToWrappedArray and ToWrappedObject
+            JObject wrappedArray = arrayTable.ToWrappedArray("ArrayProp");
+            JObject wrappedObject = objectTable.ToWrappedObject("ObjectProp");
+            JObject wrappedProperty = new JObject
+            {
+                ["ExtraProp"] = 123
+            };
+
+            // Act
+            JObject result = mainTable.ToJsonObject(wrappedArray, wrappedObject, wrappedProperty);
+
+            // Assert: main table data
+            Assert.That(result["Id"].ToObject<int>(), Is.EqualTo(1));
+            Assert.That(result["Name"].ToString(), Is.EqualTo("Main"));
+
+            // Assert: wrapped array property
+            Assert.That(result["ArrayProp"], Is.Not.Null);
+            Assert.That(result["ArrayProp"].Type, Is.EqualTo(JTokenType.Array));
+            Assert.That(result["ArrayProp"].Count(), Is.EqualTo(2));
+            Assert.That(result["ArrayProp"][0]["Value"].ToString(), Is.EqualTo("A"));
+
+            // Assert: wrapped object property
+            Assert.That(result["ObjectProp"], Is.Not.Null);
+            Assert.That(result["ObjectProp"].Type, Is.EqualTo(JTokenType.Object));
+            Assert.That(result["ObjectProp"]["Key"].ToString(), Is.EqualTo("K1"));
+            Assert.That(result["ObjectProp"]["Data"].ToObject<int>(), Is.EqualTo(100));
         }
     }
 }
