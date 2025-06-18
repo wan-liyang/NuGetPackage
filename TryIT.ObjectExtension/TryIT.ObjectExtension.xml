@@ -318,6 +318,19 @@
             <param name="ex"></param>
             <returns></returns>
         </member>
+        <member name="T:TryIT.ObjectExtension.HttpResponseMessageExtension">
+            <summary>
+            extension class for HttpResponseMessage
+            </summary>
+        </member>
+        <member name="M:TryIT.ObjectExtension.HttpResponseMessageExtension.GetStatusCodeString(System.Net.Http.HttpResponseMessage)">
+            <summary>
+            Extension method to get the status code of an HttpResponseMessage as a formatted string, e.g. "200 - OK".
+            </summary>
+            <param name="response"></param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
         <member name="T:TryIT.ObjectExtension.IEnumerableExtension">
             <summary>
             Extension method for <see cref="T:System.Collections.Generic.IEnumerable`1"/> item
