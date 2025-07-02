@@ -23,7 +23,7 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
 
             ConnectorConfig config = new ConnectorConfig
             {
-                ConnectionString = "Server=myserver;Database=mydb;Trusted_Connection=True;TrustServerCertificate=True",
+                ConnectionString = "Server={server};Database=master;Trusted_Connection=True;TrustServerCertificate=True",
                 TimeoutSecond = 10 * 60 // 10 minute
             };
             dbConnector = new DbConnector(config);
@@ -55,6 +55,16 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
 
             dbConnector = new DbConnector(config);
             dbConnector.CopyData(mode);
+        }
+
+        [Test]
+        public async Task Test_ExecuteScalarAsync()
+        {
+            string sql = "SELECT GETDATE()";
+
+            var result = await dbConnector.ExecuteScalarAsync<DateTime>(sql, CommandType.Text, null);
+
+            Assert.IsTrue(result > DateTime.MinValue, "Result should be a valid DateTime");
         }
 
         [Test]

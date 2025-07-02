@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Threading.Tasks;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
@@ -176,6 +177,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
             conn.Open();
             
+            return conn;
+        }
+
+        private async Task<SqlConnection> OpenConectionAsync()
+        {
+            var conn = new SqlConnection(_config.ConnectionString);
+
+            if (!string.IsNullOrEmpty(_config.AccessToken))
+            {
+                conn.AccessToken = _config.AccessToken;
+            }
+            await conn.OpenAsync();
+
             return conn;
         }
 
@@ -490,6 +504,45 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                         }
                     });
+            }
+            catch (Exception ex)
+            {
+                AddExcetionData(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="commandText"></param>
+        /// <param name="commandType"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public async Task<T> ExecuteScalarAsync<T>(string commandText, CommandType commandType, params SqlParameter[] parameters)
+        {
+            try
+            {
+                return await _pipeline.Execute(async exec =>
+                {
+                    using (SqlConnection sqlConnection = await OpenConectionAsync())
+                    {
+                        using (SqlCommand cmd = sqlConnection.CreateCommand())
+                        {
+                            cmd.CommandTimeout = _config.TimeoutSecond;
+                            cmd.CommandText = commandText;
+                            cmd.CommandType = commandType;
+                            if (null != parameters && parameters.Any())
+                            {
+                                cmd.Parameters.AddRange(ClondParameters(parameters));
+                            }
+                            object result = await cmd.ExecuteScalarAsync();
+
+                            return SqlHelper.ConvertValue<T>(result);
+                        }
+                    }
+                });
             }
             catch (Exception ex)
             {
