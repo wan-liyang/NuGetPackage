@@ -57,8 +57,22 @@ namespace NUnitTest02.TryIT_ObjectExtension
         [Test]
         public void GetJsonValue2()
         {
-            string json = File.ReadAllText(@"test.json");
-            var result = json.GetJsonValue<ListItem>("fields");
+            string json = @"{
+    ""Data"": {
+        ""StatusCode"": ""400"",
+        ""Message"": [
+            {
+                ""Status"": ""False"",
+                ""Description"": ""Invalid Data. ""
+            }
+        ]
+    },
+    ""Data2"": ""other data""
+}";
+
+            var result = json.GetJsonValue<string>("data");
+
+            Assert.IsTrue(result.Contains("Status"));
         }
         class ListItem
         {

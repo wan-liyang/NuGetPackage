@@ -9,6 +9,7 @@ using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Sharepoint;
 using TryIT.MicrosoftGraphApi.Request.Batching;
+using TryIT.MicrosoftGraphApi.Request.Sharepoint;
 using TryIT.MicrosoftGraphApi.Response.Sharepoint;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
@@ -437,11 +438,11 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="driveId"></param>
         /// <param name="itemId"></param>
-        /// <param name="addPermissionModel"></param>
+        /// <param name="requestBody"></param>
         /// <returns></returns>
-        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionModel addPermissionModel)
+        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionRequest.Body requestBody)
         {
-            return _helper.AddPermissions(driveId, itemId, addPermissionModel);
+            return _helper.AddPermissions(driveId, itemId, requestBody);
         }
         /// <summary>
         /// delete permission

@@ -227,7 +227,15 @@ namespace TryIT.ObjectExtension
                 }
             }
 
-            if (typeof(T).IsValueType || typeof(T) == typeof(String))
+            if (typeof(T) == typeof(string))
+            {
+                object value = jToken.Type == JTokenType.Object || jToken.Type == JTokenType.Array
+                   ? jToken.ToString(Formatting.None) // serialize to JSON string
+                   : jToken.Value<string>();
+
+                return (T)value;
+            }
+            else if (typeof(T).IsValueType)
             {
                 return jToken.Value<T>();
             }

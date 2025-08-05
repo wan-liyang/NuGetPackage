@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Converters;
 
 namespace TryIT.MicrosoftGraphApi.Helper
 {
@@ -25,10 +26,11 @@ namespace TryIT.MicrosoftGraphApi.Helper
         /// convert object to Json string
         /// </summary>
         /// <param name="obj"></param>
+        /// <param name="converters"></param>
         /// <returns></returns>
-        public static string ObjectToJson(this object obj)
+        public static string ObjectToJson(this object obj, params JsonConverter[] converters)
         {
-            return JsonConvert.SerializeObject(obj);
+            return JsonConvert.SerializeObject(obj, converters);
         }
         #endregion
 

@@ -120,8 +120,25 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
         }
 
         [Test]
-        public void GetListItems()
+        public void AddPermission()
         {
+            SharepointApi api = new SharepointApi(config);
+
+            string driveId = "";
+            string itemId = "";
+
+            api.AddPermissions(driveId, itemId, new TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Body
+            {
+                recipients = new List<TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Recipient>
+                {
+                    new TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Recipient{ email = "" },
+                    new TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Recipient{ alias = "" }
+                },
+                roles = new List<TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.PermissionRole>
+                {
+                    TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.PermissionRole.read
+                },
+            });
         }
 
         public class ListItem

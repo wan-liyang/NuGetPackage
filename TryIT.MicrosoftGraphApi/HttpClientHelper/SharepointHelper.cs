@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Converters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -513,23 +514,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="driveId"></param>
         /// <param name="itemId"></param>
-        /// <param name="addPermissionModel"></param>
+        /// <param name="requestBody"></param>
         /// <returns></returns>
-        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionModel addPermissionModel)
+        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionRequest.Body requestBody)
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/invite";
 
-            AddPermissionRequest.Body requestBody = new AddPermissionRequest.Body
-            {
-                recipients = new List<AddPermissionRequest.Recipient>
-                    {
-                        new AddPermissionRequest.Recipient {email = addPermissionModel.email}
-                    },
-                roles = new List<string> { addPermissionModel.role.ToString() },
-                sendInvitation = addPermissionModel.sendInvitation,
-                requireSignIn = true
-            };
-            string jsonContent = requestBody.ObjectToJson();
+            string jsonContent = requestBody.ObjectToJson(new StringEnumConverter());
             HttpContent httpContent = new StringContent(jsonContent);
             httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
