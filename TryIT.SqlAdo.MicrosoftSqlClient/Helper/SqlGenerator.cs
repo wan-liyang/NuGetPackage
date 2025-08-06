@@ -194,6 +194,39 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         }
 
         /// <summary>
+        /// generate sql script to insert record in table
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tableName"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static (string Sql, List<SqlParameter> Parameters) GenerateInsertSql<T>(string tableName, T entity)
+        {
+            tableName = SqlHelper.SqlWarpTable(tableName);
+            var properties = GetPropertyInfos<T>();
+            var columns_insert = new StringBuilder();
+            var values_insert = new StringBuilder();
+            var parameters = new List<SqlParameter>();
+            foreach (var prop in properties)
+            {
+                string columnName = prop.Name;
+                // sql parameters
+                object value = GetDbValueForProperty(prop, entity);
+                parameters.Add(new SqlParameter($"@{columnName}", value));
+                // sql insert
+                if (columns_insert.Length > 0)
+                {
+                    columns_insert.Append(", ");
+                    values_insert.Append(", ");
+                }
+                columns_insert.Append(SqlHelper.SqlWarpColumn(columnName));
+                values_insert.Append($"@{columnName}");
+            }
+            string sql = $"INSERT INTO {tableName} ({columns_insert}) VALUES ({values_insert})";
+            return (sql, parameters);
+        }
+
+        /// <summary>
         /// generate sql script to insert or update record in table, if the entity has property with <see cref="KeyAttribute"/>, the script will perform update if record exists, otherwise insert new record
         /// </summary>
         /// <typeparam name="T"></typeparam>
