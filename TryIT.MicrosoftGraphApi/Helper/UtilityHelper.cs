@@ -1,4 +1,6 @@
-﻿namespace TryIT.MicrosoftGraphApi.Helper
+﻿using System;
+
+namespace TryIT.MicrosoftGraphApi.Helper
 {
     /// <summary>
     /// helper utility with static method
@@ -15,6 +17,11 @@
         /// <returns></returns>
         public static string CleanItemName(string itemName)
         {
+            if (itemName == null)
+            {
+                throw new ArgumentNullException(nameof(itemName), "Item name cannot be null.");
+            }
+
             // " * : < > ? / \ |
             itemName = itemName
                 .Replace("#", "_")
