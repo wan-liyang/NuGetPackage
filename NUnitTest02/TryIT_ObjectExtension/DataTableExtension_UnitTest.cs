@@ -12,9 +12,9 @@ namespace NUnitTest02.TryIT_ObjectExtension
     {
         public class List_Test
         {
-            public string Prop1 { get; set; }
+            public required string Prop1 { get; set; }
             public int Prop2 { get; set; }
-            public string Prop3 { get; set; }
+            public required string Prop3 { get; set; }
             public int? Prop4 { get; set; }
         }
 

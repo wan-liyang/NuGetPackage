@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 
@@ -60,25 +57,22 @@ namespace TryIT.ObjectExtension
         /// <typeparam name="T"></typeparam>
         /// <param name="dtSource"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this DataTable dtSource) where T : class, new()
+        public static List<T> ToList<T>(this DataTable dtSource) where T : class
         {
             List<T> list = new List<T>();
 
-            var props = (new T()).GetType().GetProperties();
+            var props = typeof(T).GetProperties();
 
             foreach (DataRow row in dtSource.Rows)
             {
-                T obj = new T();
+                T obj = (T)Activator.CreateInstance(typeof(T), nonPublic: true);
                 for (int i = 0; i < dtSource.Columns.Count; i++)
                 {
                     string colName = dtSource.Columns[i].ColumnName;
-                    var prop = props.Where(p => p.Name.IsEquals(colName)).FirstOrDefault();
-                    if (prop != null)
+                    var prop = props.FirstOrDefault(p => p.Name.IsEquals(colName));
+                    if (prop != null && row[colName] != DBNull.Value)
                     {
-                        if (row[colName] != DBNull.Value)
-                        {
-                            SetValue(obj, prop, row[colName]);
-                        }
+                        SetValue(obj, prop, row[colName]);
                     }
                 }
                 list.Add(obj);
@@ -96,7 +90,7 @@ namespace TryIT.ObjectExtension
         /// <param name="dtSource"></param>
         /// <param name="keyValues"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this DataTable dtSource, Dictionary<string, string> keyValues) where T : class, new()
+        public static List<T> ToList<T>(this DataTable dtSource, Dictionary<string, string> keyValues) where T : class
         {
             List<T> list = new List<T>();
 
@@ -104,14 +98,14 @@ namespace TryIT.ObjectExtension
             List<string> properties = keyValues.Values.ToList();
 
             if (dtSource != null && dtSource.Rows.Count > 0
-                && columns != null && columns.Count() > 0
-                && properties != null && properties.Count() > 0)
+                && columns != null && columns.Any()
+                && properties != null && properties.Any())
             {
-                var props = (new T()).GetType().GetProperties();
+                var props = typeof(T).GetProperties();
 
                 foreach (DataRow row in dtSource.Rows)
                 {
-                    T obj = new T();
+                    T obj = (T)Activator.CreateInstance(typeof(T), nonPublic: true);
                     for (int i = 0; i < columns.Count; i++)
                     {
                         string colName = columns[i];
@@ -119,13 +113,10 @@ namespace TryIT.ObjectExtension
                         {
                             // if get respective property and assign value
                             string propName = properties[i];
-                            var prop = props.Where(p => p.Name.IsEquals(propName)).FirstOrDefault();
-                            if (prop != null)
+                            var prop = props.FirstOrDefault(p => p.Name.IsEquals(propName));
+                            if (prop != null && row[colName] != DBNull.Value)
                             {
-                                if (row[colName] != DBNull.Value)
-                                {
-                                    SetValue(obj, prop, row[colName]);
-                                }
+                                SetValue(obj, prop, row[colName]);
                             }
                         }
                     }
@@ -160,51 +151,44 @@ namespace TryIT.ObjectExtension
 
         private static object ConvertValueToType(object value, Type type)
         {
-            try
+            if (type == typeof(System.Data.SqlTypes.SqlBinary))
             {
-                if (type == typeof(System.Data.SqlTypes.SqlBinary))
-                {
-                    return Encoding.UTF8.GetBytes(value.ToString());
-                }
-
-                // guid to string, need this special handle
-                if (value is Guid && Type.GetTypeCode(type) == TypeCode.String)
-                {
-                    return value.ToString();
-                }
-
-                // string to guid, need this special handle
-                if (value is String && type.FullName == "System.Guid")
-                {
-                    return Guid.Parse(value.ToString());
-                }
-
-                switch (Type.GetTypeCode(type))
-                {
-                    case TypeCode.Boolean:
-                        if (value == null)
-                        {
-                            return Convert.ChangeType(false, type);
-                        }
-                        else if (value.ToString().ToLower() == "y" || value.ToString().ToLower() == "yes")
-                        {
-                            return Convert.ChangeType(true, type);
-                        }
-                        else if (value.ToString().ToLower() == "n" || value.ToString().ToLower() == "no")
-                        {
-                            return Convert.ChangeType(false, type);
-                        }
-                        else
-                        {
-                            return Convert.ChangeType(value, type);
-                        }
-                    default:
-                        return Convert.ChangeType(value, type);
-                }
+                return Encoding.UTF8.GetBytes(value.ToString());
             }
-            catch (Exception e)
+
+            // guid to string, need this special handle
+            if (value is Guid && Type.GetTypeCode(type) == TypeCode.String)
             {
-                throw e;
+                return value.ToString();
+            }
+
+            // string to guid, need this special handle
+            if (value is String && type.FullName == "System.Guid")
+            {
+                return Guid.Parse(value.ToString());
+            }
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Boolean:
+                    if (value == null)
+                    {
+                        return Convert.ChangeType(false, type);
+                    }
+                    else if (value.ToString().ToLower() == "y" || value.ToString().ToLower() == "yes")
+                    {
+                        return Convert.ChangeType(true, type);
+                    }
+                    else if (value.ToString().ToLower() == "n" || value.ToString().ToLower() == "no")
+                    {
+                        return Convert.ChangeType(false, type);
+                    }
+                    else
+                    {
+                        return Convert.ChangeType(value, type);
+                    }
+                default:
+                    return Convert.ChangeType(value, type);
             }
         }
 
