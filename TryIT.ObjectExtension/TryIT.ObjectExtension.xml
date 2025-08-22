@@ -424,12 +424,13 @@
             <param name="stringBase64"></param>
             <returns></returns>
         </member>
-        <member name="M:TryIT.ObjectExtension.ObjExtension.JsonToObject``1(System.String)">
+        <member name="M:TryIT.ObjectExtension.ObjExtension.JsonToObject``1(System.String,Newtonsoft.Json.JsonSerializerSettings)">
             <summary>
             covnert Json string to specific object
             </summary>
             <typeparam name="T"></typeparam>
             <param name="jsonString"></param>
+            <param name="settings"></param>
             <returns></returns>
         </member>
         <member name="M:TryIT.ObjectExtension.ObjExtension.ObjectToJson(System.Object)">

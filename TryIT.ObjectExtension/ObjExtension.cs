@@ -63,57 +63,51 @@ namespace TryIT.ObjectExtension
             if (objValue != null && objValue != DBNull.Value)
             {
                 Type type = typeof(T);
-                try
-                {
-                    if (Nullable.GetUnderlyingType(type) != null)
-                    {
-                        type = Nullable.GetUnderlyingType(type);
-                    }
 
-                    switch (Type.GetTypeCode(type))
-                    {
-                        case TypeCode.Boolean:
-                            if (string.IsNullOrEmpty(objValue.ToString()))
-                            {
-                                return value;
-                            }
-                            else if (objValue.GetType().FullName.IsEquals("System.Boolean"))
-                            {
-                                value = (T)Convert.ChangeType(objValue, type);
-                            }
-                            else if (objValue.ToString().IsIn("Y", "Yes", "On"))
-                            {
-                                value = (T)Convert.ChangeType(true, type);
-                            }
-                            else if (objValue.ToString().IsIn("N", "No", "Off"))
-                            {
-                                value = (T)Convert.ChangeType(false, type);
-                            }
-                            else
-                            {
-                                value = (T)Convert.ChangeType(objValue, type);
-                            }
-                            break;
-                        case TypeCode.Int32:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
-                            if (string.IsNullOrEmpty(objValue.ToString()))
-                            {
-                                return value;
-                            }
-                            else
-                            {
-                                value = (T)Convert.ChangeType(objValue, type);
-                            }
-                            break;
-                        default:
-                            value = (T)Convert.ChangeType(objValue, type);
-                            break;
-                    }
-                }
-                catch
+                if (Nullable.GetUnderlyingType(type) != null)
                 {
-                    throw;
+                    type = Nullable.GetUnderlyingType(type);
+                }
+
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.Boolean:
+                        if (string.IsNullOrEmpty(objValue.ToString()))
+                        {
+                            return value;
+                        }
+                        else if (objValue.GetType().FullName.IsEquals("System.Boolean"))
+                        {
+                            value = (T)Convert.ChangeType(objValue, type);
+                        }
+                        else if (objValue.ToString().IsIn("Y", "Yes", "On"))
+                        {
+                            value = (T)Convert.ChangeType(true, type);
+                        }
+                        else if (objValue.ToString().IsIn("N", "No", "Off"))
+                        {
+                            value = (T)Convert.ChangeType(false, type);
+                        }
+                        else
+                        {
+                            value = (T)Convert.ChangeType(objValue, type);
+                        }
+                        break;
+                    case TypeCode.Int32:
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        if (string.IsNullOrEmpty(objValue.ToString()))
+                        {
+                            return value;
+                        }
+                        else
+                        {
+                            value = (T)Convert.ChangeType(objValue, type);
+                        }
+                        break;
+                    default:
+                        value = (T)Convert.ChangeType(objValue, type);
+                        break;
                 }
             }
             return value;
@@ -156,10 +150,11 @@ namespace TryIT.ObjectExtension
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="jsonString"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        public static T JsonToObject<T>(this string jsonString)
+        public static T JsonToObject<T>(this string jsonString, JsonSerializerSettings settings = null)
         {
-            return JsonConvert.DeserializeObject<T>(jsonString);
+            return JsonConvert.DeserializeObject<T>(jsonString, settings);
         }
 
         /// <summary>
