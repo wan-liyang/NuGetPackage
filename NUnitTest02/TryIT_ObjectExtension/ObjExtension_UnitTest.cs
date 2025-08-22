@@ -1,7 +1,12 @@
-﻿using TryIT.ObjectExtension;
+﻿//using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using TryIT.ObjectExtension;
 
 namespace NUnitTest02.TryIT_ObjectExtension
 {
@@ -74,11 +79,59 @@ namespace NUnitTest02.TryIT_ObjectExtension
 
             Assert.IsTrue(result.Contains("Status"));
         }
+
+
+        [Test]
+        public void CustomizeFormatTest()
+        {
+            string json = @"{
+  ""status"": ""Healthy"",
+  ""duration"": ""00:00:04.004"",
+  ""timestamp"": ""2025-08-22 12:17:14.000 +0000"",
+}";
+
+            var obj = json.JsonToObject<Response>();
+
+            Assert.That(obj.timestamp.Hour, Is.EqualTo(20));
+        }
+
+
         class ListItem
         {
             public string Title { get; set; }
             public string RequestBody { get; set; }
             public string ResponseBody { get; set; }
+        }
+
+        class Response
+        {
+            public string status { get; set; }
+            public string duration { get; set; }
+
+            //[JsonConverter(typeof(CustomDateTimeConverter))]
+            public DateTime timestamp { get; set; }
+        }
+    }
+
+
+    public class CustomDateTimeConverter : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+                throw new JsonException("Non-nullable DateTime cannot be null");
+
+            string? input = reader.GetString();
+            if (string.IsNullOrWhiteSpace(input))
+                throw new JsonException("Invalid DateTime string");
+
+            string normalized = Regex.Replace(input, @"([+-]\d{2})(\d{2})$", "$1:$2");
+            return DateTimeOffset.Parse(normalized, CultureInfo.InvariantCulture).LocalDateTime;
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString("o"));
         }
     }
 }

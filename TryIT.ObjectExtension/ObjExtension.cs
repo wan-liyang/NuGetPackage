@@ -150,11 +150,10 @@ namespace TryIT.ObjectExtension
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="jsonString"></param>
-        /// <param name="settings"></param>
         /// <returns></returns>
-        public static T JsonToObject<T>(this string jsonString, JsonSerializerSettings settings = null)
+        public static T JsonToObject<T>(this string jsonString)
         {
-            return JsonConvert.DeserializeObject<T>(jsonString, settings);
+            return JsonConvert.DeserializeObject<T>(jsonString);
         }
 
         /// <summary>
