@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Outlook;
@@ -9,7 +8,7 @@ using TryIT.MicrosoftGraphApi.Response.Outlook;
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
 {
     /// <summary>
-    /// 
+    /// API for Outlook Mail
     /// </summary>
     public class OutlookApi
     {
@@ -32,6 +31,28 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         public async Task<List<GetMessageResponse.Message>> GetMessagesAsync(GetMessageModel getMessageModel)
         {
             return await _helper.GetMessagesAsync(getMessageModel);
+        }
+
+        /// <summary>
+        /// get a set of messages that have been added, deleted, or updated in a specified folder.
+        /// <para>if <see cref="GetMessageResponse.Response.odatanextLink"/> is available, continues call <see cref="GetMessagesFromLinkAsync(string)"/> to get next page messages</para>
+        /// <para>if <see cref="GetMessageResponse.Response.odatadeltaLink"/> is available, continues call <see cref="GetMessagesFromLinkAsync(string)"/> to get newly messages</para>
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public async Task<GetMessageResponse.Response> GetDeltaMessagesAsync(GetDeltaMessage model)
+        {
+            return await _helper.GetDeltaMessagesAsync(model);
+        }
+
+        /// <summary>
+        /// get messages from the provided deltalink or nextlink
+        /// </summary>
+        /// <param name="deltalink"></param>
+        /// <returns></returns>
+        public async Task<GetMessageResponse.Response> GetMessagesFromLinkAsync(string deltalink)
+        {
+            return await _helper.GetMessagesFromLinkAsync(deltalink);
         }
 
         /// <summary>

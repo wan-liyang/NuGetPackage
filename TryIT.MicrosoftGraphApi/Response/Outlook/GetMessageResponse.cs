@@ -28,14 +28,33 @@ namespace TryIT.MicrosoftGraphApi.Response.Outlook
             public EmailAddress emailAddress { get; set; }
         }
 
+        /// <summary>
+        /// api response for get messages
+        /// </summary>
         public class Response
         {
+            /// <summary>
+            /// tells the "shape" of the response and what kind of resource the payload represents
+            /// </summary>
             [JsonProperty("@odata.context")]
             public string odatacontext { get; set; }
+
+            /// <summary>
+            /// list of messages
+            /// </summary>
             public List<Message> value { get; set; }
 
+            /// <summary>
+            /// mailbox pagination
+            /// </summary>
             [JsonProperty("@odata.nextLink")]
             public string odatanextLink { get; set; }
+
+            /// <summary>
+            /// mailbox state as of now, use for delta query
+            /// </summary>
+            [JsonProperty("@odata.deltaLink")]
+            public string odatadeltaLink { get; set; }
         }
 
         public class Sender

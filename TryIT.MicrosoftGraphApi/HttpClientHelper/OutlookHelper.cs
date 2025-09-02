@@ -87,6 +87,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             }
         }
 
+        public async Task<GetMessageResponse.Response> GetDeltaMessagesAsync(GetDeltaMessage model)
+        {
+            string folder = !string.IsNullOrEmpty(model?.folder) ? model.folder : "inbox";
+            string url = $"{GraphApiRootUrl}/me/mailFolders/{folder}/messages/delta";
+            if (!string.IsNullOrEmpty(model.mailbox))
+            {
+                url = $"{GraphApiRootUrl}/users/{model.mailbox}/mailFolders/{folder}/messages/delta";
+            }
+
+            var response = await RestApi.GetAsync(url);
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = await response.Content.ReadAsStringAsync();
+            return content.JsonToObject<GetMessageResponse.Response>();
+        }
+
+        public async Task<GetMessageResponse.Response> GetMessagesFromLinkAsync(string link)
+        {
+            var response = await RestApi.GetAsync(link);
+            CheckStatusCode(response, RestApi.RetryResults);
+            string content = await response.Content.ReadAsStringAsync();
+            return content.JsonToObject<GetMessageResponse.Response>();
+        }
+
         public async Task<string> GetMIMEContentAsync(GetMIMEContentModel model)
         {
             string url = $"{GraphApiRootUrl}/me/messages/{model.messageId}/$value";
