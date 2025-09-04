@@ -66,6 +66,10 @@ namespace TryIT.MicrosoftGraphApi.Response.Outlook
         {
             public EmailAddress emailAddress { get; set; }
         }
+        public class Removed
+        {
+            public string reason { get; set; }
+        }
 
         public class Message
         {
@@ -100,6 +104,9 @@ namespace TryIT.MicrosoftGraphApi.Response.Outlook
             public List<Recipient> bccRecipients { get; set; }
             public List<object> replyTo { get; set; }
             public Flag flag { get; set; }
+
+            [JsonProperty("@removed")]
+            public Removed removed { get; set; }
         }
     }
 }
