@@ -15,14 +15,17 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             List<string> results = new List<string>();
             BatchingRequest.Body body = new BatchingRequest.Body();
 
+            // max 20 requests per batch https://learn.microsoft.com/en-us/graph/json-batching?utm_source=chatgpt.com&tabs=http,
+            // set limit to 10 to avoid issue
+
+            int batchSizeLimit = 10;
             int batchCount = 0;
             for (int i = 0; i < requestBody.requests.Count; i++)
             {
                 body.requests.Add(requestBody.requests[i]);
                 batchCount++;
-                if (batchCount == 20 || 
-                    (batchCount < 20 && i == requestBody.requests.Count - 1)
-                   )
+                if (batchCount == batchSizeLimit 
+                    || (batchCount < batchSizeLimit && i == requestBody.requests.Count - 1))
                 {
                     string result = await _postBatch(body);
                     results.Add(result);
