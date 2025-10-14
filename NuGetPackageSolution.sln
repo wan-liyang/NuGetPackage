@@ -60,6 +60,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TryIT.Zip", "TryIT.Zip\TryI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryIT.EPPlus", "TryIT.EPPlus\TryIT.EPPlus.csproj", "{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest03", "NUnitTest03\NUnitTest03.csproj", "{A58E93F5-F79E-482D-B016-9012BF037B9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,6 +184,10 @@ Global
 		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA70AD9C-0497-4ECC-96D4-6A8AF261A46C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A58E93F5-F79E-482D-B016-9012BF037B9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A58E93F5-F79E-482D-B016-9012BF037B9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A58E93F5-F79E-482D-B016-9012BF037B9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A58E93F5-F79E-482D-B016-9012BF037B9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

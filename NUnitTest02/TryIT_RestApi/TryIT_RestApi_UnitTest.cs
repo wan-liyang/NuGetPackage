@@ -12,8 +12,14 @@ namespace NUnitTest02.TryIT_RestApi
     {
 
         [Test]
-        public void Test1()
+        public async Task Test1()
         {
+            TryIT.RestApi.Api api = new Api(new HttpClientConfig
+            {
+                
+            });
+
+            var response = await api.GetAsync("https://www.baidu.com");
         }
     }
 }

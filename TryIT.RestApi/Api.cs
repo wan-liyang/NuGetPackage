@@ -24,8 +24,9 @@ namespace TryIT.RestApi
 
         private ResiliencePipeline _pipeline;
         private readonly HttpClient _httpClient;
+        private readonly HttpLogDelegate _httpLogDelegate;
 
-        private List<RetryResult> _retryResults = new List<RetryResult>();
+        private readonly List<RetryResult> _retryResults = new List<RetryResult>();
         /// <summary>
         /// retry results, capture each response or exception
         /// </summary>
@@ -48,6 +49,8 @@ namespace TryIT.RestApi
             {
                 throw new ArgumentNullException(nameof(clientConfig));
             }
+
+            _httpLogDelegate = clientConfig.HttpLogDelegate;
 
             HttpClient httpClient = null;
             if (clientConfig.HttpClient != null)
@@ -240,17 +243,22 @@ namespace TryIT.RestApi
             try
             {
                 return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    try
                     {
-                        try
+                        return await WrapSendAsync(async () =>
                         {
                             return await _httpClient.GetAsync(url);
-                        }
-                        catch (Exception ex)
-                        {
-                            ex.Data.Add((object)Api.EXCEPTION_DATA_HTTP_METHOD, HttpMethod.Get.Method);
-                            throw;
-                        }
-                    });
+                        },
+                        url,
+                        HttpMethod.Get);                        
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.Data.Add((object)Api.EXCEPTION_DATA_HTTP_METHOD, HttpMethod.Get.Method);
+                        throw;
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -270,36 +278,42 @@ namespace TryIT.RestApi
             try
             {
                 return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    try
                     {
-                        try
+                        string paras = string.Empty;
+
+                        if (paras != null && paras.Length > 0)
                         {
-                            string paras = string.Empty;
+                            paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
+                        }
 
-                            if (paras != null && paras.Length > 0)
+                        if (!string.IsNullOrEmpty(paras))
+                        {
+                            if (url.Contains("?"))
                             {
-                                paras = string.Join("&", parameters.Select(p => $"{HttpUtility.UrlEncode(p.Key)}={HttpUtility.UrlEncode(p.Value)}"));
+                                url = $"{url}&{paras}";
                             }
-
-                            if (!string.IsNullOrEmpty(paras))
+                            else
                             {
-                                if (url.Contains("?"))
-                                {
-                                    url = $"{url}&{paras}";
-                                }
-                                else
-                                {
-                                    url = $"{url}?{paras}";
-                                }
+                                url = $"{url}?{paras}";
                             }
+                        }
 
+                        return await WrapSendAsync(async () =>
+                        {
                             return await _httpClient.GetAsync(url);
-                        }
-                        catch (Exception ex)
-                        {
-                            ex.Data.Add((object)Api.EXCEPTION_DATA_HTTP_METHOD, HttpMethod.Get.Method);
-                            throw;
-                        }
-                    });
+                        },
+                        url,
+                        HttpMethod.Get);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.Data.Add((object)Api.EXCEPTION_DATA_HTTP_METHOD, HttpMethod.Get.Method);
+                        throw;
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -319,9 +333,14 @@ namespace TryIT.RestApi
             try
             {
                 return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    return await WrapSendAsync(async () =>
                     {
                         return await _httpClient.PostAsync(url, content);
-                    });
+                    },
+                    url,
+                    HttpMethod.Post);
+                });
             }
             catch (Exception ex)
             {
@@ -341,13 +360,18 @@ namespace TryIT.RestApi
             try
             {
                 return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    return await WrapSendAsync(async () =>
                     {
                         return await _httpClient.PutAsync(url, content);
-                    });
+                    },
+                    url,
+                    HttpMethod.Put);
+                });
             }
             catch (Exception ex)
             {
-                AddExcetionData(ex, url); 
+                AddExcetionData(ex, url);
                 throw;
             }
         }
@@ -363,12 +387,18 @@ namespace TryIT.RestApi
             try
             {
                 return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    HttpMethod httpMethod = new HttpMethod("PATCH");
+                    return await WrapSendAsync(async () =>
                     {
-                        var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
+                        var request = new HttpRequestMessage(httpMethod, url);
                         request.Content = content;
 
                         return await _httpClient.SendAsync(request);
-                    });
+                    },
+                    url,
+                    httpMethod);
+                });
             }
             catch (Exception ex)
             {
@@ -387,13 +417,81 @@ namespace TryIT.RestApi
             try
             {
                 return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    return await WrapSendAsync(async () =>
                     {
                         return await _httpClient.DeleteAsync(url);
-                    });
+                    }, 
+                    url, 
+                    HttpMethod.Delete);
+                });
             }
             catch (Exception ex)
             {
                 AddExcetionData(ex, url);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// wrap send async with logging
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="url"></param>
+        /// <param name="httpMethod"></param>
+        /// <returns></returns>
+        private async Task<HttpResponseMessage> WrapSendAsync(Func<Task<HttpResponseMessage>> action, string url, HttpMethod httpMethod)
+        {
+            var start = DateTimeOffset.UtcNow;
+            var correlationId = Guid.NewGuid().ToString();
+            try
+            {
+                if (_httpLogDelegate != null)
+                {
+                    await _httpLogDelegate?.Invoke(new HttpLogContext
+                    {
+                        CorrelationId = correlationId,
+                        Stage = LogStage.BeforeRequest,
+                        Method = httpMethod,
+                        Url = url,
+                        StartTimeUtc = start
+                    });
+                }                
+
+                var resonse = await action();
+
+                if (_httpLogDelegate != null)
+                {
+                    await _httpLogDelegate?.Invoke(new HttpLogContext
+                    {
+                        CorrelationId = correlationId,
+                        Stage = LogStage.AfterResponse,
+                        Method = httpMethod,
+                        Url = url,
+                        Response = resonse,
+                        StartTimeUtc = start,
+                        EndTimeUtc = DateTimeOffset.UtcNow
+                    });
+                }
+
+                return resonse;
+            }
+            catch (Exception ex)
+            {
+                if (_httpLogDelegate != null)
+                {
+                    await _httpLogDelegate?.Invoke(new HttpLogContext
+                    {
+                        CorrelationId = correlationId,
+                        Stage = LogStage.OnError,
+                        Method = httpMethod,
+                        Url = url,
+                        Exception = ex,
+                        StartTimeUtc = start,
+                        EndTimeUtc = DateTimeOffset.UtcNow
+                    });
+                }                    
+
                 throw;
             }
         }

@@ -84,6 +84,15 @@
             <param name="url"></param>
             <returns></returns>
         </member>
+        <member name="M:TryIT.RestApi.Api.WrapSendAsync(System.Func{System.Threading.Tasks.Task{System.Net.Http.HttpResponseMessage}},System.String,System.Net.Http.HttpMethod)">
+            <summary>
+            wrap send async with logging
+            </summary>
+            <param name="action"></param>
+            <param name="url"></param>
+            <param name="httpMethod"></param>
+            <returns></returns>
+        </member>
         <member name="T:TryIT.RestApi.Models.BasicAuth">
             <summary>
             basic auth proper
@@ -97,6 +106,81 @@
         <member name="P:TryIT.RestApi.Models.BasicAuth.Password">
             <summary>
             password for Basic Authorization, if provided will use Basic Authorization
+            </summary>
+        </member>
+        <member name="T:TryIT.RestApi.Models.HttpLogDelegate">
+            <summary>
+            Delegate for logging HTTP request and response details.
+            </summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TryIT.RestApi.Models.HttpLogContext">
+            <summary>
+            Http log context for logging request and response details.
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.CorrelationId">
+            <summary>
+            Unique identifier to correlate logs across a request chain.
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.Stage">
+            <summary>
+            Indicates which stage of the HTTP lifecycle this log represents.
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.Method">
+            <summary>
+            The HTTP method (GET, POST, DELETE, etc.)
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.Url">
+            <summary>
+            The request URL
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.Response">
+            <summary>
+            The HTTP response (if available)
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.Exception">
+            <summary>
+            The exception that occurred (if any)
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.StartTimeUtc">
+            <summary>
+            The UTC time when the request started
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.EndTimeUtc">
+            <summary>
+            The UTC time when the request completed (success or failure)
+            </summary>
+        </member>
+        <member name="T:TryIT.RestApi.Models.LogStage">
+            <summary>
+            Represents the stage of the HTTP request lifecycle for logging purposes.
+            </summary>
+        </member>
+        <member name="F:TryIT.RestApi.Models.LogStage.BeforeRequest">
+            <summary>
+            Occurs before the HTTP request is sent.
+            Useful for logging request URL, headers, and payload.
+            </summary>
+        </member>
+        <member name="F:TryIT.RestApi.Models.LogStage.AfterResponse">
+            <summary>
+            Occurs after a successful HTTP response is received.
+            Useful for logging response status code, headers, and content.
+            </summary>
+        </member>
+        <member name="F:TryIT.RestApi.Models.LogStage.OnError">
+            <summary>
+            Occurs when an exception is thrown during the request or response handling.
+            Useful for logging errors, stack traces, and diagnostic context.
             </summary>
         </member>
         <member name="T:TryIT.RestApi.Models.HttpClientConfig">
@@ -116,7 +200,7 @@
         </member>
         <member name="P:TryIT.RestApi.Models.HttpClientConfig.RetryProperty">
             <summary>
-            retry property for the request when meet the condition, this will only effective when <see cref="P:TryIT.RestApi.Models.RetryProperty.RetryStatusCodes"/> is set
+            retry property for the request when meet the condition
             </summary>
         </member>
         <member name="P:TryIT.RestApi.Models.HttpClientConfig.BasicAuth">
@@ -142,6 +226,11 @@
         <member name="P:TryIT.RestApi.Models.HttpClientConfig.securityProtocolType">
             <summary>
             default use <see cref="F:System.Net.SecurityProtocolType.Tls12"/> for more secure
+            </summary>
+        </member>
+        <member name="P:TryIT.RestApi.Models.HttpClientConfig.HttpLogDelegate">
+            <summary>
+            Optional async logger delegate, allows external caller to log request/response.
             </summary>
         </member>
         <member name="T:TryIT.RestApi.Models.ProxyConfig">
