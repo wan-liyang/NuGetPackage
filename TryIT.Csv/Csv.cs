@@ -11,7 +11,7 @@ namespace TryIT.Csv
     /// <summary>
     /// initial Csv helper
     /// </summary>
-    public class Csv
+    public static class Csv
     {
         /// <summary>
         /// get csv file as table
@@ -100,12 +100,24 @@ namespace TryIT.Csv
         /// <returns></returns>
         private static string AddHeader(string fileNameAndPath, string[] header, string delimiter)
         {
-            string tempfile = Path.GetTempFileName();
+            string tempfile = Path.GetRandomFileName();
             using (var writer = new StreamWriter(tempfile))
             {
                 using (var reader = new StreamReader(fileNameAndPath))
                 {
-                    writer.WriteLine(string.Join(delimiter, header));
+                    // Quote header fields if they contain the delimiter or quotes
+                    string[] quotedHeader = new string[header.Length];
+                    for (int i = 0; i < header.Length; i++)
+                    {
+                        string field = header[i];
+                        if (field.Contains(delimiter) || field.Contains("\""))
+                        {
+                            // Escape quotes by doubling them
+                            field = "\"" + field.Replace("\"", "\"\"") + "\"";
+                        }
+                        quotedHeader[i] = field;
+                    }
+                    writer.WriteLine(string.Join(delimiter, quotedHeader));
                     while (!reader.EndOfStream)
                     {
                         writer.WriteLine(reader.ReadLine());

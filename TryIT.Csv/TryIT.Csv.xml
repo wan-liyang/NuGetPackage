@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TryIT.Csv</name>
+    </assembly>
+    <members>
+        <member name="T:TryIT.Csv.Csv">
+            <summary>
+            initial Csv helper
+            </summary>
+        </member>
+        <member name="M:TryIT.Csv.Csv.ReadAsDataTable(TryIT.Csv.CsvReaderConfig)">
+            <summary>
+            get csv file as table
+            </summary>
+            <param name="csvConfig"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.Csv.Csv.AddHeader(System.String,System.String[],System.String)">
+            <summary>
+            add header row into file
+            </summary>
+            <param name="fileNameAndPath"></param>
+            <param name="header"></param>
+            <param name="delimiter"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.Csv.Csv.SaveAs(System.Data.DataTable,TryIT.Csv.CsvWriterConfig)">
+            <summary>
+            save DataTable as Csv file, overwrite if exists
+            </summary>
+            <param name="dataTable"></param>
+            <param name="csvConfig"></param>
+        </member>
+        <member name="M:TryIT.Csv.Csv.NextRecord(CsvHelper.CsvWriter,System.Boolean)">
+            <summary>
+            end current row and start a new row, when the <paramref name="hasPreviousRow"/> is true
+            </summary>
+            <param name="csv"></param>
+            <param name="hasPreviousRow"></param>
+        </member>
+        <member name="T:TryIT.Csv.CsvReaderConfig">
+            <summary>
+            configuration for read csv file
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.FilePath">
+            <summary>
+            file to load data
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.Delimiter">
+            <summary>
+            delimiter to get data as table
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.HasHeaderRecord">
+            <summary>
+            indicate whether source file has header record
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.Header">
+            <summary>
+            if <see cref="P:TryIT.Csv.CsvReaderConfig.HasHeaderRecord"/> is false, need provide this array to populate data as table
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.CsvHelperCsvMode">
+            <summary>
+            NoEscape / Escape / None (default)
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.SkipHeaderRows">
+            <summary>
+            number of header row to skip, it will remove from DataTable result
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvReaderConfig.SkipFooterRows">
+            <summary>
+            number of footer row to skip, it will remove from DataTable result
+            </summary>
+        </member>
+        <member name="T:TryIT.Csv.CsvWriterConfig">
+            <summary>
+            configuration for write into csv file
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvWriterConfig.OutputFileNameAndPath">
+            <summary>
+            file name and path where csv save to
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvWriterConfig.Delimiter">
+            <summary>
+            csv delimiter
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvWriterConfig.AlwaysQuote">
+            <summary>
+            indicator always put content inside quote
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvWriterConfig.FirstLineValue">
+            <summary>
+            value to put in first line
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvWriterConfig.LastLineValue">
+            <summary>
+            value to put in last line
+            </summary>
+        </member>
+        <member name="P:TryIT.Csv.CsvWriterConfig.SkipHeader">
+            <summary>
+            indicate whether skip write header
+            </summary>
+        </member>
+    </members>
+</doc>
