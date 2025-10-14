@@ -24,5 +24,10 @@ namespace TryIT.MicrosoftGraphApi.Model
         /// retry mechanism for the request
         /// </summary>
         public RetryProperty RetryProperty { get; set; }
+
+        /// <summary>
+        /// logging delegate for http request and response
+        /// </summary>
+        public HttpLogDelegate HttpLogDelegate { get; set; }
     }
 }

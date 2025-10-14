@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Deterministic>true</Deterministic>
@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="TryIT.RestApi" Version="1.1.7" />
+    <PackageReference Include="TryIT.RestApi" Version="1.1.8" />
   </ItemGroup>
   
   <ItemGroup>

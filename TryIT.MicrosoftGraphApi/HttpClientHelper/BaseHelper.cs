@@ -59,7 +59,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(config));
             }
             _httpClient = new MsGraphHelper(config).GetHttpClient();
-            _restApi = GetRestApiInstance(_httpClient, config.RetryProperty);
+            _restApi = GetRestApiInstance(_httpClient, config.RetryProperty, config.HttpLogDelegate);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 var errorContent = content.JsonToObject<ServiceNotAvailableResponse.Response>();
                 if (errorContent != null && errorContent.error?.retryAfterSeconds > 0)
                 {
-                    Task.Delay(TimeSpan.FromSeconds(errorContent.error.retryAfterSeconds)).Wait();
+                    await Task.Delay(TimeSpan.FromSeconds(errorContent.error.retryAfterSeconds));
                     response = await func();
                 }
             }
@@ -181,11 +181,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="httpClient"></param>
         /// <param name="retryProperty"></param>
         /// <returns></returns>
-        protected RestApi.Api GetRestApiInstance(HttpClient httpClient, RetryProperty retryProperty)
+        protected RestApi.Api GetRestApiInstance(HttpClient httpClient, RetryProperty retryProperty, HttpLogDelegate httpLogDelegate)
         {
             var config = new HttpClientConfig
             {
                 HttpClient = httpClient,
+                HttpLogDelegate = httpLogDelegate
             };
 
             if (retryProperty != null)
