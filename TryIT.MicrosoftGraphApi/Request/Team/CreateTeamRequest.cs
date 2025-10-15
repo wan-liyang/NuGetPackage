@@ -10,6 +10,7 @@ namespace TryIT.MicrosoftGraphApi.Request.Team
             public string templateodatabind { get; set; }
             public string displayName { get; set; }
             public string description { get; set; }
+            public string visibility { get; set; } = "private";
         }
     }
 }
