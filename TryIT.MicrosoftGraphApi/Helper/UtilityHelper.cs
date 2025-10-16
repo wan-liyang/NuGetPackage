@@ -9,17 +9,19 @@ namespace TryIT.MicrosoftGraphApi.Helper
     public static class UtilityHelper
     {
         /// <summary>
-        /// replace invalid character in input string with tobeCharacter
+        /// replace invalid character for group name
+        /// <para>https://learn.microsoft.com/en-us/graph/api/group-post-groups#request-body</para>
         /// </summary>
         /// <param name="input"></param>
-        /// <param name="toReplaceCharacters"></param>
-        /// <param name="tobeCharacter"></param>
         /// <returns></returns>
-        public static string ReplaceInvalidChar(string input, List<string> toReplaceCharacters, string tobeCharacter)
+        public static string ReplaceInvalidCharForGroupName(string input)
         {
+            // replace characters in @ () \ [] " ; : <> , SPACE
+            List<string> toReplaceCharacters = new List<string> { "@", "(", ")", "\\", "[", "]", "\"", ";", ":", "<", ">", ",", " " };
+
             foreach (var c in toReplaceCharacters)
             {
-                input = input.Replace(c, tobeCharacter);
+                input = input.Replace(c, "");
             }
 
             return input;

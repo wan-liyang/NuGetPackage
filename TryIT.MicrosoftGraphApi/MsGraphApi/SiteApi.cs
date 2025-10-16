@@ -57,12 +57,10 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <returns></returns>
         public async Task<CreateGroupResponse.Response> CreateSiteAsync(CreateSiteRequest.Request request)
         {
-            // replace characters in @ () \ [] " ; : <> , SPACE
-            List<string> toReplaceCharacters = new List<string> { "@", "(", ")", "\\", "[", "]", "\"", ";", ":", "<", ">", ",", " " };
 
             request.groupTypes = new List<string> { "Unified" };
             request.mailEnabled = false;
-            request.mailNickname = UtilityHelper.ReplaceInvalidChar(request.displayName, toReplaceCharacters, "");
+            request.mailNickname = UtilityHelper.ReplaceInvalidCharForGroupName(request.displayName);
             request.securityEnabled = true;
             request.visibility = "Private";
 
