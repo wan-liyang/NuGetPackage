@@ -6,16 +6,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SiteHelper : BaseHelper
     {
-        private readonly string _hostName;
-
-        public SiteHelper(MsGraphApiConfig config, string hostName) : base(config) 
+        public SiteHelper(MsGraphApiConfig config) : base(config) 
         {
-            _hostName = hostName;
         }
 
-        public GetSiteResponse.Response GetSite(string siteName)
+        public GetSiteResponse.Response GetSite(string siteName, string hostName)
         {
-            string url = $"{GraphApiRootUrl}/sites/{_hostName}:/sites/{siteName}";
+            string url = $"{GraphApiRootUrl}/sites/{hostName}:/sites/{siteName}";
 
             var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
             CheckStatusCode(response, RestApi.RetryResults);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TryIT.MicrosoftGraphApi.Helper
 {
@@ -7,6 +8,23 @@ namespace TryIT.MicrosoftGraphApi.Helper
     /// </summary>
     public static class UtilityHelper
     {
+        /// <summary>
+        /// replace invalid character in input string with tobeCharacter
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="toReplaceCharacters"></param>
+        /// <param name="tobeCharacter"></param>
+        /// <returns></returns>
+        public static string ReplaceInvalidChar(string input, List<string> toReplaceCharacters, string tobeCharacter)
+        {
+            foreach (var c in toReplaceCharacters)
+            {
+                input = input.Replace(c, tobeCharacter);
+            }
+
+            return input;
+        }
+
         /// <summary>
         /// replace special character with _, because the sharepoint item name cannot has special character
         /// <para>replace last . to _, solve error - The file or folder name cannnot end with .</para>

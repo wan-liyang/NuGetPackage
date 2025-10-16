@@ -53,8 +53,8 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             string hostname = "";
             string sitename = "";
-            SiteApi siteApi = new SiteApi(config, hostname);
-            var site = siteApi.GetSite(sitename);
+            SiteApi siteApi = new SiteApi(config);
+            var site = siteApi.GetSite(sitename, hostname);
             var drive = siteApi.GetDrive(site.id);
 
             var item = api.GetItemByPath(drive.id, "");
@@ -69,8 +69,8 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             string hostname = "";
             string sitename = "";
-            SiteApi siteApi = new SiteApi(config, hostname);
-            var site = siteApi.GetSite(sitename);
+            SiteApi siteApi = new SiteApi(config);
+            var site = siteApi.GetSite(sitename, hostname);
             var drive = siteApi.GetDrive(site.id);
 
             string folderPath = @"";
@@ -87,8 +87,8 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             string hostname = "";
             string sitename = "";
-            SiteApi siteApi = new SiteApi(config, hostname);
-            var site = siteApi.GetSite(sitename);
+            SiteApi siteApi = new SiteApi(config);
+            var site = siteApi.GetSite(sitename, hostname);
             var drive = siteApi.GetDrive(site.id);
 
             var item = api.GetItemByPath(drive.id, @"sgfinance\Project_Office\013-CIS\01 - To Generate (GB)");

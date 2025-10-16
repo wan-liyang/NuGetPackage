@@ -12,10 +12,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     internal class SiteListHelper : BaseHelper
     {
         private readonly SiteHelper _siteHelper;
-
+        private readonly string _hostName;
         public SiteListHelper(MsGraphApiConfig config, string hostName) : base(config) 
         {
-            _siteHelper = new SiteHelper(config, hostName);
+            _hostName = hostName;
+            _siteHelper = new SiteHelper(config);
         }
 
         /// <summary>
@@ -25,7 +26,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public List<GetListResponse.SiteList> GetAllList(string siteName)
         {
-            string siteId = _siteHelper.GetSite(siteName).id;
+            string siteId = _siteHelper.GetSite(siteName, _hostName).id;
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists";
 
@@ -44,7 +45,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public GetListResponse.SiteList GetList(string siteName, string listName)
         {
-            string siteId = _siteHelper.GetSite(siteName).id;
+            string siteId = _siteHelper.GetSite(siteName, _hostName).id;
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?$filter={EscapeExpression($"DisplayName eq '{listName}'")}";
 
@@ -65,7 +66,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public List<GetItemResponse.Item> GetItems(string siteName, string listName)
         {
-            string siteId = _siteHelper.GetSite(siteName).id;
+            string siteId = _siteHelper.GetSite(siteName, _hostName).id;
             string listId = GetList(siteName, listName).id;
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items?expand=fields";
@@ -137,7 +138,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public T GetItem<T>(string siteName, string listName, string id)
         {
-            string siteId = _siteHelper.GetSite(siteName).id;
+            string siteId = _siteHelper.GetSite(siteName, _hostName).id;
             string listId = GetList(siteName, listName).id;
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/{id}";
@@ -158,7 +159,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public GetItemResponse.Item CreateItem(string siteName, string listName, string jsonBody)
         {
-            string siteId = _siteHelper.GetSite(siteName).id;
+            string siteId = _siteHelper.GetSite(siteName, _hostName).id;
             string listId = GetList(siteName, listName).id;
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/";
@@ -182,7 +183,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         public GetItemResponse.Fields UpdateItem(string siteName, string listName, string itemId, string jsonBody)
         {
-            string siteId = _siteHelper.GetSite(siteName).id;
+            string siteId = _siteHelper.GetSite(siteName, _hostName).id;
             string listId = GetList(siteName, listName).id;
 
             string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/{itemId}/fields";

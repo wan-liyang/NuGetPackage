@@ -10,28 +10,23 @@ using TryIT.MicrosoftGraphApi.MsGraphApi;
 
 namespace NUnitTest02.TryIT_MicrosoftGraphApi
 {
-    internal class Token_UnitTest
+    internal class Site_UnitTest
     {
         [Test]
-        public void Token_Test()
+        public async Task Test()
         {
             MsGraphApiConfig config = new MsGraphApiConfig
             {
-                Token = "NA",
+                Token = "",
             };
 
-            TokenApi api = new TokenApi(config);
+            SiteApi api = new SiteApi(config);
 
-            GetTokenModel tokenModel = new GetTokenModel
+            var site = await api.CreateSiteAsync(new TryIT.MicrosoftGraphApi.Request.Site.CreateSiteRequest.Request
             {
-                tenant_id = "",
-                grant_type = "client_credentials",
-                client_id = "",
-                client_secret = "",
-                scope = "https://graph.microsoft.com/.default",
-            };
-
-            var response = api.GetToken(tokenModel);
+                displayName = "O365-TestCreateSiteOnly09-NCS",
+                description = "TestCreateSiteOnly09",
+            });
 
             Assert.True(1 == 1);
         }

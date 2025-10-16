@@ -18,7 +18,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         private readonly SiteHelper _siteHelper;
         public SharepointHelper(MsGraphApiConfig config) : base(config)
         {
-            _siteHelper = new SiteHelper(config, null);
+            _siteHelper = new SiteHelper(config);
         }
 
         /// <summary>

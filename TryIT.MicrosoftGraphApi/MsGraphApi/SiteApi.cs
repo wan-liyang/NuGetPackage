@@ -1,6 +1,11 @@
-﻿using TryIT.MicrosoftGraphApi.Helper;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Request.Group;
+using TryIT.MicrosoftGraphApi.Request.Site;
+using TryIT.MicrosoftGraphApi.Response.Group;
 using TryIT.MicrosoftGraphApi.Response.Site;
 
 namespace TryIT.MicrosoftGraphApi.MsGraphApi
@@ -10,26 +15,28 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
     /// </summary>
     public class SiteApi
     {
-        private readonly SiteHelper _helper;
+        private readonly SiteHelper _siteHelper;
+        private readonly GroupHelper _groupHelper;
 
         /// <summary>
         /// init Teams api with configuration
         /// </summary>
         /// <param name="config">configuration for api request, e.g token, timeout, proxy etc</param>
-        /// <param name="hostName">the host(domain) of the site, use for api request to get site under specific host</param>
-        public SiteApi(MsGraphApiConfig config, string hostName)
+        public SiteApi(MsGraphApiConfig config)
         {
-            _helper = new SiteHelper(config, hostName);
+            _siteHelper = new SiteHelper(config);
+            _groupHelper = new GroupHelper(config);
         }
 
         /// <summary>
         /// get all list under a site
         /// </summary>
         /// <param name="siteName"></param>
+        /// <param name="hostName"></param>
         /// <returns></returns>
-        public GetSiteResponse.Response GetSite(string siteName)
+        public GetSiteResponse.Response GetSite(string siteName, string hostName)
         {
-            return _helper.GetSite(siteName);
+            return _siteHelper.GetSite(siteName, hostName);
         }
 
         /// <summary>
@@ -39,7 +46,52 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <returns></returns>
         public GetDriveResponse.Response GetDrive(string siteId)
         {
-            return _helper.GetDrive(siteId);
+            return _siteHelper.GetDrive(siteId);
+        }
+
+        /// <summary>
+        /// Create a sharepoint site, the site will be created with the group
+        /// <para>https://learn.microsoft.com/en-us/graph/api/group-post-groups</para> with unified type
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<CreateGroupResponse.Response> CreateSiteAsync(CreateSiteRequest.Request request)
+        {
+            // replace characters in @ () \ [] " ; : <> , SPACE
+            List<string> toReplaceCharacters = new List<string> { "@", "(", ")", "\\", "[", "]", "\"", ";", ":", "<", ">", ",", " " };
+
+            request.groupTypes = new List<string> { "Unified" };
+            request.mailEnabled = false;
+            request.mailNickname = UtilityHelper.ReplaceInvalidChar(request.displayName, toReplaceCharacters, "");
+            request.securityEnabled = true;
+            request.visibility = "Private";
+
+            CreateGroupRequest.Request groupRequest = new CreateGroupRequest.Request
+            {
+                displayName = request.displayName,
+                description = request.description,
+                groupTypes = request.groupTypes,
+                mailEnabled = request.mailEnabled,
+                mailNickname = request.mailNickname,
+                securityEnabled = request.securityEnabled,
+                visibility = request.visibility,
+                membersodatabind = request.membersodatabind,
+                ownersodatabind = request.ownersodatabind
+            };
+
+            // create group wit unified type, then a sharepoint site will be created with the group
+            return await _groupHelper.CreateGroupAsync(groupRequest);
+        }
+
+
+        /// <summary>
+        /// Get the SharePoint site associated with a Microsoft 365 group
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        public async Task<GetSiteResponse.Response> GetGroupSite(string groupId)
+        {
+            return await _groupHelper.GetGroupSiteAsync(groupId);
         }
     }
 }

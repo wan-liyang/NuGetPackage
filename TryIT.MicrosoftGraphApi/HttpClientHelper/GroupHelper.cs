@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Request.Group;
 using TryIT.MicrosoftGraphApi.Response.Group;
+using TryIT.MicrosoftGraphApi.Response.Site;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
@@ -158,14 +161,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             };
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members/$ref";
-
-            string jsonContent = newMember.ObjectToJson();
-
-            HttpContent httpContent = new StringContent(jsonContent);
-            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+            HttpContent httpContent = GetJsonHttpContent(newMember);
             var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
             CheckStatusCode(response);
         }
@@ -200,6 +196,30 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
                 CheckStatusCode(response);
             }           
+        }
+
+        public async Task<CreateGroupResponse.Response> CreateGroupAsync(CreateGroupRequest.Request request)
+        {
+            string url = $"{GraphApiRootUrl}/groups";
+            HttpContent httpContent = GetJsonHttpContent(request);
+            var response = await RestApi.PostAsync(url, httpContent);
+            CheckStatusCode(response);
+            string content = await response.Content.ReadAsStringAsync();
+            return content.JsonToObject<CreateGroupResponse.Response>();
+        }
+
+        /// <summary>
+        /// use group id to get the sharepoint site associated with the group
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        public async Task<GetSiteResponse.Response> GetGroupSiteAsync(string groupId)
+        {
+            string url = $"{GraphApiRootUrl}/groups/{groupId}/sites/root";
+            var response = await RestApi.GetAsync(url);
+            CheckStatusCode(response);
+            string content = await response.Content.ReadAsStringAsync();
+            return content.JsonToObject<GetSiteResponse.Response>();
         }
 
         /// <summary>
