@@ -21,6 +21,7 @@ dotnet pack ./TryIT.Jwt/TryIT.Jwt.csproj --output nupkgs -p:PackageVersion=1.1.1
 dotnet pack ./TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj --output nupkgs -p:PackageVersion=2.1.0
 dotnet pack ./TryIT.ObjectExtension/TryIT.ObjectExtension.csproj --output nupkgs -p:PackageVersion=1.3.7
 dotnet pack ./TryIT.PGP/TryIT.PGP.csproj --output nupkgs -p:PackageVersion=1.0.3
+dotnet pack ./TryIT.PostgreSql/TryIT.PostgreSql.csproj --output nupkgs -p:PackageVersion=1.0.0
 dotnet pack ./TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj --output nupkgs -p:PackageVersion=1.0.2
 dotnet pack ./TryIT.RestApi/TryIT.RestApi.csproj --output nupkgs -p:PackageVersion=1.1.8
 dotnet pack ./TryIT.SFTP/TryIT.SFTP.csproj --output nupkgs -p:PackageVersion=1.0.1
