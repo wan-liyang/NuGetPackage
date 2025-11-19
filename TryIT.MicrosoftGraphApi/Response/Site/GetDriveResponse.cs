@@ -29,11 +29,11 @@ namespace TryIT.MicrosoftGraphApi.Response.Site
 
         public class Quota
         {
-            public int deleted { get; set; }
+            public long deleted { get; set; }
             public long remaining { get; set; }
             public string state { get; set; }
             public long total { get; set; }
-            public int used { get; set; }
+            public long used { get; set; }
         }
 
         public class Response
@@ -59,7 +59,5 @@ namespace TryIT.MicrosoftGraphApi.Response.Site
             public string email { get; set; }
             public string id { get; set; }
         }
-
-
     }
 }
