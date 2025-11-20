@@ -580,19 +580,17 @@ namespace TryIT.ObjectExtension
             duplicateDt.Columns.Add("Count", typeof(int));
 
             var groups = dt.AsEnumerable()
-                .GroupBy(row => columnNames.Select(c => row.Field<object>(c)), new AnonymousObjectComparer())
-                //.Where(g => g.Count() > 1)
+                .GroupBy(
+                    row => columnNames.Select(c => Normalize(row[c])), 
+                    new AnonymousObjectComparer())
                 .Select(g =>
                 {
-                    var key = g.Key;
-                    var count = g.Count();
-
                     var newRow = duplicateDt.NewRow();
                     for (int i = 0; i < columnNames.Length; i++)
                     {
                         newRow[columnNames[i]] = g.First()[columnNames[i]];
                     }
-                    newRow["Count"] = count;
+                    newRow["Count"] = g.Count();
 
                     return newRow;
                 });
@@ -605,19 +603,49 @@ namespace TryIT.ObjectExtension
 
             return duplicateDt;
         }
+        private static object Normalize(object value) => value == DBNull.Value ? null : value;
 
-        private class AnonymousObjectComparer : IEqualityComparer<IEnumerable<object>>
+        private sealed class AnonymousObjectComparer : IEqualityComparer<IEnumerable<object>>
         {
             public bool Equals(IEnumerable<object> x, IEnumerable<object> y)
             {
-                return x.SequenceEqual(y);
+                if (ReferenceEquals(x, y)) return true;
+                if (x == null || y == null) return false;
+
+                return x.SequenceEqual(y, new ValueComparer());
             }
 
             public int GetHashCode(IEnumerable<object> obj)
             {
-                return obj.Aggregate(0, (hash, value) => hash ^ value.GetHashCode());
+                unchecked
+                {
+                    int hash = 17;
+                    foreach (var v in obj)
+                    {
+                        var nv = Normalize(v);
+                        hash = hash * 23 + (nv?.GetHashCode() ?? 0);
+                    }
+                    return hash;
+                }
+            }
+
+            private sealed class ValueComparer : IEqualityComparer<object>
+            {
+                public new bool Equals(object x, object y)
+                {
+                    x = Normalize(x);
+                    y = Normalize(y);
+                    return object.Equals(x, y);
+                }
+
+                public int GetHashCode(object obj)
+                {
+                    obj = Normalize(obj);
+                    return obj?.GetHashCode() ?? 0;
+                }
             }
         }
+
 
         /// <summary>
         /// from this table or <paramref name="dt1"/> exclude rows present in <paramref name="dt2"/> based on <paramref name="keysMap"/>

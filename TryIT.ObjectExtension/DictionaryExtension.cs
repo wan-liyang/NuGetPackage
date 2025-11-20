@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace TryIT.ObjectExtension
 {
+    /// <summary>
+    /// extension method for Dictionary type
+    /// </summary>
     public static class DictionaryExtension
     {
         /// <summary>
@@ -46,12 +49,9 @@ namespace TryIT.ObjectExtension
         public static string TryGetValue(this Dictionary<string, string> keyValuePairs, string key)
         {
             string value = null;
-            if (keyValuePairs != null && keyValuePairs.Count() > 0)
+            if (keyValuePairs != null && keyValuePairs.Any() && keyValuePairs.IsContainsKey(key))
             {
-                if (keyValuePairs.IsContainsKey(key))
-                {
-                    value = keyValuePairs[key];
-                }
+                value = keyValuePairs[key];
             }
             return value;
         }

@@ -278,18 +278,21 @@ namespace NUnitTest02.TryIT_ObjectExtension
         [Test]
         public void GroupBy_Test()
         {
-            //DataTable dt = CreateSampleTable();
 
-            var csvReaderConfig = new TryIT.Csv.CsvReaderConfig
-            {
-                FilePath = @"",
-                Delimiter = "|",
-                HasHeaderRecord = true,
-                SkipFooterRows = 1
-            };
-            DataTable dt2 = TryIT.Csv.Csv.ReadAsDataTable(csvReaderConfig);
+            //var csvReaderConfig = new TryIT.Csv.CsvReaderConfig
+            //{
+            //    FilePath = @"",
+            //    Delimiter = "|",
+            //    HasHeaderRecord = true,
+            //    SkipFooterRows = 1
+            //};
+            //DataTable dt2 = TryIT.Csv.Csv.ReadAsDataTable(csvReaderConfig);
+            //var result = dt2.GroupBy(new string[] { "WBSELEMENT", "DOCNO", "DOCITEMNO", "DOCTYPE" });
 
-            var result = dt2.GroupBy(new string[] { "WBSELEMENT", "DOCNO", "DOCITEMNO", "DOCTYPE" });
+            DataTable dt1 = CreateSampleTable();
+            var result = dt1.GroupBy(new string[] { "Column1", "Column2", "Column3" });
+
+            var result2 = dt1.GroupBy(new string[] { "Column1" });
 
             Assert.True(result == null);
         }
