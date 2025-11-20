@@ -280,6 +280,11 @@
             <param name="dt"></param>
             <returns></returns>
         </member>
+        <member name="T:TryIT.ObjectExtension.DictionaryExtension">
+            <summary>
+            extension method for Dictionary type
+            </summary>
+        </member>
         <member name="M:TryIT.ObjectExtension.DictionaryExtension.IsContainsKey(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.StringComparison)">
             <summary>
             check whether string dictionary contains provided key, default ignore case, return false if key is null
