@@ -168,7 +168,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             // interim solution to infinite check permission
             // check for non-owner permission only
 
-            var nonOwnerRoles = _get_non_owner_permissions(driveId, itemId);
+            var nonOwnerRoles = await _get_non_owner_permissions(driveId, itemId);
             while (nonOwnerRoles != null && nonOwnerRoles.Count > 0)
             {
                 if (nonOwnerRoles.Count > 1)
@@ -189,17 +189,17 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
                 }
                 else
                 {
-                    _helper.DeletePermission(driveId, itemId, nonOwnerRoles[0].id);
+                    _helper.DeletePermissionAsync(driveId, itemId, nonOwnerRoles[0].id);
                 }
 
                 // get list of permission again
-                nonOwnerRoles = nonOwnerRoles = _get_non_owner_permissions(driveId, itemId);
+                nonOwnerRoles = await _get_non_owner_permissions(driveId, itemId);
             }
         }
 
-        private List<ListPermissionsResponse.Value> _get_non_owner_permissions(string driveId, string itemId)
+        private async Task<List<ListPermissionsResponse.Value>> _get_non_owner_permissions(string driveId, string itemId)
         {
-            var permissions = _helper.ListPermissions(driveId, itemId);
+            var permissions = await _helper.ListPermissionsAsync(driveId, itemId);
             return permissions.Where(p => !p.roles.Contains("owner", StringComparer.OrdinalIgnoreCase)).ToList();
         }
 
@@ -428,9 +428,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="driveId"></param>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public List<ListPermissionsResponse.Value> ListPermissions(string driveId, string itemId)
+        public async Task<List<ListPermissionsResponse.Value>> ListPermissionsAsync(string driveId, string itemId)
         {
-            return _helper.ListPermissions(driveId, itemId);
+            return await _helper.ListPermissionsAsync(driveId, itemId);
         }
 
         /// <summary>
@@ -440,20 +440,20 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="itemId"></param>
         /// <param name="requestBody"></param>
         /// <returns></returns>
-        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionRequest.Body requestBody)
+        public async Task<List<AddPermissionResponse.Value>> AddPermissionsAsync(string driveId, string itemId, AddPermissionRequest.Body requestBody)
         {
-            return _helper.AddPermissions(driveId, itemId, requestBody);
+            return await _helper.AddPermissionsAsync(driveId, itemId, requestBody);
         }
         /// <summary>
         /// delete permission
         /// </summary>
         /// <param name="driveId"></param>
         /// <param name="itemId"></param>
-        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string, string)"/></param>
+        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissionsAsync(string, string)"/></param>
         /// <returns></returns>
-        public bool DeletePermission(string driveId, string itemId, string permissionId)
+        public async Task<bool> DeletePermissionAsync(string driveId, string itemId, string permissionId)
         {
-            return _helper.DeletePermission(driveId, itemId, permissionId);
+            return await _helper.DeletePermissionAsync(driveId, itemId, permissionId);
         }
         #endregion
     }

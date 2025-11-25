@@ -127,7 +127,7 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
             string driveId = "";
             string itemId = "";
 
-            api.AddPermissions(driveId, itemId, new TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Body
+            api.AddPermissionsAsync(driveId, itemId, new TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Body
             {
                 recipients = new List<TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.Recipient>
                 {

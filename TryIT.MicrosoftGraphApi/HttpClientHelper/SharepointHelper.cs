@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Sharepoint;
@@ -496,14 +497,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="driveId"></param>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public List<ListPermissionsResponse.Value> ListPermissions(string driveId, string itemId)
+        public async Task<List<ListPermissionsResponse.Value>> ListPermissionsAsync(string driveId, string itemId)
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/permissions";
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response, RestApi.RetryResults);
 
-            string content = response.Content.ReadAsStringAsync().Result;
+            string content = await response.Content.ReadAsStringAsync();
             var item = content.JsonToObject<ListPermissionsResponse.Response>();
 
             return item.value;
@@ -516,7 +517,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="itemId"></param>
         /// <param name="requestBody"></param>
         /// <returns></returns>
-        public List<AddPermissionResponse.Value> AddPermissions(string driveId, string itemId, AddPermissionRequest.Body requestBody)
+        public async Task<List<AddPermissionResponse.Value>> AddPermissionsAsync(string driveId, string itemId, AddPermissionRequest.Body requestBody)
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/invite";
 
@@ -524,10 +525,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             HttpContent httpContent = new StringContent(jsonContent);
             httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response, RestApi.RetryResults);
 
-            string content = response.Content.ReadAsStringAsync().Result;
+            string content = await response.Content.ReadAsStringAsync();
             var item = content.JsonToObject<AddPermissionResponse.Response>();
 
             return item.value;
@@ -538,13 +539,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="driveId"></param>
         /// <param name="itemId"></param>
-        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissions(string, string)"/></param>
+        /// <param name="permissionId">the id of permission object, can get from <see cref="ListPermissionsAsync(string, string)"/></param>
         /// <returns></returns>
-        public bool DeletePermission(string driveId, string itemId, string permissionId)
+        public async Task<bool> DeletePermissionAsync(string driveId, string itemId, string permissionId)
         {
             string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/permissions/{permissionId}";
 
-            var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.DeleteAsync(url);
             if (response.StatusCode == HttpStatusCode.NoContent)
             {
                 return true;

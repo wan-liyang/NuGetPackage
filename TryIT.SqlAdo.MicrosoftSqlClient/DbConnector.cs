@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
@@ -169,18 +170,10 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <returns></returns>
         private SqlConnection OpenConection()
         {
-            var conn = new SqlConnection(_config.ConnectionString);
-
-            if (!string.IsNullOrEmpty(_config.AccessToken))
-            {
-                conn.AccessToken = _config.AccessToken;
-            }
-            conn.Open();
-            
-            return conn;
+            return OpenConectionAsync().GetAwaiter().GetResult();
         }
 
-        private async Task<SqlConnection> OpenConectionAsync()
+        private async Task<SqlConnection> OpenConectionAsync(CancellationToken cancellationToken = default)
         {
             var conn = new SqlConnection(_config.ConnectionString);
 
@@ -188,105 +181,92 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             {
                 conn.AccessToken = _config.AccessToken;
             }
-            await conn.OpenAsync();
+            await conn.OpenAsync(cancellationToken);
 
             return conn;
         }
 
         /// <summary>
-        /// fetch DataTable from <paramref name="commandText"/>
+        /// fetch DataTable from <paramref name="sql"/>
         /// </summary>
-        /// <param name="commandText"></param>
+        /// <param name="sql"></param>
         /// <param name="commandType"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public DataTable FetchDataTable(string commandText, CommandType commandType = CommandType.Text, SqlParameter[] parameters = null)
+        public DataTable FetchDataTable(string sql, CommandType commandType = CommandType.Text, SqlParameter[] parameters = null)
         {
-
-            if (string.IsNullOrEmpty(commandText))
-            {
-                throw new ArgumentNullException(nameof(commandText));
-            }
-
-            try
-            {
-                return _pipeline.Execute(exec =>
-                    {
-                        using (SqlConnection sqlConnection = OpenConection())
-                        {
-                            using (SqlCommand cmd = sqlConnection.CreateCommand())
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.CommandText = commandText;
-                                cmd.CommandType = commandType;
-                                if (parameters != null && parameters.Any())
-                                {
-                                    cmd.Parameters.AddRange(ClondParameters(parameters));
-                                }
-
-                                using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(cmd))
-                                {
-                                    DataTable dataTable = new DataTable();
-                                    sqlDataAdapter.Fill(dataTable);
-                                    return dataTable;
-                                }
-                            }
-                        }
-                    });
-            }
-            catch (Exception ex)
-            {
-                AddExcetionData(ex);
-                throw;
-            }
+            return FetchDataTableAsync(sql, commandType, parameters).GetAwaiter().GetResult();
         }
 
         /// <summary>
-        /// fetch DataSet from <paramref name="commandText"/>
+        /// Asynchronously fetches a DataTable from the specified SQL command.
         /// </summary>
-        /// <param name="commandText"></param>
+        /// <param name="sql">The SQL command text.</param>
+        /// <param name="commandType">The type of the command.</param>
+        /// <param name="parameters">The parameters for the command.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>A task representing the asynchronous operation, with a DataTable result.</returns>
+        /// <returns></returns>
+        public async Task<DataTable> FetchDataTableAsync(
+            string sql,
+            CommandType commandType,
+            SqlParameter[] parameters = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await ExecuteAsync(sql, commandType, async (cmd, token) =>
+            {
+                return await Task.Run(() =>
+                {
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        DataTable dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+                        return dataTable;
+                    }
+                });
+            }, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// fetch DataSet from <paramref name="sql"/>
+        /// </summary>
+        /// <param name="sql"></param>
         /// <param name="commandType"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public DataSet FetchDataSet(string commandText, CommandType commandType, params SqlParameter[] parameters)
+        public DataSet FetchDataSet(string sql, CommandType commandType, params SqlParameter[] parameters)
         {
-            if (string.IsNullOrEmpty(commandText))
-            {
-                throw new ArgumentNullException(nameof(commandText));
-            }
+            return FetchDataSetAsync(sql, commandType, parameters).GetAwaiter().GetResult();
+        }
 
-            try
+        /// <summary>
+        /// Asynchronously fetches a DataSet from the specified SQL command.
+        /// </summary>
+        /// <param name="sql">The SQL command text.</param>
+        /// <param name="commandType">The type of the command.</param>
+        /// <param name="parameters">The parameters for the command.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>A task representing the asynchronous operation, with a DataSet result.</returns>
+        public async Task<DataSet> FetchDataSetAsync(
+            string sql,
+            CommandType commandType,
+            SqlParameter[] parameters = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await ExecuteAsync(sql, commandType, async (cmd, token) =>
             {
-                return _pipeline.Execute(exec =>
+                return await Task.Run(() =>
+                {
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                     {
-                        using (SqlConnection sqlConnection = OpenConection())
-                        {
-                            using (SqlCommand cmd = sqlConnection.CreateCommand())
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.CommandText = commandText;
-                                cmd.CommandType = commandType;
-                                if (null != parameters && parameters.Any())
-                                {
-                                    cmd.Parameters.AddRange(ClondParameters(parameters));
-                                }
-                                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                                {
-                                    DataSet ds = new DataSet();
-                                    adapter.Fill(ds);
-                                    return ds;
-                                }
-                            }
-                        }
-                    });
-            }
-            catch (Exception ex)
-            {
-                AddExcetionData(ex);
-                throw;
-            }
+                        DataSet ds = new DataSet();
+                        adapter.Fill(ds);
+                        return ds;
+                    }
+                });
+            }, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -414,45 +394,73 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
-        /// <summary>
-        /// Executes a Transact-SQL statement and returns the number of rows affected.
-        /// </summary>
-        /// <param name="commandText"></param>
-        /// <param name="commandType"></param>
-        /// <param name="parameters"></param>
-        public int ExecuteNonQuery(string commandText, CommandType commandType, params SqlParameter[] parameters)
+        private async Task<TResult> ExecuteAsync<TResult>(
+            string sql,
+            CommandType commandType,
+            Func<SqlCommand, CancellationToken, Task<TResult>> executor,
+            SqlParameter[] parameters = null,
+            CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(commandText))
+            if (string.IsNullOrWhiteSpace(sql))
             {
-                throw new ArgumentNullException(nameof(commandText));
+                throw new ArgumentNullException(nameof(sql));
             }
 
             try
             {
-                return _pipeline.Execute(exec =>
+                return await _pipeline.ExecuteAsync(async exec =>
+                {
+                    using (SqlConnection sqlConnection = await OpenConectionAsync(cancellationToken))
                     {
-                        using (SqlConnection sqlConnection = OpenConection())
+                        using (SqlCommand cmd = sqlConnection.CreateCommand())
                         {
-                            using (SqlCommand cmd = sqlConnection.CreateCommand())
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
+                            cmd.CommandTimeout = _config.TimeoutSecond;
 
-                                cmd.CommandText = commandText;
-                                cmd.CommandType = commandType;
-                                if (null != parameters && parameters.Any())
-                                {
-                                    cmd.Parameters.AddRange(ClondParameters(parameters));
-                                }
-                                return cmd.ExecuteNonQuery();
+                            cmd.CommandText = sql;
+                            cmd.CommandType = commandType;
+                            if (null != parameters && parameters.Any())
+                            {
+                                cmd.Parameters.AddRange(ClondParameters(parameters));
                             }
+
+                            return await executor(cmd, cancellationToken);
                         }
-                    });
+                    }
+                }, cancellationToken);
             }
             catch (Exception ex)
             {
                 AddExcetionData(ex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Executes a Transact-SQL statement and returns the number of rows affected.
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="commandType"></param>
+        /// <param name="parameters"></param>
+        public int ExecuteNonQuery(string sql, CommandType commandType, params SqlParameter[] parameters)
+        {
+            return ExecuteAsync(sql, commandType, (cmd, token) => cmd.ExecuteNonQueryAsync(token), parameters).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Executes a Transact-SQL statement asynchronously and returns the number of rows affected.
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="commandType"></param>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<int> ExecuteNonQueryAsync(
+            string sql, 
+            CommandType commandType, 
+            SqlParameter[] parameters = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await ExecuteAsync(sql, commandType, (cmd, token) => cmd.ExecuteNonQueryAsync(token), parameters, cancellationToken);
         }
 
         /// <summary>
@@ -477,78 +485,33 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="commandText"></param>
+        /// <param name="sql"></param>
         /// <param name="commandType"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string commandText, CommandType commandType, params SqlParameter[] parameters)
+        public T ExecuteScalar<T>(string sql, CommandType commandType, params SqlParameter[] parameters)
         {
-            try
-            {
-                return _pipeline.Execute(exec =>
-                    {
-                        using (SqlConnection sqlConnection = OpenConection())
-                        {
-                            using (SqlCommand cmd = sqlConnection.CreateCommand())
-                            {
-                                cmd.CommandTimeout = _config.TimeoutSecond;
-                                cmd.CommandText = commandText;
-                                cmd.CommandType = commandType;
-                                if (null != parameters && parameters.Any())
-                                {
-                                    cmd.Parameters.AddRange(ClondParameters(parameters));
-                                }
-                                object result = cmd.ExecuteScalar();
-
-                                return SqlHelper.ConvertValue<T>(result);
-                            }
-                        }
-                    });
-            }
-            catch (Exception ex)
-            {
-                AddExcetionData(ex);
-                throw;
-            }
+            object result = ExecuteAsync(sql, commandType, (cmd, token) => cmd.ExecuteScalarAsync(token), parameters).GetAwaiter().GetResult();
+            return SqlHelper.ConvertValue<T>(result);
         }
 
         /// <summary>
-        /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+        /// Executes the query asynchronously and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="commandText"></param>
+        /// <param name="sql"></param>
         /// <param name="commandType"></param>
         /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<T> ExecuteScalarAsync<T>(string commandText, CommandType commandType, params SqlParameter[] parameters)
+        public async Task<T> ExecuteScalarAsync<T>(
+            string sql,
+            CommandType commandType,
+            SqlParameter[] parameters = null,
+            CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return await _pipeline.Execute(async exec =>
-                {
-                    using (SqlConnection sqlConnection = await OpenConectionAsync())
-                    {
-                        using (SqlCommand cmd = sqlConnection.CreateCommand())
-                        {
-                            cmd.CommandTimeout = _config.TimeoutSecond;
-                            cmd.CommandText = commandText;
-                            cmd.CommandType = commandType;
-                            if (null != parameters && parameters.Any())
-                            {
-                                cmd.Parameters.AddRange(ClondParameters(parameters));
-                            }
-                            object result = await cmd.ExecuteScalarAsync();
-
-                            return SqlHelper.ConvertValue<T>(result);
-                        }
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                AddExcetionData(ex);
-                throw;
-            }
+            object result = await ExecuteAsync(sql, commandType, (cmd, token) => cmd.ExecuteScalarAsync(token), parameters, cancellationToken);
+            return SqlHelper.ConvertValue<T>(result);
         }
 
         /// <summary>
