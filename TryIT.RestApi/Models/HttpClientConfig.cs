@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace TryIT.RestApi.Models
@@ -144,5 +145,10 @@ namespace TryIT.RestApi.Models
         /// Optional async logger delegate, allows external caller to log request/response.
         /// </summary>
         public HttpLogDelegate HttpLogDelegate { get; set; }
+
+        /// <summary>
+        /// client certificates to use for the request
+        /// </summary>
+        public X509Certificate2Collection ClientCertificates { get; set; }
     }
 }

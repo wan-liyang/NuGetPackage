@@ -73,10 +73,16 @@ namespace TryIT.RestApi
                         clientHandler.Proxy = proxy;
                     }
                 }
+
+                // add client certificates if any
+                if (clientConfig.ClientCertificates != null 
+                    && clientConfig.ClientCertificates.Count > 0)
+                {
+                    clientHandler.ClientCertificates.AddRange(clientConfig.ClientCertificates);
+                }
+
                 httpClient = new HttpClient(clientHandler);
             }
-
-
 
             if (clientConfig.TimeoutSecond > 0)
             {

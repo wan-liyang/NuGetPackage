@@ -233,6 +233,11 @@
             Optional async logger delegate, allows external caller to log request/response.
             </summary>
         </member>
+        <member name="P:TryIT.RestApi.Models.HttpClientConfig.ClientCertificates">
+            <summary>
+            client certificates to use for the request
+            </summary>
+        </member>
         <member name="T:TryIT.RestApi.Models.ProxyConfig">
             <summary>
             proxy config for the api
