@@ -1,4 +1,5 @@
-﻿using TryIT.MicrosoftGraphApi.Helper;
+﻿using System.Threading.Tasks;
+using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Token;
@@ -27,9 +28,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="tokenModel"></param>
         /// <returns></returns>
-        public GetAppTokenResponse.Response GetToken(GetTokenModel tokenModel)
+        public async Task<GetAppTokenResponse.Response> GetTokenAsync(GetTokenModel tokenModel)
         {
-            return _helper.GetToken(tokenModel);
+            return await _helper.GetTokenAsync(tokenModel);
         }
     }
 }

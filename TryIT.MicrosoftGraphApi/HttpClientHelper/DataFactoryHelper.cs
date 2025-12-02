@@ -1,5 +1,5 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Request.DataFactory;
@@ -16,7 +16,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public CreateRunResponse.Response CreateRun(CreateRunRequest request)
+        public async Task<CreateRunResponse.Response> CreateRunAsync(CreateRunRequest request)
         {
             string url = $"https://management.azure.com/subscriptions/{request.subscriptionId}/resourceGroups/{request.resourceGroupName}/providers/Microsoft.DataFactory/factories/{request.factoryName}/pipelines/{request.pipelineName}/createRun?api-version=2018-06-01";
 
@@ -26,10 +26,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 httpContent = new StringContent(request.ParametersJson);
             }
 
-            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<CreateRunResponse.Response>();
         }
 
@@ -38,14 +38,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public GetPipelineRunsResponse.Response GetPipelineRun(GetPipelineRunRequest request)
+        public async Task<GetPipelineRunsResponse.Response> GetPipelineRunAsync(GetPipelineRunRequest request)
         {
             string url = $"https://management.azure.com/subscriptions/{request.subscriptionId}/resourceGroups/{request.resourceGroupName}/providers/Microsoft.DataFactory/factories/{request.factoryName}/pipelineruns/{request.runId}?api-version=2018-06-01";
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetPipelineRunsResponse.Response>();
         }
     }

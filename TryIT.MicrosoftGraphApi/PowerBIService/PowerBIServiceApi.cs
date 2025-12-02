@@ -24,7 +24,7 @@ namespace TryIT.MicrosoftGraphApi.PowerBIService
                 Proxy = config.Proxy
             });
 
-            var tokenResponse = tokenApi.GetToken(config.TokenRequestInfo);
+            var tokenResponse = tokenApi.GetTokenAsync(config.TokenRequestInfo).GetAwaiter().GetResult();
 
             var _msApiConfig = new MsGraphApiConfig
             {

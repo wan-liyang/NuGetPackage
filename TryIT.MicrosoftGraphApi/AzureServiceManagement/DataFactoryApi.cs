@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.MsGraphApi;
@@ -13,7 +14,6 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
     public class DataFactoryApi
     {
         private DataFactoryHelper _helper;
-        private DateTime TokenIssueOn;
         private DateTime TokenExpireOn;
 
         private readonly ApiConfig _apiConfig;
@@ -30,9 +30,9 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
                 Proxy = config.Proxy
             });
 
-            this.TokenIssueOn = DateTime.Now;
-            var tokenResponse = tokenApi.GetToken(config.TokenRequestInfo);
-            this.TokenExpireOn = this.TokenIssueOn.AddSeconds(tokenResponse.expires_in);
+            var issueAt = DateTime.Now;
+            var tokenResponse = tokenApi.GetTokenAsync(config.TokenRequestInfo).GetAwaiter().GetResult();
+            this.TokenExpireOn = issueAt.AddSeconds(tokenResponse.expires_in);
 
             InitialGraphHelper(tokenResponse.access_token);
         }
@@ -40,7 +40,7 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
         /// <summary>
         /// refresh the token and helper if token expired
         /// </summary>
-        private void RefreshToken()
+        private async Task RefreshToken()
         {
             if (this.TokenExpireOn < DateTime.Now.AddSeconds(-10))
             {
@@ -49,8 +49,9 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
                     Proxy = _apiConfig.Proxy
                 });
 
-                var tokenResponse = tokenApi.GetToken(_apiConfig.TokenRequestInfo);
-                this.TokenExpireOn = this.TokenIssueOn.AddSeconds(tokenResponse.expires_in);
+                var issueAt = DateTime.Now;
+                var tokenResponse = await tokenApi.GetTokenAsync(_apiConfig.TokenRequestInfo);
+                this.TokenExpireOn = issueAt.AddSeconds(tokenResponse.expires_in);
 
                 InitialGraphHelper(tokenResponse.access_token);
             }
@@ -73,10 +74,10 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public CreateRunResponse.Response CreateRun(CreateRunRequest request)
+        public async Task<CreateRunResponse.Response> CreateRunAsync(CreateRunRequest request)
         {
-            RefreshToken();
-            return _helper.CreateRun(request);
+            await RefreshToken();
+            return await _helper.CreateRunAsync(request);
         }
 
         /// <summary>
@@ -84,10 +85,10 @@ namespace TryIT.MicrosoftGraphApi.AzureServiceManagement
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public GetPipelineRunsResponse.Response GetPipelineRun(GetPipelineRunRequest request)
+        public async Task<GetPipelineRunsResponse.Response> GetPipelineRunAsync(GetPipelineRunRequest request)
         {
-            RefreshToken();
-            return _helper.GetPipelineRun(request);
+            await RefreshToken();
+            return await _helper.GetPipelineRunAsync(request);
         }
     }
 }

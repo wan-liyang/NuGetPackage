@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Token;
@@ -12,7 +13,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     {
         public AppTokenHelper(MsGraphApiConfig config) : base(config) { }
 
-        public GetAppTokenResponse.Response GetToken(GetTokenModel tokenModel)
+        public async Task<GetAppTokenResponse.Response> GetTokenAsync(GetTokenModel tokenModel)
         {
             string url = $"https://login.microsoftonline.com/{tokenModel.tenant_id}/oauth2/v2.0/token";
 
@@ -25,10 +26,10 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 };
 
             HttpContent httpContent = new FormUrlEncodedContent(dic);
-            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetAppTokenResponse.Response>();
         }
     }

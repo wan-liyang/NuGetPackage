@@ -13,7 +13,7 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
     internal class Token_UnitTest
     {
         [Test]
-        public void Token_Test()
+        public async Task Token_Test()
         {
             MsGraphApiConfig config = new MsGraphApiConfig
             {
@@ -31,7 +31,7 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
                 scope = "https://graph.microsoft.com/.default",
             };
 
-            var response = api.GetToken(tokenModel);
+            var response = await api.GetTokenAsync(tokenModel);
 
             Assert.True(1 == 1);
         }
