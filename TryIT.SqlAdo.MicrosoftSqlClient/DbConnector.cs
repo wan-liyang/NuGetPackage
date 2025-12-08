@@ -25,7 +25,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         private readonly ResiliencePipeline _pipeline;
         private readonly ConnectorConfig _config;
         
-        private List<RetryResult> _retryResults = new List<RetryResult>();
+        private readonly List<RetryResult> _retryResults = new List<RetryResult>();
         
         /// <summary>
         /// retry results
@@ -637,20 +637,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             }
                         }
 
-                        if (iCopyMode is CopyMode_InsertUpdate)
+                        if (iCopyMode is CopyMode_InsertUpdate insertUpdateMode)
                         {
-                            var mode = iCopyMode as CopyMode_InsertUpdate;
-                            if (mode.SourceData.Rows.Count > 0)
+                            if (insertUpdateMode.SourceData.Rows.Count > 0)
                             {
-                                mode.ColumnMappings = ResetColumnMap(mode.SourceData, mode.ColumnMappings);
+                                insertUpdateMode.ColumnMappings = ResetColumnMap(insertUpdateMode.SourceData, insertUpdateMode.ColumnMappings);
 
-                                var alwaysEncryptedColumns = this.GetAlwaysEncryptedColumns(mode.TargetTable);
+                                var alwaysEncryptedColumns = this.GetAlwaysEncryptedColumns(insertUpdateMode.TargetTable);
 
                                 if (alwaysEncryptedColumns != null && alwaysEncryptedColumns.Count > 0)
                                 {
                                     try
                                     {
-                                        Upsert_Encrypted(mode, sqlConnection, transaction, alwaysEncryptedColumns);
+                                        Upsert_Encrypted(insertUpdateMode, sqlConnection, transaction, alwaysEncryptedColumns);
                                     }
                                     catch (Exception ex)
                                     {
@@ -661,7 +660,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 {
                                     try
                                     {
-                                        Upsert(mode, sqlConnection, transaction, targetTableStructure);
+                                        UpsertToDestination(insertUpdateMode, sqlConnection, transaction, targetTableStructure);
                                     }
                                     catch (Exception ex)
                                     {
@@ -670,28 +669,39 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 }
                             }
                         }
+                        else if (iCopyMode is UpdateCopyMode updateMode)
+                        {
+                            if (updateMode.SourceData.Rows.Count > 0)
+                            {
+                                updateMode.ColumnMappings = ResetColumnMap(updateMode.SourceData, updateMode.ColumnMappings);
+
+                                try
+                                {
+                                    UpdateToDestination(updateMode, sqlConnection, transaction, targetTableStructure);
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new InvalidOperationException($"Update failed - {ex.Message}", ex);
+                                }
+                            }                            
+                        }
                         else
                         {
-                            if (iCopyMode is CopyMode_TruncateInsert)
+                            if (iCopyMode is CopyMode_TruncateInsert truncateInsertMode)
                             {
-                                var mode = (CopyMode_TruncateInsert)iCopyMode;
                                 // truncate table before load
-                                string cmdText = $"TRUNCATE TABLE {SqlHelper.SqlWarpTable(mode.TargetTable)};";
+                                string cmdText = $"TRUNCATE TABLE {SqlHelper.SqlWarpTable(truncateInsertMode.TargetTable)};";
                                 using (SqlCommand cmd = new SqlCommand(cmdText, sqlConnection, transaction))
                                 {
                                     cmd.CommandTimeout = _config.TimeoutSecond;
                                     cmd.ExecuteNonQuery();
                                 }
                             }
-                            else if (iCopyMode is CopyMode_DeleteInsert)
+                            else if (iCopyMode is CopyMode_DeleteInsert deleteInsertMode 
+                                && string.IsNullOrEmpty(deleteInsertMode.PreScript))
                             {
-                                var mode = (CopyMode_DeleteInsert)iCopyMode;
-
                                 // PreScript is mandatory for DeleteInsert
-                                if (string.IsNullOrEmpty(mode.PreScript))
-                                {
-                                    throw new ArgumentException($"The {mode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
-                                }
+                                throw new ArgumentException($"The {deleteInsertMode.PreScript} cannot be empty when Copy Mode is {nameof(CopyMode_DeleteInsert)}");
                             }
 
                             try
@@ -841,6 +851,98 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
         }
 
+
+        #region do Update
+        /// <summary>
+        /// perform insert or update action, 1) write data into temp table, 2) insert or update to target table join with temp table, 3) delete temp table
+        /// </summary>
+        /// <param name="copyMode"></param>
+        /// <param name="sqlConnection"></param>
+        /// <param name="transaction"></param>
+        /// <param name="targetTableStructure"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Exception"></exception>
+        private void UpdateToDestination(UpdateCopyMode copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
+        {
+            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
+            {
+                throw new ArgumentException("Primary Key is mandatory for UpdateInsert copy mode");
+            }
+
+            // write data into temp table
+            string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction, targetTableStructure);
+
+            // do update & insert to target table, and drop temp table
+            // build primary key sql
+            string sql_key = string.Empty;
+            int keys_count = copyMode.PrimaryKeys.Count;
+            for (int i = 0; i < keys_count; i++)
+            {
+                string t_col = copyMode.PrimaryKeys[i];
+                string s_col = copyMode.ColumnMappings.First(p => p.Value.Equals(t_col, StringComparison.CurrentCultureIgnoreCase)).Key;
+
+                if (string.IsNullOrEmpty(t_col))
+                {
+                    throw new ArgumentException($"Configured primay key column [{s_col}] has no corresponding column in target table {copyMode.TargetTable}");
+                }
+
+                sql_key += $"S.{SqlHelper.SqlWarpColumn(s_col)} = T.{SqlHelper.SqlWarpColumn(t_col)}";
+
+                if (i != keys_count - 1)
+                {
+                    sql_key += " AND ";
+                }
+            }
+
+            // build update sql
+            string sql_update = string.Empty;
+            var tobeUpdateColumns = copyMode.ColumnMappings.Where(p => !copyMode.PrimaryKeys.Any(k => k.Equals(p.Value, StringComparison.CurrentCultureIgnoreCase))).ToDictionary(x => x.Key, x => x.Value);
+
+            foreach (var item in tobeUpdateColumns)
+            {
+                string s_col = item.Key;
+                string t_col = item.Value;
+
+                sql_update += $"T.{SqlHelper.SqlWarpColumn(t_col)} = S.{SqlHelper.SqlWarpColumn(s_col)},";
+            }
+            sql_update = sql_update.TrimEnd(',');
+
+            if (!string.IsNullOrEmpty(copyMode.TimestampColumn))
+            {
+                sql_update += $", {SqlHelper.SqlWarpColumn(copyMode.TimestampColumn)} = GETDATE()";
+            }
+
+            // build update sql
+            string warppedTable = SqlHelper.SqlWarpTable(copyMode.TargetTable);
+
+            string sql_upsert = $@"
+                            UPDATE T 
+                            SET {sql_update}
+                            FROM {warppedTable} T
+                            INNER JOIN {tempTable} S ON {sql_key};
+
+                            DROP TABLE {tempTable};
+                            ";
+
+            // if target table has identity column, then check the column map has that column or not, if has, then warp with IdentityInsert, otherwise not need warp
+            string identityColumn = this.GetIdentityColumnName(copyMode.TargetTable);
+            if (!string.IsNullOrEmpty(identityColumn))
+            {
+                var map = copyMode.ColumnMappings.Where(p => p.Value.Equals(identityColumn, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                if (map != null && map.Count > 0)
+                {
+                    sql_upsert = SqlHelper.SqlWarpIdentityInsert(warppedTable, sql_upsert);
+                }
+            }
+
+            using (SqlCommand cmd = new SqlCommand(sql_upsert, sqlConnection, transaction))
+            {
+                cmd.CommandTimeout = _config.TimeoutSecond;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
         #region do Update & Insert
         /// <summary>
         /// perform insert or update action, 1) write data into temp table, 2) insert or update to target table join with temp table, 3) delete temp table
@@ -851,7 +953,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="targetTableStructure"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        private void Upsert(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
+        private void UpsertToDestination(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
         {
             if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
             {
@@ -942,6 +1044,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 cmd.ExecuteNonQuery();
             }
         }
+        #endregion
 
         /// <summary>
         /// write data into temp table
@@ -1005,7 +1108,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
             return tempTable;
         }
-        #endregion
 
         #region do Update & Insert for tables contains AlwaysEncrypted enabled
         /// <summary>
