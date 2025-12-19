@@ -10,11 +10,6 @@ namespace TryIT.Csv
     public class CsvReaderConfig
     {
         /// <summary>
-        /// file to load data
-        /// </summary>
-        public string FilePath { get; set; }
-
-        /// <summary>
         /// delimiter to get data as table
         /// </summary>
         public string Delimiter { get; set; }

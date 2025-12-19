@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace TryIT.Csv
 {
@@ -14,18 +15,43 @@ namespace TryIT.Csv
     public static class Csv
     {
         /// <summary>
-        /// get csv file as table
+        /// Get csv stream as table
         /// </summary>
+        /// <param name="stream"></param>
         /// <param name="csvConfig"></param>
         /// <returns></returns>
-        public static DataTable ReadAsDataTable(CsvReaderConfig csvConfig)
+        public static async Task<DataTable> ReadStreamAsTableAsync(Stream stream, CsvReaderConfig csvConfig)
+        {
+            string _tempFile = Path.GetRandomFileName();
+
+            try
+            {
+                await using (var outFs = File.Create(_tempFile))
+                {
+                    await stream.CopyToAsync(outFs);
+                }
+            }
+            finally
+            {
+                if (File.Exists(_tempFile))
+                    File.Delete(_tempFile);
+            }
+
+            return ReadAsDataTable(_tempFile, csvConfig);
+        }
+
+        /// <summary>
+        /// Get csv file as table
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="csvConfig"></param>
+        /// <returns></returns>
+        public static DataTable ReadAsDataTable(string filePath, CsvReaderConfig csvConfig)
         {
             if (!csvConfig.HasHeaderRecord && (csvConfig.Header == null || csvConfig.Header.Length == 0))
             {
-                throw new ArgumentNullException(nameof(csvConfig.Header), $"{nameof(csvConfig.Header)} is required when {nameof(csvConfig.HasHeaderRecord)} is false");
+                throw new ArgumentException($"{nameof(CsvReaderConfig.Header)} is required when {nameof(CsvReaderConfig.HasHeaderRecord)} is false");
             }
-
-            string filePath = csvConfig.FilePath;
 
             // if file has no header, to create a tmp file with header row, then CsvReader able to read row correctly
             if (!csvConfig.HasHeaderRecord)
@@ -61,7 +87,7 @@ namespace TryIT.Csv
                         dt.Load(dr);
                     }
                 }
-            };
+            }
 
             // delete the tmp file after read
             if (!csvConfig.HasHeaderRecord)
@@ -70,22 +96,20 @@ namespace TryIT.Csv
             }
 
             // delete skip header or footer row from table
+            int skipHeader = csvConfig.SkipHeaderRows;
+            while (skipHeader > 0)
             {
-                int skipHeader = csvConfig.SkipHeaderRows;
-                while (skipHeader > 0)
-                {
-                    dt.Rows[0].Delete();
-                    dt.AcceptChanges();
-                    skipHeader--;
-                }
+                dt.Rows[0].Delete();
+                dt.AcceptChanges();
+                skipHeader--;
+            }
 
-                int skipFooter = csvConfig.SkipFooterRows;
-                while (skipFooter > 0)
-                {
-                    dt.Rows[dt.Rows.Count - 1].Delete();
-                    dt.AcceptChanges();
-                    skipFooter--;
-                }
+            int skipFooter = csvConfig.SkipFooterRows;
+            while (skipFooter > 0)
+            {
+                dt.Rows[dt.Rows.Count - 1].Delete();
+                dt.AcceptChanges();
+                skipFooter--;
             }
 
             return dt;

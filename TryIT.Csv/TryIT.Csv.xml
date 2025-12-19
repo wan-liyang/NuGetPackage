@@ -9,10 +9,19 @@
             initial Csv helper
             </summary>
         </member>
-        <member name="M:TryIT.Csv.Csv.ReadAsDataTable(TryIT.Csv.CsvReaderConfig)">
+        <member name="M:TryIT.Csv.Csv.ReadStreamAsTableAsync(System.IO.Stream,TryIT.Csv.CsvReaderConfig)">
             <summary>
-            get csv file as table
+            Get csv stream as table
             </summary>
+            <param name="stream"></param>
+            <param name="csvConfig"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TryIT.Csv.Csv.ReadAsDataTable(System.String,TryIT.Csv.CsvReaderConfig)">
+            <summary>
+            Get csv file as table
+            </summary>
+            <param name="filePath"></param>
             <param name="csvConfig"></param>
             <returns></returns>
         </member>
@@ -42,11 +51,6 @@
         <member name="T:TryIT.Csv.CsvReaderConfig">
             <summary>
             configuration for read csv file
-            </summary>
-        </member>
-        <member name="P:TryIT.Csv.CsvReaderConfig.FilePath">
-            <summary>
-            file to load data
             </summary>
         </member>
         <member name="P:TryIT.Csv.CsvReaderConfig.Delimiter">
