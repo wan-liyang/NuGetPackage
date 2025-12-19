@@ -5,7 +5,7 @@ string publicKeyFile = @"C:\publicKey.asc";
 string inputFile = @"C:\inputFile.docx";
 //string outputFile = @"C:\inputFile.docx.pgp";
 
-TryIT.PGP.PgpEncryption.EncryptFile(publicKeyFile, inputFile);
+await TryIT.Pgp.PgpCrypto.EncryptFileAsync(publicKeyFile, inputFile);
 ```
 
 ### Decrypt File
@@ -15,5 +15,5 @@ string passPhrase = "";
 string inputFile = @"C:\inputFile.docx.pgp";
 //string outputFile = @"C:\inputFile.docx";
 
-TryIT.PGP.PgpEncryption.DecryptFile(privateKeyFile, passPhrase, inputFile);
+await TryIT.Pgp.PgpCrypto.DecryptFileAsync(privateKeyFile, passPhrase, inputFile);
 ```

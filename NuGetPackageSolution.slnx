@@ -20,7 +20,7 @@
   <Project Path="TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj" />
   <Project Path="TryIT.ObjectExtension/TryIT.ObjectExtension.csproj" />
   <Project Path="TryIT.OracleDbConnector/TryIT.OracleDbConnector.csproj" />
-  <Project Path="TryIT.PGP/TryIT.PGP.csproj" />
+  <Project Path="TryIT.Pgp/TryIT.Pgp.csproj" DisplayName="TryIT.Pgp" />
   <Project Path="TryIT.PostgreSql/TryIT.PostgreSql.csproj" />
   <Project Path="TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj" />
   <Project Path="TryIT.RestApi/TryIT.RestApi.csproj" />

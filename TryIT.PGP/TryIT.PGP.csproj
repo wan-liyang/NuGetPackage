@@ -13,14 +13,15 @@
     <Company>TryIT</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>implement PGP encryption</Description>
-    <PackageId>TryIT.PGP</PackageId>
+    <PackageId>TryIT.Pgp</PackageId>
     <PackageTags>PGP</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Configurations>Release;Debug</Configurations>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile>bin\Debug\netstandard2.1\TryIT.PGP.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.1\TryIT.Pgp.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="BouncyCastle" />
