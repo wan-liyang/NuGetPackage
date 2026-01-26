@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
+using TryIT.MicrosoftGraphApi.Response.Application;
 using TryIT.MicrosoftGraphApi.Response.SiteList;
 
 namespace TryIT.MicrosoftGraphApi.HttpClientHelper
@@ -66,7 +67,31 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             CheckStatusCode(response, RestApi.RetryResults);
 
             string content = await response.Content.ReadAsStringAsync();
-            return content.JsonToObject<GetItemResponse.Response>().value;
+            var responseObj = content.JsonToObject<GetItemResponse.Response>();
+
+            List<GetItemResponse.Item> items = new List<GetItemResponse.Item>();
+            items.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+            {
+                await _getnextlink2(responseObj.odatanextLink, items);
+            }
+
+            return items;
+        }
+        private async Task _getnextlink2(string nextLink, List<GetItemResponse.Item> list)
+        {
+            var response = await RestApi.GetAsync(nextLink);
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = await response.Content.ReadAsStringAsync();
+            var responseObj = content.JsonToObject<GetItemResponse.Response>();
+            list.AddRange(responseObj.value);
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+            {
+                await _getnextlink(responseObj.odatanextLink, list);
+            }
         }
 
         /// <summary>
@@ -98,24 +123,46 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             CheckStatusCode(response, RestApi.RetryResults);
 
             string content = await response.Content.ReadAsStringAsync();
-
-            var items = content.JsonToObject<GetItemResponse.Response>().value;
-
+            var responseObj = content.JsonToObject<GetItemResponse.Response>();
+            var items = responseObj.value;
             if (items.Count == 0)
             {
                 return null;
             }
 
             List<T> list = new List<T>();
-
             for (int i = 0; i < items.Count; i++)
             {
                 var item = content.GetJsonValue<T>($"value[{i}]:fields");
-
                 list.Add(item);
             }
 
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+            {
+                await _getnextlink(responseObj.odatanextLink, list);
+            }
+
             return list;
+        }
+
+        private async Task _getnextlink<T>(string nextLink, List<T> list)
+        {
+            var response = await RestApi.GetAsync(nextLink);
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = await response.Content.ReadAsStringAsync();
+            var responseObj = content.JsonToObject<GetItemResponse.Response>();
+            var items = responseObj.value;
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = content.GetJsonValue<T>($"value[{i}]:fields");
+                list.Add(item);
+            }
+
+            if (!string.IsNullOrEmpty(responseObj.odatanextLink))
+            {
+                await _getnextlink(responseObj.odatanextLink, list);
+            }
         }
 
         /// <summary>

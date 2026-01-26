@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Package Command Line.txt" />
+  </Folder>
   <Project Path="NUnitTest02/NUnitTest02.csproj" />
   <Project Path="NUnitTest03/NUnitTest03.csproj" />
   <Project Path="NUnitTest_Web/NUnitTest_Web.csproj" />
@@ -20,7 +23,7 @@
   <Project Path="TryIT.MicrosoftGraphApi/TryIT.MicrosoftGraphApi.csproj" />
   <Project Path="TryIT.ObjectExtension/TryIT.ObjectExtension.csproj" />
   <Project Path="TryIT.OracleDbConnector/TryIT.OracleDbConnector.csproj" />
-  <Project Path="TryIT.Pgp/TryIT.Pgp.csproj" DisplayName="TryIT.Pgp" />
+  <Project Path="TryIT.Pgp/TryIT.Pgp.csproj" />
   <Project Path="TryIT.PostgreSql/TryIT.PostgreSql.csproj" />
   <Project Path="TryIT.QuartzJobBase/TryIT.QuartzJobBase.csproj" />
   <Project Path="TryIT.RestApi/TryIT.RestApi.csproj" />

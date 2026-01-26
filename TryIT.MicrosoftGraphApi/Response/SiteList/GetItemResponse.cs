@@ -11,6 +11,9 @@ namespace TryIT.MicrosoftGraphApi.Response.SiteList
         {
             [JsonProperty("@odata.context")]
             public string odatacontext { get; set; }
+
+            [JsonProperty("@odata.nextLink")]
+            public string odatanextLink { get; set; }
             public List<Item> value { get; set; }
         }
 

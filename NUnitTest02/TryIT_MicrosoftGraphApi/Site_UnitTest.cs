@@ -24,11 +24,39 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
 
             var site = await api.CreateSiteAsync(new TryIT.MicrosoftGraphApi.Request.Site.CreateSiteRequest.Request
             {
-                displayName = "O365-TestCreateSiteOnly09-NCS",
-                description = "TestCreateSiteOnly09",
+                displayName = "",
+                description = "",
             });
 
             Assert.True(1 == 1);
+        }
+        [Test]
+        public async Task GetSiteListItemTest()
+        {
+            MsGraphApiConfig config = new MsGraphApiConfig
+            {
+                Token = "",
+            };
+            SiteListApi api = new SiteListApi(config, "", "");
+            var items = await api.GetItemsAsync("");
+            Assert.True(items != null && items.Count > 0);
+        }
+
+        [Test]
+        public async Task GetSiteListItemAsObjectTest()
+        {
+            MsGraphApiConfig config = new MsGraphApiConfig
+            {
+                Token = "",
+            };
+            SiteListApi api = new SiteListApi(config, "", "");
+            var items = await api.GetItemsAsync<ItemObject>("", "");
+            Assert.True(items != null && items.Count > 0);
+        }
+
+        class ItemObject
+        {
+            public string Title { get; set; }
         }
     }
 }
