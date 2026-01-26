@@ -2,11 +2,20 @@
 using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using TryIT.Pgp;
 
 namespace NUnitTest02.TryIT_PGP
 {
     public class PGP_UnitTest
     {
+        [Test]
+        public void Encryption_Test()
+        {
+            string fileToEncrypt = @"";
+            string publicKeyFile = @"";
+            PgpCrypto.EncryptFileAsync(publicKeyFile, fileToEncrypt).Wait();
+        }
+
         [Test]
         public async Task DecryptToStreamAsync_Test_10MB()
         {

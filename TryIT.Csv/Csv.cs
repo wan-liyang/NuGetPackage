@@ -30,14 +30,14 @@ namespace TryIT.Csv
                 {
                     await stream.CopyToAsync(outFs);
                 }
+
+                return ReadAsDataTable(_tempFile, csvConfig);
             }
             finally
             {
                 if (File.Exists(_tempFile))
                     File.Delete(_tempFile);
             }
-
-            return ReadAsDataTable(_tempFile, csvConfig);
         }
 
         /// <summary>
