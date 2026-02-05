@@ -28,7 +28,7 @@
             <param name="retryProperty"></param>
             <returns></returns>
         </member>
-        <member name="M:TryIT.RestApi.Api.AddExcetionData(System.Exception,System.String)">
+        <member name="M:TryIT.RestApi.Api.AddExcetionData(System.Exception,System.String,System.Net.Http.HttpMethod)">
             <summary>
             add extra data into exception
             <para>Uri</para>
@@ -37,6 +37,7 @@
             </summary>
             <param name="ex"></param>
             <param name="url"></param>
+            <param name="httpMethod"></param>
         </member>
         <member name="M:TryIT.RestApi.Api.GetAsync(System.String)">
             <summary>
