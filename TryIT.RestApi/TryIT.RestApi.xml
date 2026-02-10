@@ -85,13 +85,12 @@
             <param name="url"></param>
             <returns></returns>
         </member>
-        <member name="M:TryIT.RestApi.Api.WrapSendAsync(System.Func{System.Threading.Tasks.Task{System.Net.Http.HttpResponseMessage}},System.String,System.Net.Http.HttpMethod)">
+        <member name="M:TryIT.RestApi.Api.WrapSendAsync(System.Func{System.Threading.Tasks.Task{System.Net.Http.HttpResponseMessage}},System.Net.Http.HttpRequestMessage)">
             <summary>
             wrap send async with logging
             </summary>
             <param name="action"></param>
-            <param name="url"></param>
-            <param name="httpMethod"></param>
+            <param name="httpRequest"></param>
             <returns></returns>
         </member>
         <member name="T:TryIT.RestApi.Models.BasicAuth">
@@ -131,14 +130,9 @@
             Indicates which stage of the HTTP lifecycle this log represents.
             </summary>
         </member>
-        <member name="P:TryIT.RestApi.Models.HttpLogContext.Method">
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.Request">
             <summary>
-            The HTTP method (GET, POST, DELETE, etc.)
-            </summary>
-        </member>
-        <member name="P:TryIT.RestApi.Models.HttpLogContext.Url">
-            <summary>
-            The request URL
+            The HTTP request message
             </summary>
         </member>
         <member name="P:TryIT.RestApi.Models.HttpLogContext.Response">

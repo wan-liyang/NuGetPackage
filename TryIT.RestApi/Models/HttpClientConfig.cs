@@ -30,14 +30,9 @@ namespace TryIT.RestApi.Models
         public LogStage Stage { get; set; }
 
         /// <summary>
-        /// The HTTP method (GET, POST, DELETE, etc.)
+        /// The HTTP request message
         /// </summary>
-        public HttpMethod Method { get; set; }
-
-        /// <summary>
-        /// The request URL
-        /// </summary>
-        public string Url { get; set; } = string.Empty;
+        public HttpRequestMessage Request { get; set; }
 
         /// <summary>
         /// The HTTP response (if available)

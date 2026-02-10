@@ -255,8 +255,7 @@ namespace TryIT.RestApi
                     {
                         return await _httpClient.GetAsync(url);
                     },
-                    url,
-                    HttpMethod.Get);
+                    new HttpRequestMessage(HttpMethod.Get, url));
                 });
             }
             catch (Exception ex)
@@ -301,8 +300,7 @@ namespace TryIT.RestApi
                     {
                         return await _httpClient.GetAsync(url);
                     },
-                    url,
-                    HttpMethod.Get);
+                    new HttpRequestMessage(HttpMethod.Get, url));
                 });
             }
             catch (Exception ex)
@@ -328,8 +326,7 @@ namespace TryIT.RestApi
                     {
                         return await _httpClient.PostAsync(url, content);
                     },
-                    url,
-                    HttpMethod.Post);
+                    new HttpRequestMessage(HttpMethod.Post, url) { Content = content });
                 });
             }
             catch (Exception ex)
@@ -355,8 +352,7 @@ namespace TryIT.RestApi
                     {
                         return await _httpClient.PutAsync(url, content);
                     },
-                    url,
-                    HttpMethod.Put);
+                    new HttpRequestMessage(HttpMethod.Put, url) { Content = content});
                 });
             }
             catch (Exception ex)
@@ -386,8 +382,7 @@ namespace TryIT.RestApi
 
                         return await _httpClient.SendAsync(request);
                     },
-                    url,
-                    httpMethod);
+                    new HttpRequestMessage(httpMethod, url) { Content = content});
                 });
             }
             catch (Exception ex)
@@ -412,8 +407,7 @@ namespace TryIT.RestApi
                     {
                         return await _httpClient.DeleteAsync(url);
                     }, 
-                    url, 
-                    HttpMethod.Delete);
+                    new HttpRequestMessage(HttpMethod.Delete, url));
                 });
             }
             catch (Exception ex)
@@ -427,28 +421,32 @@ namespace TryIT.RestApi
         /// wrap send async with logging
         /// </summary>
         /// <param name="action"></param>
-        /// <param name="url"></param>
-        /// <param name="httpMethod"></param>
+        /// <param name="httpRequest"></param>
         /// <returns></returns>
-        private async Task<HttpResponseMessage> WrapSendAsync(Func<Task<HttpResponseMessage>> action, string url, HttpMethod httpMethod)
+        private async Task<HttpResponseMessage> WrapSendAsync(Func<Task<HttpResponseMessage>> action, HttpRequestMessage httpRequest)
         {
             var start = DateTimeOffset.UtcNow;
             var correlationId = Guid.NewGuid().ToString();
             try
             {
+                foreach (var item in _httpClient.DefaultRequestHeaders)
+                {
+                    httpRequest.Headers.Remove(item.Key);
+                    httpRequest.Headers.Add(item.Key, item.Value);
+                }
+
                 if (_httpLogDelegate != null)
                 {
                     await _httpLogDelegate?.Invoke(new HttpLogContext
                     {
                         CorrelationId = correlationId,
                         Stage = LogStage.BeforeRequest,
-                        Method = httpMethod,
-                        Url = url,
+                        Request = httpRequest,
                         StartTimeUtc = start
                     });
-                }                
+                }
 
-                var resonse = await action();
+                var response = await action();
 
                 if (_httpLogDelegate != null)
                 {
@@ -456,15 +454,14 @@ namespace TryIT.RestApi
                     {
                         CorrelationId = correlationId,
                         Stage = LogStage.AfterResponse,
-                        Method = httpMethod,
-                        Url = url,
-                        Response = resonse,
+                        Request = httpRequest,
+                        Response = response,
                         StartTimeUtc = start,
                         EndTimeUtc = DateTimeOffset.UtcNow
                     });
                 }
 
-                return resonse;
+                return response;
             }
             catch (Exception ex)
             {
@@ -474,8 +471,7 @@ namespace TryIT.RestApi
                     {
                         CorrelationId = correlationId,
                         Stage = LogStage.OnError,
-                        Method = httpMethod,
-                        Url = url,
+                        Request = httpRequest,
                         Exception = ex,
                         StartTimeUtc = start,
                         EndTimeUtc = DateTimeOffset.UtcNow
