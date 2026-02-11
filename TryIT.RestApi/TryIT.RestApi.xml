@@ -120,9 +120,9 @@
             Http log context for logging request and response details.
             </summary>
         </member>
-        <member name="P:TryIT.RestApi.Models.HttpLogContext.CorrelationId">
+        <member name="P:TryIT.RestApi.Models.HttpLogContext.TraceId">
             <summary>
-            Unique identifier to correlate logs across a request chain.
+            Trace identifier for this request.
             </summary>
         </member>
         <member name="P:TryIT.RestApi.Models.HttpLogContext.Stage">

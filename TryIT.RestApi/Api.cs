@@ -426,7 +426,7 @@ namespace TryIT.RestApi
         private async Task<HttpResponseMessage> WrapSendAsync(Func<Task<HttpResponseMessage>> action, HttpRequestMessage httpRequest)
         {
             var start = DateTimeOffset.UtcNow;
-            var correlationId = Guid.NewGuid().ToString();
+            var traceId = Guid.NewGuid().ToString();
             try
             {
                 foreach (var item in _httpClient.DefaultRequestHeaders)
@@ -439,7 +439,7 @@ namespace TryIT.RestApi
                 {
                     await _httpLogDelegate?.Invoke(new HttpLogContext
                     {
-                        CorrelationId = correlationId,
+                        TraceId = traceId,
                         Stage = LogStage.BeforeRequest,
                         Request = httpRequest,
                         StartTimeUtc = start
@@ -452,7 +452,7 @@ namespace TryIT.RestApi
                 {
                     await _httpLogDelegate?.Invoke(new HttpLogContext
                     {
-                        CorrelationId = correlationId,
+                        TraceId = traceId,
                         Stage = LogStage.AfterResponse,
                         Request = httpRequest,
                         Response = response,
@@ -469,7 +469,7 @@ namespace TryIT.RestApi
                 {
                     await _httpLogDelegate?.Invoke(new HttpLogContext
                     {
-                        CorrelationId = correlationId,
+                        TraceId = traceId,
                         Stage = LogStage.OnError,
                         Request = httpRequest,
                         Exception = ex,

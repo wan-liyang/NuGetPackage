@@ -20,9 +20,9 @@ namespace TryIT.RestApi.Models
     public class HttpLogContext
     {
         /// <summary>
-        /// Unique identifier to correlate logs across a request chain.
+        /// Trace identifier for this request.
         /// </summary>
-        public string CorrelationId { get; set; }
+        public string TraceId { get; set; }
 
         /// <summary>
         /// Indicates which stage of the HTTP lifecycle this log represents.
