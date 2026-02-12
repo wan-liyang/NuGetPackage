@@ -435,50 +435,56 @@ namespace TryIT.RestApi
                     httpRequest.Headers.Add(item.Key, item.Value);
                 }
 
-                if (_httpLogDelegate != null)
+                await SafeLogAsync(new HttpLogContext
                 {
-                    await _httpLogDelegate?.Invoke(new HttpLogContext
-                    {
-                        TraceId = traceId,
-                        Stage = LogStage.BeforeRequest,
-                        Request = httpRequest,
-                        StartTimeUtc = start
-                    });
-                }
+                    TraceId = traceId,
+                    Stage = LogStage.BeforeRequest,
+                    Request = httpRequest,
+                    StartTimeUtc = start
+                });
 
                 var response = await action();
 
-                if (_httpLogDelegate != null)
+                await SafeLogAsync(new HttpLogContext
                 {
-                    await _httpLogDelegate?.Invoke(new HttpLogContext
-                    {
-                        TraceId = traceId,
-                        Stage = LogStage.AfterResponse,
-                        Request = httpRequest,
-                        Response = response,
-                        StartTimeUtc = start,
-                        EndTimeUtc = DateTimeOffset.UtcNow
-                    });
-                }
+                    TraceId = traceId,
+                    Stage = LogStage.AfterResponse,
+                    Request = httpRequest,
+                    Response = response,
+                    StartTimeUtc = start,
+                    EndTimeUtc = DateTimeOffset.UtcNow
+                });
 
                 return response;
             }
             catch (Exception ex)
             {
-                if (_httpLogDelegate != null)
+                await SafeLogAsync(new HttpLogContext
                 {
-                    await _httpLogDelegate?.Invoke(new HttpLogContext
-                    {
-                        TraceId = traceId,
-                        Stage = LogStage.OnError,
-                        Request = httpRequest,
-                        Exception = ex,
-                        StartTimeUtc = start,
-                        EndTimeUtc = DateTimeOffset.UtcNow
-                    });
-                }                    
+                    TraceId = traceId,
+                    Stage = LogStage.OnError,
+                    Request = httpRequest,
+                    Exception = ex,
+                    StartTimeUtc = start,
+                    EndTimeUtc = DateTimeOffset.UtcNow
+                });
 
                 throw;
+            }
+        }
+
+        private async Task SafeLogAsync(HttpLogContext context)
+        {
+            if (_httpLogDelegate == null) return;
+
+            try
+            {
+                await _httpLogDelegate.Invoke(context);
+            }
+            catch
+            {
+                // Optionally: log to fallback mechanism (Debug.WriteLine, EventLog, etc.)
+                // But never throw - logging must not break the flow
             }
         }
     }
