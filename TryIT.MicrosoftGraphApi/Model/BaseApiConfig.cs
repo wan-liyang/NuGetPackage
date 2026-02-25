@@ -29,5 +29,10 @@ namespace TryIT.MicrosoftGraphApi.Model
         /// logging delegate for http request and response
         /// </summary>
         public HttpLogDelegate HttpLogDelegate { get; set; }
+
+        /// <summary>
+        /// Headers for the request, e.g. correlationId
+        /// </summary>
+        public Dictionary<string, string> Headers { get; set; }
     }
 }

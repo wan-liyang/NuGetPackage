@@ -59,7 +59,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 throw new ArgumentNullException(nameof(config));
             }
             _httpClient = new MsGraphHelper(config).GetHttpClient();
-            _restApi = GetRestApiInstance(_httpClient, config.RetryProperty, config.HttpLogDelegate);
+            _restApi = GetRestApiInstance(_httpClient, config.RetryProperty, config.HttpLogDelegate, config.Headers);
         }
 
         /// <summary>
@@ -180,13 +180,19 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="httpClient"></param>
         /// <param name="retryProperty"></param>
+        /// <param name="httpLogDelegate"></param>
+        /// <param name="headers"></param>
         /// <returns></returns>
-        protected RestApi.Api GetRestApiInstance(HttpClient httpClient, RetryProperty retryProperty, HttpLogDelegate httpLogDelegate)
+        protected RestApi.Api GetRestApiInstance(HttpClient httpClient, 
+            RetryProperty retryProperty, 
+            HttpLogDelegate httpLogDelegate,
+            Dictionary<string, string> headers)
         {
             var config = new HttpClientConfig
             {
                 HttpClient = httpClient,
-                HttpLogDelegate = httpLogDelegate
+                HttpLogDelegate = httpLogDelegate,
+                Headers = headers
             };
 
             if (retryProperty != null)
