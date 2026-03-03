@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using TryIT.TableauApi.ApiResponse;
 using TryIT.TableauApi.Model;
 
@@ -15,17 +17,17 @@ namespace TryIT.TableauApi
         /// <param name="projectId"></param>
         /// <param name="defaultPermissionType">determine get project perssion, or other defualt permission (e.g. Workbooks, Datasources, etc)</param>
         /// <returns></returns>
-        public SiteModel.Permission GetProjectPermission(string projectId, DefaultPermissionTypeEnum defaultPermissionType)
+        public async Task<SiteModel.Permission> GetProjectPermission(string projectId, DefaultPermissionTypeEnum defaultPermissionType)
         {
-            string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/permissions";
+            string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}/permissions";
             if (!defaultPermissionType.Equals(DefaultPermissionTypeEnum.project))
             {
-                url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/default-permissions/{defaultPermissionType}";
+                url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}/default-permissions/{defaultPermissionType}";
             }
-            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.GetAsync(url);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var result = content.JsonToObject<GetProjectPermssionResponse.Response>();
 
             return result.permissions.ToPermission();
@@ -39,17 +41,17 @@ namespace TryIT.TableauApi
         /// <param name="defaultPermissionType"></param>
         /// <param name="capabilities"></param>
         /// <returns></returns>
-        public SiteModel.Permission AddProjectGroupPermission(string projectId, string groupId, DefaultPermissionTypeEnum defaultPermissionType, List<Capability> capabilities)
+        public async Task <SiteModel.Permission> AddProjectGroupPermission(string projectId, string groupId, DefaultPermissionTypeEnum defaultPermissionType, List<Capability> capabilities)
         {
             if (capabilities == null || capabilities.Count == 0)
             {
                 throw new ArgumentNullException(nameof(capabilities), "no capability provided");
             }
 
-            string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/permissions";
+            string url = $"{_requestModel.HostUrl} /api/ {_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}/permissions";
             if (!defaultPermissionType.Equals(DefaultPermissionTypeEnum.project))
             {
-                url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/default-permissions/{defaultPermissionType}";
+                url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}/default-permissions/{defaultPermissionType}";
             }
             StringBuilder stringBuilder = new StringBuilder();
             foreach (var item in capabilities)
@@ -59,22 +61,20 @@ namespace TryIT.TableauApi
 
             string request = $"<tsRequest><permissions><granteeCapabilities><group id=\"{groupId}\" /><capabilities>{stringBuilder.ToString()}</capabilities></granteeCapabilities></permissions></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
-            var responseMessage = httpClient.PutAsync(url, requestContent).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.PutAsync(url, requestContent);
             CheckResponseStatus(responseMessage);
 
-            return GetProjectPermission(projectId, defaultPermissionType);
+            return await GetProjectPermission(projectId, defaultPermissionType);
         }
 
         /// <summary>
         /// delete permission for "All User" group
         /// </summary>
-        /// <param name="token"></param>
-        /// <param name="siteId"></param>
         /// <param name="projectId"></param>
-        public void DeletePermissionForAllUserGroup(string projectId)
+        public async Task DeletePermissionForAllUserGroup(string projectId)
         {
-            var group = GetGroup("All Users");
-            DeleteProjectGroupPermission(projectId, group.id);
+            var group = await GetGroup("All Users");
+            await DeleteProjectGroupPermission(projectId, group.id);
         }
 
         /// <summary>
@@ -82,41 +82,35 @@ namespace TryIT.TableauApi
         /// </summary>
         /// <param name="projectId"></param>
         /// <param name="groupId"></param>
-        public void DeleteProjectGroupPermission(string projectId, string groupId)
+        public async Task DeleteProjectGroupPermission(string projectId, string groupId)
         {
             // 1. delete project permission
             // 2. delete project default permission
 
             // DELETE /api/api-version/sites/site-id/projects/project-id/permissions/groups/group-id/capability-name/capability-mode
+            var permission = await GetProjectPermission(projectId, DefaultPermissionTypeEnum.project);
+            if (permission != null)
             {
-                var permission = GetProjectPermission(projectId, DefaultPermissionTypeEnum.project);
-
-                if (permission != null)
+                foreach (var item in permission.granteeCapabilities
+                                    .Where(p => !string.IsNullOrEmpty(p.groupId)
+                                            && p.groupId.Equals(groupId, StringComparison.CurrentCultureIgnoreCase)))
                 {
-                    foreach (var item in permission.granteeCapabilities)
+                    foreach (var cap in item.capabilities)
                     {
-                        if (!string.IsNullOrEmpty(item.groupId) && item.groupId.Equals(groupId, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            foreach (var cap in item.capabilities)
-                            {
-                                string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/permissions/groups/{groupId}/{cap.name}/{cap.mode}";
-                                var responseMessage = httpClient.DeleteAsync(url).GetAwaiter().GetResult();
-                                CheckResponseStatus(responseMessage);
-                            }
-                        }
+                        string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}/permissions/groups/{groupId}/{cap.name}/{cap.mode}";
+                        var responseMessage = await RestApiInstance.DeleteAsync(url);
+                        CheckResponseStatus(responseMessage);
                     }
                 }
             }
 
             // DELETE /api/api-version/sites/site-luid/projects/project-luid/default-permissions/workbooks/groups/group-luid/capability-name/capability-mode
-            {
-                DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.workbooks);
-                DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.datasources);
-                DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.dataroles);
-                DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.flows);
-                DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.lenses);
-                DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.metrics);
-            }
+            await DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.workbooks);
+            await DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.datasources);
+            await DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.dataroles);
+            await DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.flows);
+            await DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.lenses);
+            await DeleteDefaultPermission(projectId, groupId, null, DefaultPermissionTypeEnum.metrics);
         }
         /// <summary>
         /// delete default permission by groupId or userId
@@ -125,22 +119,21 @@ namespace TryIT.TableauApi
         /// <param name="groupId"></param>
         /// <param name="userId"></param>
         /// <param name="defaultPermissionType"></param>
-        private void DeleteDefaultPermission(string projectId, string groupId, string userId, DefaultPermissionTypeEnum defaultPermissionType)
+        private async Task DeleteDefaultPermission(string projectId, string groupId, string userId, DefaultPermissionTypeEnum defaultPermissionType)
         {
-            var permission = GetProjectPermission(projectId, defaultPermissionType);
+            var permission = await GetProjectPermission(projectId, defaultPermissionType);
             if (permission != null)
             {
-                foreach (var item in permission.granteeCapabilities)
+                foreach (var item in permission.granteeCapabilities.Where(
+                    item => (!string.IsNullOrEmpty(item.groupId) && item.groupId.Equals(groupId, StringComparison.CurrentCultureIgnoreCase))
+                            || (!string.IsNullOrEmpty(item.userId) && item.userId.Equals(userId, StringComparison.CurrentCultureIgnoreCase)
+                    )))
                 {
-                    if (!string.IsNullOrEmpty(item.groupId) && item.groupId.Equals(groupId, StringComparison.CurrentCultureIgnoreCase)
-                        || !string.IsNullOrEmpty(item.userId) && item.userId.Equals(userId, StringComparison.CurrentCultureIgnoreCase))
+                    foreach (var cap in item.capabilities)
                     {
-                        foreach (var cap in item.capabilities)
-                        {
-                            string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}/default-permissions/{defaultPermissionType}/groups/{groupId}/{cap.name}/{cap.mode}";
-                            var responseMessage = httpClient.DeleteAsync(url).GetAwaiter().GetResult();
-                            CheckResponseStatus(responseMessage);
-                        }
+                        string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}/default-permissions/{defaultPermissionType}/groups/{groupId}/{cap.name}/{cap.mode}";
+                        var responseMessage = await RestApiInstance.DeleteAsync(url);
+                        CheckResponseStatus(responseMessage);
                     }
                 }
             }

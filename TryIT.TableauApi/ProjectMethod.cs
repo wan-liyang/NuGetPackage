@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.TableauApi.ApiResponse;
 using TryIT.TableauApi.Model;
 
@@ -15,28 +12,28 @@ namespace TryIT.TableauApi
      /// <param name="parentProjectId"></param>
      /// <param name="projectName">values are case sensitive, refer to https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#filter-expression-notes</param>
      /// <returns></returns>
-        public SiteModel.Project GetProject(string parentProjectId, string projectName)
+        public async Task<SiteModel.Project> GetProject(string parentProjectId, string projectName)
         {
             projectName = projectName.Replace(" ", "+");
             string url = string.Empty;
             if (string.IsNullOrEmpty(parentProjectId))
             {
-                url = $"/api/{apiVersion}/sites/{siteId}/projects?filter=topLevelProject:eq:true,name:eq:{projectName}";
+                url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects?filter=topLevelProject:eq:true,name:eq:{projectName}";
             }
             else
             {
-                url = $"/api/{apiVersion}/sites/{siteId}/projects?filter=parentProjectId:eq:{parentProjectId},name:eq:{projectName}";
+                url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects?filter=parentProjectId:eq:{parentProjectId},name:eq:{projectName}";
             }
-            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.GetAsync(url);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var result = content.JsonToObject<GetProjectResponse.Response>();
             if (result.projects.project == null)
             {
                 return null;
             }
-            return result.projects.project.First().ToProject();
+            return result.projects.project[0].ToProject();
         }
 
         /// <summary>
@@ -47,15 +44,15 @@ namespace TryIT.TableauApi
         /// <param name="projectDescription"></param>
         /// <param name="projectContentPermission">This value controls user permissions in a project, default is ManagedByOwner</param>
         /// <returns></returns>
-        public SiteModel.Project CreateProject(string parentProjectId, string projectName, string projectDescription, ProjectContentPermission projectContentPermission = ProjectContentPermission.ManagedByOwner)
+        public async Task<SiteModel.Project> CreateProject(string parentProjectId, string projectName, string projectDescription, ProjectContentPermission projectContentPermission = ProjectContentPermission.ManagedByOwner)
         {
-            string url = $"/api/{apiVersion}/sites/{siteId}/projects";
+            string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects";
             string request = $"<tsRequest><project parentProjectId=\"{parentProjectId}\" name=\"{projectName}\" description=\"{projectDescription}\" contentPermissions=\"{projectContentPermission}\" /></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
-            var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.PostAsync(url, requestContent);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var result = content.JsonToObject<CreateProjectResponse.Response>();
 
             if (result.project == null)
@@ -75,15 +72,15 @@ namespace TryIT.TableauApi
         /// <param name="newProjectDescription"></param>
         /// <param name="newProjectContentPermission"></param>
         /// <returns></returns>
-        public SiteModel.Project UpdateProject(string projectId, string newParentProjectId, string newProjectName, string newProjectDescription, ProjectContentPermission newProjectContentPermission = ProjectContentPermission.ManagedByOwner)
+        public async Task<SiteModel.Project> UpdateProject(string projectId, string newParentProjectId, string newProjectName, string newProjectDescription, ProjectContentPermission newProjectContentPermission = ProjectContentPermission.ManagedByOwner)
         {
-            string url = $"/api/{apiVersion}/sites/{siteId}/projects/{projectId}";
+            string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/projects/{projectId}";
             string request = $"<tsRequest><project parentProjectId=\"{newParentProjectId}\" name=\"{newProjectName}\" description=\"{newProjectDescription}\" contentPermissions=\"{newProjectContentPermission}\" /></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
-            var responseMessage = httpClient.PutAsync(url, requestContent).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.PutAsync(url, requestContent);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var result = content.JsonToObject<CreateProjectResponse.Response>();
 
             if (result.project == null)

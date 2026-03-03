@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Net.Http;
-using System.Net;
-using System.Text;
+using System.Threading.Tasks;
+using TryIT.RestApi.Models;
 using TryIT.TableauApi.ApiResponse;
 using TryIT.TableauApi.SiteModel;
 
@@ -13,28 +11,22 @@ namespace TryIT.TableauApi
     {
         string siteId;
         string myId;
-        string apiVersion;
 
-        HttpClient httpClient;
-
-        private static WebProxy GetProxy(WebProxyModel proxyModel)
+        private RestApi.Api _api;
+        RestApi.Api RestApiInstance
         {
-            WebProxy proxy = null;
-
-            if (proxyModel != null && !string.IsNullOrEmpty(proxyModel.Url))
+            get
             {
-                proxy = new WebProxy(proxyModel.Url);
-
-                if (!string.IsNullOrEmpty(proxyModel.Username))
+                if (_api == null)
                 {
-                    proxy.UseDefaultCredentials = false;
-                    proxy.Credentials = new NetworkCredential(proxyModel.Username, proxyModel.Password);
+                    throw new InvalidOperationException("please call SignIn method to initialize rest api instance before any API call");
                 }
-                proxy.BypassProxyOnLocal = true;
+                return _api;
             }
-
-            return proxy;
         }
+
+        private readonly ApiRequestModel _requestModel;
+        private readonly HttpClientConfig _httpClientConfig;
 
         private static void ValidateInfo(ApiRequestModel requestModel)
         {
@@ -44,74 +36,85 @@ namespace TryIT.TableauApi
             }
             if (string.IsNullOrEmpty(requestModel.HostUrl))
             {
-                throw new ArgumentNullException(nameof(requestModel.HostUrl));
+                throw new ArgumentException(nameof(requestModel.HostUrl));
             }
             if (string.IsNullOrEmpty(requestModel.Sitename))
             {
-                throw new ArgumentNullException(nameof(requestModel.Sitename));
+                throw new ArgumentException(nameof(requestModel.Sitename));
             }
             if (string.IsNullOrEmpty(requestModel.ApiVersion))
             {
-                throw new ArgumentNullException(nameof(requestModel.ApiVersion));
+                throw new ArgumentException(nameof(requestModel.ApiVersion));
             }
             if (string.IsNullOrEmpty(requestModel.TokenName))
             {
-                throw new ArgumentNullException(nameof(requestModel.TokenName));
+                throw new ArgumentException(nameof(requestModel.TokenName));
             }
             if (string.IsNullOrEmpty(requestModel.TokenSecret))
             {
-                throw new ArgumentNullException(nameof(requestModel.TokenSecret));
+                throw new ArgumentException(nameof(requestModel.TokenSecret));
             }
         }
 
+        
+
         /// <summary>
-        /// init Tableau Connector
+        /// Init Tableau Connector, after initializing, you can call SignIn method to get token for later API call, if the token is expired, just call SignIn method again to refresh the token
         /// </summary>
+        /// <param name="httpClientConfig"></param>
         /// <param name="requestModel"></param>
-        public TableauConnector(ApiRequestModel requestModel)
+        public TableauConnector(HttpClientConfig httpClientConfig, ApiRequestModel requestModel)
         {
             ValidateInfo(requestModel);
 
-            this.apiVersion = requestModel.ApiVersion;
+            _requestModel = requestModel;
+            _httpClientConfig = httpClientConfig;
+        }
 
-            WebProxy proxy = GetProxy(requestModel.Proxy);
-            HttpClientHandler clientHandler = new HttpClientHandler()
-            {
-                AllowAutoRedirect = true,
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
-            };
-            if (proxy != null)
-            {
-                clientHandler.Proxy = proxy;
-            }
-
-            httpClient = new HttpClient(clientHandler);
-            httpClient.BaseAddress = new Uri(requestModel.HostUrl);
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            string url = $"/api/{apiVersion}/auth/signin";
-            string request = $"<tsRequest><credentials personalAccessTokenName=\"{requestModel.TokenName}\" personalAccessTokenSecret=\"{requestModel.TokenSecret}\"><site contentUrl=\"{requestModel.Sitename}\"/></credentials></tsRequest>";
+        /// <summary>
+        /// Perform sign in action to get siteId, userId and token, the token will be added into httpClient for later API call, if the token is expired, just call this method again to refresh the token
+        /// </summary>
+        public async Task SignIn()
+        {
+            string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/auth/signin";
+            string request = $"<tsRequest><credentials personalAccessTokenName=\"{_requestModel.TokenName}\" personalAccessTokenSecret=\"{_requestModel.TokenSecret}\"><site contentUrl=\"{_requestModel.Sitename}\"/></credentials></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
-            var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
+            var responseMessage = await new RestApi.Api(_httpClientConfig).PostAsync(url, requestContent);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var signinResponse = content.JsonToObject<SigninResponse.Response>();
             this.siteId = signinResponse.credentials.site.id;
             this.myId = signinResponse.credentials.user.id;
 
+            HttpClientConfig clientConfig = new HttpClientConfig
+            {
+                TimeoutSecond = _httpClientConfig.TimeoutSecond,
+                BasicAuth = _httpClientConfig.BasicAuth,
+                ClientCertificates = _httpClientConfig.ClientCertificates,
+                HttpClient = _httpClientConfig.HttpClient,
+                HttpLogDelegate = _httpClientConfig.HttpLogDelegate,
+                Proxy = _httpClientConfig.Proxy,
+                securityProtocolType = _httpClientConfig.securityProtocolType,
+                Headers = _httpClientConfig.Headers,
+                RetryProperty = _httpClientConfig.RetryProperty,
+            };
+
             // add the token into httpClient
             string token = signinResponse.credentials.token;
-            httpClient.DefaultRequestHeaders.Remove("X-Tableau-Auth");
-            httpClient.DefaultRequestHeaders.Add("X-Tableau-Auth", token);
+            clientConfig.Headers["X-Tableau-Auth"] = token;
+
+            _api = new RestApi.Api(clientConfig);
         }
 
+        /// <summary>
+        /// Dispose HttpClient and clear siteId and myId, after calling Dispose, the instance is not recommended to use anymore
+        /// </summary>
         public void Dispose()
         {
             siteId = null;
             myId = null;
-            httpClient = null;
+            _api = null;
         }
 
         /// <summary>
@@ -119,11 +122,11 @@ namespace TryIT.TableauApi
         /// </summary>
         /// <param name="responseMessage"></param>
         /// <exception cref="Exception"></exception>
-        private void CheckResponseStatus(HttpResponseMessage responseMessage)
+        private static void CheckResponseStatus(HttpResponseMessage responseMessage)
         {
             if (!responseMessage.IsSuccessStatusCode)
             {
-                throw new Exception($"operation failed: {responseMessage.Content.ReadAsStringAsync().Result}");
+                throw new InvalidOperationException($"operation failed: {responseMessage.Content.ReadAsStringAsync().Result}");
             }
         }
 
@@ -132,7 +135,7 @@ namespace TryIT.TableauApi
         /// </summary>
         /// <param name="pageSize"></param>
         /// <param name="totalAvailable"></param>
-        private int GetTotalPages(int pageSize, int totalAvailable)
+        private static int GetTotalPages(int pageSize, int totalAvailable)
         {
             int pages = totalAvailable / pageSize;
 

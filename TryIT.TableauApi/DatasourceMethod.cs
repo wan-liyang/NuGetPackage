@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using TryIT.TableauApi.ApiResponse;
 using TryIT.TableauApi.ApiResponse.Datasource;
 
@@ -15,20 +12,20 @@ namespace TryIT.TableauApi
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public GetDataSourceResponse.Datasource GetDatasource(string name)
+        public async Task<GetDataSourceResponse.Datasource> GetDatasource(string name)
         {
-            string url = $"/api/{apiVersion}/sites/{siteId}/datasources?filter=name:eq:{name}";
+            string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/datasources?filter=name:eq:{name}";
 
-            var responseMessage = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.GetAsync(url);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var result = content.JsonToObject<GetDataSourceResponse.TsResponse>();
             if (result.Datasources.Datasource == null)
             {
                 return null;
             }
-            return result.Datasources.Datasource.First();
+            return result.Datasources.Datasource[0];
         }
 
         /// <summary>
@@ -36,18 +33,18 @@ namespace TryIT.TableauApi
         /// </summary>
         /// <param name="name">datasource name</param>
         /// <returns></returns>
-        public RefreshDatasourceResponse.Job RefreshDatasource(string name)
+        public async Task <RefreshDatasourceResponse.Job> RefreshDatasource(string name)
         {
             var datasource = GetDatasource(name);
 
-            string url = $"/api/{apiVersion}/sites/{siteId}/datasources/{datasource.Id}/refresh";
+            string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/datasources/{datasource.Id}/refresh";
 
             string request = $"<tsRequest></tsRequest>";
             StringContent requestContent = new StringContent(request, System.Text.Encoding.UTF8, "application/xml");
-            var responseMessage = httpClient.PostAsync(url, requestContent).GetAwaiter().GetResult();
+            var responseMessage = await RestApiInstance.PostAsync(url, requestContent);
             CheckResponseStatus(responseMessage);
 
-            var content = responseMessage.Content.ReadAsStringAsync().Result;
+            var content = await responseMessage.Content.ReadAsStringAsync();
             var result = content.JsonToObject<RefreshDatasourceResponse.TsResponse>();
             if (result.Job == null)
             {

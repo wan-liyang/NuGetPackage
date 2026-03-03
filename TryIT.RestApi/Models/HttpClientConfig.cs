@@ -90,6 +90,8 @@ namespace TryIT.RestApi.Models
         /// </summary>
         public HttpClientConfig()
         {
+            Headers = new Dictionary<string, string>();
+
             securityProtocolType = SecurityProtocolType.Tls12;
 
             RetryProperty = new RetryProperty

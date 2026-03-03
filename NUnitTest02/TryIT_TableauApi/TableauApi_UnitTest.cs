@@ -7,11 +7,13 @@ namespace NUnitTest02.TryIT_TableauApi
     class ServiceUtility_UnitTest
     {
         [Test]
-        public void GetUser_Test()
+        public async Task GetUser_Test()
         {
-            using(TableauConnector connector = new TableauConnector(GetRequestModel()))
+            using(TableauConnector connector = new TableauConnector(new TryIT.RestApi.Models.HttpClientConfig { }, GetRequestModel()))
             {
-                connector.GetUsers();
+                await connector.SignIn();
+
+                await connector.GetUsers();
             }
         }
 
@@ -24,10 +26,6 @@ namespace NUnitTest02.TryIT_TableauApi
                 Sitename = "",
                 TokenName = "",
                 TokenSecret = "",
-                Proxy = new TryIT.TableauApi.SiteModel.WebProxyModel
-                {
-                    Url = ""
-                }
             };
         }
     }
