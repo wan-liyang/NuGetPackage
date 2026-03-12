@@ -35,7 +35,7 @@ namespace TryIT.TableauApi
         /// <returns></returns>
         public async Task <RefreshDatasourceResponse.Job> RefreshDatasource(string name)
         {
-            var datasource = GetDatasource(name);
+            var datasource = await GetDatasource(name);
 
             string url = $"{_requestModel.HostUrl}/api/{_requestModel.ApiVersion}/sites/{siteId}/datasources/{datasource.Id}/refresh";
 

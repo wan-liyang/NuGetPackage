@@ -6,12 +6,13 @@ using TryIT.TableauApi.Model;
 namespace TryIT.TableauApi
 {
     public partial class TableauConnector
-    {/// <summary>
-     /// get project by name and parent project id, if <paramref name="parentProjectId"/> is null or empty, means get top level project
-     /// </summary>
-     /// <param name="parentProjectId"></param>
-     /// <param name="projectName">values are case sensitive, refer to https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#filter-expression-notes</param>
-     /// <returns></returns>
+    {
+        /// <summary>
+        /// get project by name and parent project id, if <paramref name="parentProjectId"/> is null or empty, means get top level project
+        /// </summary>
+        /// <param name="parentProjectId"></param>
+        /// <param name="projectName">values are case sensitive, refer to https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#filter-expression-notes</param>
+        /// <returns></returns>
         public async Task<SiteModel.Project> GetProject(string parentProjectId, string projectName)
         {
             projectName = projectName.Replace(" ", "+");
