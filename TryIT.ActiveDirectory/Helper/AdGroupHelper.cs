@@ -7,6 +7,18 @@ namespace TryIT.ActiveDirectory.Helper
 {
     internal class AdGroupHelper
     {
+		public void GetGroupMembers(string groupName)
+		{
+				string filter = $"(&(objectClass=group)((cn={groupName})))";
+				var search = new DirectorySearcher(new DirectoryEntry())
+				{
+					PageSize = 1000,
+					Filter = filter
+				};
+				//m
+		}
+
+
 		public AdGroupModel FindGroup(string distinguishedName)
         {
 			string filter = $"(&(objectClass=group)((distinguishedName={distinguishedName})))";

@@ -63,6 +63,11 @@ namespace TryIT.ActiveDirectory.Helper
 			return GetUserInfoByDistinuishdName(user.Manager_DistinguishedName, AttributeMap.User.ManagerMap);			
 		}
 
+		public AdUserModel FindUserByDistinguishedName(string userDistinguishedName)
+		{
+			return GetUserInfoByDistinuishdName(userDistinguishedName, AttributeMap.User.DetailMap);
+		}
+
 		public AdUserModel FindUserGroup(string userDistinguishedName)
 		{
 			return GetUserInfoByDistinuishdName(userDistinguishedName, AttributeMap.User.UserGroupMap);

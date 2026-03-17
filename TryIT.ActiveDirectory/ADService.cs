@@ -15,7 +15,7 @@ namespace TryIT.ActiveDirectory
         /// </summary>
         public class User
         {
-            private static AdUser GetAdUserEntity(AdUserModel model)
+            internal static AdUser GetAdUserEntity(AdUserModel model)
             {
                 AdUser user = null;
 
@@ -174,6 +174,40 @@ namespace TryIT.ActiveDirectory
                 }
 
                 return groups;
+            }
+        }
+    
+        /// <summary>
+        /// Group operation
+        /// </summary>
+        public class Group
+        {
+            /// <summary>
+            /// Get group members
+            /// </summary>
+            /// <param name="groupName"></param>
+            /// <returns></returns>
+            public static List<AdUser> GetGroupMembers(string groupName)
+            {
+                List<AdUser> members = new List<AdUser>();
+
+                AdGroupHelper adGroupHelper = new AdGroupHelper();
+                var memberDis =  adGroupHelper.FindGroupMember(groupName);
+
+                if (memberDis != null && memberDis.Count > 0)
+                {
+                    AdUserHelper adUserHelper = new AdUserHelper();
+
+                    foreach (var item in memberDis)
+                    {
+                        var user = adUserHelper.FindUserByDistinguishedName(item);
+
+                        var entity = User.GetAdUserEntity(user);
+                        members.Add(entity);
+                    }                    
+                }
+
+                return members;
             }
         }
     }
