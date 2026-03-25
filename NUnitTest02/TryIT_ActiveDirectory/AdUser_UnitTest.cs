@@ -24,6 +24,7 @@ namespace NUnitTest02.TryIT_ActiveDirectory
 
             Assert.IsNull(user);
         }
+            var members = ADService.Group.GetGroupMembers("ITAPP_NON_PRD_DB_NCSEDW");
     }
 }
 
