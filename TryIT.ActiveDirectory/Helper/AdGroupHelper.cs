@@ -18,8 +18,13 @@ namespace TryIT.ActiveDirectory.Helper
 				//m
 		}
 
+		public AdGroupModel FindGroupByName(string groupName)
+		{
+            string filter = $"(&(objectClass=group)((name={groupName})))";
+            return _FindGroup(filter);
+        }
 
-		public AdGroupModel FindGroup(string distinguishedName)
+		public AdGroupModel FindGroupByDistinguishedName(string distinguishedName)
         {
 			string filter = $"(&(objectClass=group)((distinguishedName={distinguishedName})))";
 			return _FindGroup(filter);

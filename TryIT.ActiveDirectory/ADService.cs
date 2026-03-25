@@ -8,12 +8,12 @@ namespace TryIT.ActiveDirectory
     /// <summary>
     /// service to operate with Active Directory
     /// </summary>
-    public class ADService
+    public static class ADService
     {
         /// <summary>
         /// User related service
         /// </summary>
-        public class User
+        public static class User
         {
             internal static AdUser GetAdUserEntity(AdUserModel model)
             {
@@ -180,19 +180,33 @@ namespace TryIT.ActiveDirectory
         /// <summary>
         /// Group operation
         /// </summary>
-        public class Group
+        public static class Group
         {
             /// <summary>
             /// Get group members
             /// </summary>
             /// <param name="groupName"></param>
             /// <returns></returns>
-            public static List<AdUser> GetGroupMembers(string groupName)
+            public static List<AdGroupMember> GetGroupMembers(string groupName)
             {
-                List<AdUser> members = new List<AdUser>();
+                return _GetInheritGroupMembers(string.Empty, groupName);
+            }
+
+            /// <summary>
+            /// Get group members and inherited members from nested groups, and also indicate which group the user is inherited from
+            /// </summary>
+            /// <param name="parentGroupPath"></param>
+            /// <param name="groupName"></param>
+            /// <returns></returns>
+            private static List<AdGroupMember> _GetInheritGroupMembers(string parentGroupPath, string groupName)
+            {
+                List<AdGroupMember> members = new List<AdGroupMember>();
 
                 AdGroupHelper adGroupHelper = new AdGroupHelper();
-                var memberDis =  adGroupHelper.FindGroupMember(groupName);
+
+                var group = adGroupHelper.FindGroupByName(groupName);
+
+                var memberDis = adGroupHelper.FindGroupMember(group.DistinguishedName);
 
                 if (memberDis != null && memberDis.Count > 0)
                 {
@@ -202,9 +216,24 @@ namespace TryIT.ActiveDirectory
                     {
                         var user = adUserHelper.FindUserByDistinguishedName(item);
 
-                        var entity = User.GetAdUserEntity(user);
-                        members.Add(entity);
-                    }                    
+                        // if user is null, it means the member is a group
+                        if (user == null)
+                        {
+                            var innerGroup = adGroupHelper.FindGroupByDistinguishedName(item);
+                            var innerMembers = _GetInheritGroupMembers($"{parentGroupPath} > {innerGroup.Name}", innerGroup.Name);
+
+                            members.AddRange(innerMembers);
+                        }
+                        else
+                        {
+                            var entity = User.GetAdUserEntity(user);
+                            members.Add(new AdGroupMember
+                            {
+                                AdUser = entity,
+                                InheritedFromGroup = $"{parentGroupPath}"
+                            });
+                        }
+                    }
                 }
 
                 return members;

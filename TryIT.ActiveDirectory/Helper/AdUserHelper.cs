@@ -208,7 +208,7 @@ namespace TryIT.ActiveDirectory.Helper
 
                             while (hasNext)
                             {
-                                AdGroupModel group = adGroup.FindGroup(valueItem.Current.ToString());
+                                AdGroupModel group = adGroup.FindGroupByDistinguishedName(valueItem.Current.ToString());
 
                                 groupDistinguishedName.Add(group.DistinguishedName);
                                 groups.Add(group);

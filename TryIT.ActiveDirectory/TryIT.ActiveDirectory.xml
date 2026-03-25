@@ -68,9 +68,32 @@
             <param name="groupName"></param>
             <returns></returns>
         </member>
+        <member name="M:TryIT.ActiveDirectory.ADService.Group._GetInheritGroupMembers(System.String,System.String)">
+            <summary>
+            Get group members and inherited members from nested groups, and also indicate which group the user is inherited from
+            </summary>
+            <param name="parentGroupPath"></param>
+            <param name="groupName"></param>
+            <returns></returns>
+        </member>
         <member name="P:TryIT.ActiveDirectory.Constants.AttributeMap.User.ManagerMap">
             <summary>
             user's manager get general information only, exclude memberof info, exclude manager's manager info
+            </summary>
+        </member>
+        <member name="T:TryIT.ActiveDirectory.Entities.AdGroupMember">
+            <summary>
+            Group member
+            </summary>
+        </member>
+        <member name="P:TryIT.ActiveDirectory.Entities.AdGroupMember.AdUser">
+            <summary>
+            User information
+            </summary>
+        </member>
+        <member name="P:TryIT.ActiveDirectory.Entities.AdGroupMember.InheritedFromGroup">
+            <summary>
+            Group from which the user is inherited, value is empty if the user is direct member of the group
             </summary>
         </member>
         <member name="P:TryIT.ActiveDirectory.Entities.AdUser.AccountActive">
