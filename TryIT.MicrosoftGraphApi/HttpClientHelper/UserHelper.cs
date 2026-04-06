@@ -147,7 +147,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             url += select;
 
-            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+            AddConsistencyLevelHeader(HttpClient);
 
             var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
             CheckStatusCode(response);

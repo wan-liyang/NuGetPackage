@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TryIT.MicrosoftGraphApi.Helper;
+using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.HttpClientHelper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Response.Group;
@@ -26,9 +26,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="groupDisplayName">group display name</param>
         /// <returns></returns>
-        public GetGroupResponse.Group GetGroup(string groupDisplayName)
+        public async Task<GetGroupResponse.Group> GetGroupAsync(string groupDisplayName)
         {
-            return _helper.GetGroup(groupDisplayName);
+            return await _helper.GetGroupAsync(groupDisplayName);
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="groupDisplayName"></param>
         /// <returns></returns>
-        public List<GetGroupMemberResponse.Member> GetMembers(string groupDisplayName)
+        public async Task<List<GetGroupMemberResponse.Member>> GetMembersAsync(string groupDisplayName)
         {
-            return _helper.GetMembers(groupDisplayName);
+            return await _helper.GetMembersAsync(groupDisplayName);
         }
 
         /// <summary>
@@ -47,9 +47,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <param name="userEmail"></param>
         /// <param name="groupDisplayName"></param>
         /// <returns></returns>
-        public bool IsMemberOf(string userEmail, string groupDisplayName)
+        public async Task<bool> IsMemberOfAsync(string userEmail, string groupDisplayName)
         {
-            return _helper.IsMemberOf(userEmail, groupDisplayName);
+            return await _helper.IsMemberOfAsync(userEmail, groupDisplayName);
         }
 
         /// <summary>
@@ -57,9 +57,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="userEmail"></param>
         /// <param name="groupDisplayName"></param>
-        public void AddMember(string userEmail, string groupDisplayName)
+        public async Task AddMemberAsync(string userEmail, string groupDisplayName)
         {
-            _helper.AddMember(userEmail, groupDisplayName);
+            await _helper.AddMemberAsync(userEmail, groupDisplayName);
         }
 
         /// <summary>
@@ -67,9 +67,9 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// </summary>
         /// <param name="userEmail"></param>
         /// <param name="groupDisplayName"></param>
-        public void RemoveMember(string userEmail, string groupDisplayName)
+        public async Task RemoveMemberAsync(string userEmail, string groupDisplayName)
         {
-            _helper.RemoveMember(userEmail, groupDisplayName);
+            await _helper.RemoveMemberAsync(userEmail, groupDisplayName);
         }
     }
 }

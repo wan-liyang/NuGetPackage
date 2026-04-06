@@ -75,6 +75,13 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         }
 
         /// <summary>
+        /// Add ConsistencyLevel header with eventual value, to make sure count return correct value when do filter or search query.
+        /// </summary>
+        /// <param name="client"></param>
+        protected static void AddConsistencyLevelHeader(HttpClient client)
+             => AddDefaultRequestHeaders(client, "ConsistencyLevel", "eventual");
+
+        /// <summary>
         /// do get and retry once when api return error with retryAfterSeconds
         /// <para>{"error":{"code":"serviceNotAvailable","message":"Service unavailable","retryAfterSeconds":15}}</para>
         /// </summary>

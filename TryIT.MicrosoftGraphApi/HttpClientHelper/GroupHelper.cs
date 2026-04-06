@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
@@ -21,7 +20,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             _userHelper = new UserHelper(config);
         }
 
-        public GetGroupResponse.Group GetGroup(string groupDisplayName)
+        public async Task<GetGroupResponse.Group> GetGroupAsync(string groupDisplayName)
         {
             if (string.IsNullOrEmpty(groupDisplayName))
             {
@@ -30,12 +29,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/groups?$filter={EscapeExpression($"displayName eq '{groupDisplayName}'")}";
 
-            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+            AddConsistencyLevelHeader(HttpClient);
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetGroupResponse.Response>().value.FirstOrDefault();
         }
 
@@ -45,23 +44,23 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="groupDisplayName">group display name</param>
         /// <returns></returns>
-        public List<GetGroupMemberResponse.Member> GetMembers(string groupDisplayName)
+        public async Task<List<GetGroupMemberResponse.Member>> GetMembersAsync(string groupDisplayName)
         {
-            var group = GetGroup(groupDisplayName);
+            var group = await GetGroupAsync(groupDisplayName);
 
             if (group == null)
             {
-                throw new Exception($"group '{groupDisplayName}' not found");
+                throw new InvalidOperationException($"group '{groupDisplayName}' not found");
             }
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members";
 
-            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+            AddConsistencyLevelHeader(HttpClient);
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
 
             var getMembersResponse = content.JsonToObject<GetGroupMemberResponse.Response>();
 
@@ -70,7 +69,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
             {
-                GetMembersNextLink(getMembersResponse.odatanextLink);
+                await GetMembersNextLinkAsync(getMembersResponse.odatanextLink);
             }
 
             return GroupMembers;
@@ -81,21 +80,21 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// </summary>
         /// <param name="nextLink">next link url</param>
         /// <returns></returns>
-        private void GetMembersNextLink(string nextLink)
+        private async Task GetMembersNextLinkAsync(string nextLink)
         {
-            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+            AddConsistencyLevelHeader(HttpClient);
 
-            var response = RestApi.GetAsync(nextLink).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(nextLink);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
 
             var getMembersResponse = content.JsonToObject<GetGroupMemberResponse.Response>();
             GroupMembers.AddRange(getMembersResponse.value);
 
             if (!string.IsNullOrEmpty(getMembersResponse.odatanextLink))
             {
-                GetMembersNextLink(getMembersResponse.odatanextLink);
+                await GetMembersNextLinkAsync(getMembersResponse.odatanextLink);
             }
         }
 
@@ -107,29 +106,29 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        public bool IsMemberOf(string userEmail, string groupDisplayName)
+        public async Task<bool> IsMemberOfAsync(string userEmail, string groupDisplayName)
         {
-            var group = GetGroup(groupDisplayName);
+            var group = await GetGroupAsync(groupDisplayName);
 
             if (group == null)
             {
-                throw new Exception($"group '{groupDisplayName}' not found");
+                throw new InvalidOperationException($"group '{groupDisplayName}' not found");
             }
 
             var user = _userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
-                throw new Exception($"user '{userEmail}' not found");
+                throw new InvalidOperationException($"user '{userEmail}' not found");
             }
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members?$count=true&$filter={EscapeExpression($"mail eq '{userEmail}'")}";
 
-            AddDefaultRequestHeaders(HttpClient, "ConsistencyLevel", "eventual");
+            AddConsistencyLevelHeader(HttpClient);
 
-            var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(url);
             CheckStatusCode(response);
 
-            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            string content = await response.Content.ReadAsStringAsync();
 
             var result = content.JsonToObject<GetGroupMemberResponse.Response>();
             return result.odatacount > 0;
@@ -141,18 +140,18 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="userEmail"></param>
         /// <param name="groupDisplayName"></param>
         /// <exception cref="Exception"></exception>
-        public void AddMember(string userEmail, string groupDisplayName)
+        public async Task AddMemberAsync(string userEmail, string groupDisplayName)
         {
-            var group = GetGroup(groupDisplayName);
+            var group = await GetGroupAsync(groupDisplayName);
             if (group == null)
             {
-                throw new Exception($"group '{groupDisplayName}' not found");
+                throw new InvalidOperationException($"group '{groupDisplayName}' not found");
             }
 
             var user = _userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
-                throw new Exception($"user '{userEmail}' not found");
+                throw new InvalidOperationException($"user '{userEmail}' not found");
             }
 
             var newMember = new NewMemberModel
@@ -162,7 +161,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/groups/{group.id}/members/$ref";
             HttpContent httpContent = GetJsonHttpContent(newMember);
-            var response = RestApi.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var response = await RestApi.PostAsync(url, httpContent);
             CheckStatusCode(response);
         }
 
@@ -173,27 +172,27 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <param name="userEmail"></param>
         /// <param name="groupDisplayName"></param>
         /// <exception cref="Exception"></exception>
-        public void RemoveMember(string userEmail, string groupDisplayName)
+        public async Task RemoveMemberAsync(string userEmail, string groupDisplayName)
         {
-            var group = GetGroup(groupDisplayName);
+            var group = await GetGroupAsync(groupDisplayName);
             if (group == null)
             {
-                throw new Exception($"group '{groupDisplayName}' not found");
+                throw new InvalidOperationException($"group '{groupDisplayName}' not found");
             }
 
             var user = _userHelper.GetUserByMail(userEmail);
             if (user == null)
             {
-                throw new Exception($"user '{userEmail}' not found");
+                throw new InvalidOperationException($"user '{userEmail}' not found");
             }
 
-            var isMember = IsMemberOf(userEmail, groupDisplayName);
+            var isMember = await IsMemberOfAsync(userEmail, groupDisplayName);
 
             if (isMember)
             {
                 string url = $"{GraphApiRootUrl}/groups/{group.id}/members/{user.id}/$ref";
 
-                var response = RestApi.DeleteAsync(url).GetAwaiter().GetResult();
+                var response = await RestApi.DeleteAsync(url);
                 CheckStatusCode(response);
             }           
         }
@@ -225,7 +224,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         /// <summary>
         /// new member object for add member into group
         /// </summary>
-        private class NewMemberModel
+        private sealed class NewMemberModel
         {
             [JsonProperty("@odata.id")]
             public string odataid { get; set; }

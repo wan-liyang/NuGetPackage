@@ -26,7 +26,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             string url = $"{GraphApiRootUrl}/applications?$filter={EscapeExpression($"displayName eq '{appDisplayName}'")}";
 
-            HttpClient.DefaultRequestHeaders.Add("ConsistencyLevel", "eventual");
+            AddConsistencyLevelHeader(HttpClient);
+
             var response = RestApi.GetAsync(url).GetAwaiter().GetResult();
             CheckStatusCode(response);
 
