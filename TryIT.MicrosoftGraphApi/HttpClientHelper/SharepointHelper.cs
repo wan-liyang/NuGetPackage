@@ -554,5 +554,23 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return false;
         }
         #endregion
+
+        /// <summary>
+        /// Create sharing link, https://learn.microsoft.com/en-us/graph/api/driveitem-createlink?view=graph-rest-1.0&tabs=http
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="requestBody"></param>
+        /// <returns></returns>
+        public async Task<CreateLinkResponse.Response> CreateLinkAsync(string driveId, string itemId, CreateLinkRequest.Body requestBody)
+        {
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}/createLink";
+            HttpContent httpContent = GetJsonHttpContent(requestBody);
+            var response = await RestApi.PostAsync(url, httpContent);
+            CheckStatusCode(response, RestApi.RetryResults);
+            string content = await response.Content.ReadAsStringAsync();
+            var item = content.JsonToObject<CreateLinkResponse.Response>();
+            return item;
+        }
     }
 }

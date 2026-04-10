@@ -91,9 +91,9 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
             var site = siteApi.GetSite(sitename, hostname);
             var drive = siteApi.GetDrive(site.id);
 
-            var item = api.GetItemByPath(drive.id, @"sgfinance\Project_Office\013-CIS\01 - To Generate (GB)");
+            var item = api.GetItemByPath(drive.id, @"");
 
-            var response = api.DownloadItems(drive.id, item.id, @"D:\01_NCS_Project\New folder");
+            var response = api.DownloadItems(drive.id, item.id, @"");
         }
 
         [Test]
@@ -139,6 +139,17 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
                     TryIT.MicrosoftGraphApi.Request.Sharepoint.AddPermissionRequest.PermissionRole.read
                 },
             });
+        }
+
+        [Test]
+        public async Task CreateLinkTest()
+        {
+            SharepointApi api = new SharepointApi(config);
+            string driveId = "";
+            string itemId = "";
+            var response = await api.CreateLinkAsync(driveId, itemId, new TryIT.MicrosoftGraphApi.Request.Sharepoint.CreateLinkRequest.Body { });
+
+            Assert.IsNotEmpty(response.link.webUrl);
         }
 
         public class ListItem

@@ -456,5 +456,17 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return await _helper.DeletePermissionAsync(driveId, itemId, permissionId);
         }
         #endregion
+
+        /// <summary>
+        /// Create sharing link, https://learn.microsoft.com/en-us/graph/api/driveitem-createlink?view=graph-rest-1.0&tabs=http 
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="requestBody"></param>
+        /// <returns></returns>
+        public async Task<CreateLinkResponse.Response> CreateLinkAsync(string driveId, string itemId, CreateLinkRequest.Body requestBody)
+        {
+            return await _helper.CreateLinkAsync(driveId, itemId, requestBody);
+        }
     }
 }
