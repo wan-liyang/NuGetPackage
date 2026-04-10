@@ -11,6 +11,14 @@ namespace TryIT.MicrosoftGraphApi.Model
     public class BaseApiConfig
     {
         /// <summary>
+        /// Initialize Headers dictionary
+        /// </summary>
+        public BaseApiConfig()
+        {
+            Headers = new Dictionary<string, string>();
+        }
+
+        /// <summary>
         /// determine request timeout second, default is 100 seconds, https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.timeout?view=net-7.0
         /// </summary>
         public double TimeoutSecond { get; set; }
