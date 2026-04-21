@@ -1,5 +1,12 @@
-﻿namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
 {
+
     /// <summary>
     /// database connector configuration
     /// </summary>
@@ -39,5 +46,10 @@
         /// access token use for Azure AD authentication when connect to Azure SQL, can get via <see cref="Helper.AzureSqlTokenHelper.GetToken(AzureServicePrincipal)"/>
         /// </summary>
         public string AccessToken { get; set; }
+
+        /// <summary>
+        /// log delegate for database operations, it will be called before and after command execution, and when error happens
+        /// </summary>
+        public DbLogDelegate DbLogDelegate { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient.AlwaysEncrypted.AzureKeyVaultProvider;
 using Polly;
 using Polly.Retry;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -26,7 +27,11 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         private readonly ConnectorConfig _config;
         
         private readonly List<RetryResult> _retryResults = new List<RetryResult>();
-        
+        private readonly DbLogDelegate _dbLogDelegate;
+
+        private readonly string _dataSource;
+        private readonly string _database;
+
         /// <summary>
         /// retry results
         /// </summary>
@@ -55,6 +60,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentException($"{nameof(config.ConnectionString)} is null or empty");
             }
             _config = config;
+
+            _dbLogDelegate = config.DbLogDelegate;
+
+            // parse data source and database from connection string for logging use
+            var builder = new SqlConnectionStringBuilder(config.ConnectionString);
+            _dataSource = builder.DataSource;
+            _database = builder.InitialCatalog;
 
             var Buider = GetBuilder(config.RetryProperty);
 
@@ -406,9 +418,50 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 throw new ArgumentNullException(nameof(sql));
             }
 
+
+            var startTime = DateTimeOffset.UtcNow;
+            string traceId = GetTraceId();
+            Exception exception = null;
+            TResult result = default;
+
+            var context = CorrelationContextAccessor.Current;
+
             try
             {
-                return await _pipeline.ExecuteAsync(async exec =>
+                // 🔥 Fire-and-forget logging (non-blocking)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var logContext = new DbLogContext
+                        {
+                            TraceId = traceId, // implement based on your context
+                            Stage = LogStage.BeforeExecute,
+                            Provider = "SqlServer",
+                            Database = _database, // optional: extract from connection if needed
+                            DataSource = _dataSource, // optional
+                            CommandText = SanitizeSql(sql),
+                            CommandType = commandType,
+                            Parameters = BuildParameters(parameters),
+                            //RowsAffected = TryGetResultCountSafe(result),
+                            //DurationMs = durationMs,
+                            StartTimeUtc = startTime,
+                            //EndTimeUtc = endTime,
+                            //Exception = exception,
+                            CorrelationId = context?.CorrelationId,
+                            CorrelationExtra = context?.CorrelationExtra,
+                            InTransaction = false // enhance if you support transaction
+                        };
+
+                        await SafeLogAsync(logContext);
+                    }
+                    catch
+                    {
+                        // 🚫 NEVER throw from logging
+                    }
+                });
+
+                result = await _pipeline.ExecuteAsync(async exec =>
                 {
                     using (SqlConnection sqlConnection = await OpenConectionAsync(cancellationToken))
                     {
@@ -427,11 +480,113 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                         }
                     }
                 }, cancellationToken);
+
+                return result;
             }
             catch (Exception ex)
             {
+                exception = ex;
                 AddExcetionData(ex);
                 throw;
+            }
+            finally
+            {
+                var endTime = DateTimeOffset.UtcNow;
+                var durationMs = (long)(endTime - startTime).TotalMilliseconds;
+
+                // 🔥 Fire-and-forget logging (non-blocking)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var logContext = new DbLogContext
+                        {
+                            TraceId = traceId, // implement based on your context
+                            Stage = exception == null ? LogStage.AfterExecute : LogStage.OnError,
+                            //Provider = "SqlServer",
+                            //Database = null, // optional: extract from connection if needed
+                            //DataSource = null, // optional
+                            //CommandText = SanitizeSql(sql),
+                            //CommandType = commandType,
+                            //Parameters = BuildParameters(parameters),
+                            RowsAffected = TryGetResultCountSafe(result),
+                            DurationMs = durationMs,
+                            StartTimeUtc = startTime,
+                            EndTimeUtc = endTime,
+                            Exception = exception,
+                            //InTransaction = false // enhance if you support transaction
+                        };
+
+                        await SafeLogAsync(logContext);
+                    }
+                    catch
+                    {
+                        // 🚫 NEVER throw from logging
+                    }
+                });
+            }
+        }
+
+        private static int? TryGetResultCountSafe<TResult>(TResult result)
+        {
+            switch (result)
+            {
+                case DataTable dt:
+                    return dt.Rows.Count;
+
+                case IList list:
+                    return list.Count;
+
+                default:
+                    return null;
+            }
+        }
+
+        private static string GetTraceId()
+        {
+            return System.Diagnostics.Activity.Current?.Id
+                   ?? Guid.NewGuid().ToString();
+        }
+
+
+        private static string SanitizeSql(string sql)
+        {
+            // Keep it lightweight — DO NOT do heavy regex here
+            return sql;
+        }
+
+        private static IDictionary<string, object> BuildParameters(SqlParameter[] parameters)
+        {
+            if (parameters == null) return null;
+
+            return parameters.ToDictionary(
+                p => p.ParameterName,
+                p => IsSensitive(p.ParameterName) ? "***" : p.Value
+            );
+        }
+
+        private static bool IsSensitive(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return false;
+
+            name = name.ToLowerInvariant();
+
+            return name.Contains("password")
+                || name.Contains("token")
+                || name.Contains("secret");
+        }
+
+        private async Task SafeLogAsync(DbLogContext context)
+        {
+            if (_dbLogDelegate == null) return;
+            try
+            {
+                await _dbLogDelegate.Invoke(context);
+            }
+            catch
+            {
+                // Optionally: log to fallback mechanism (Debug.WriteLine, EventLog, etc.)
+                // But never throw - logging must not break the flow
             }
         }
 

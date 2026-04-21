@@ -23,11 +23,19 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
 
             ConnectorConfig config = new ConnectorConfig
             {
-                ConnectionString = "Server={server};Database=master;Trusted_Connection=True;TrustServerCertificate=True",
+                DbLogDelegate = LogDelegate,
+                ConnectionString = "Server={serverName};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True",
                 TimeoutSecond = 10 * 60 // 10 minute
             };
             dbConnector = new DbConnector(config);
         }
+
+        private async Task LogDelegate(DbLogContext context)
+        {
+            // Here you can implement your logging logic, for example:
+            Console.WriteLine($"[{context.Stage}] {context.Provider} - {context.Database} - {context.CommandText}");
+        }
+
         [Test]
         public void CopyData()
         {
@@ -60,11 +68,37 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
         [Test]
         public async Task Test_ExecuteScalarAsync()
         {
-            string sql = "SELECT GETDATE()";
+            var correlationContext = new DbCorrelationContext
+            {
+                CorrelationId = Guid.NewGuid().ToString(),
+                CorrelationExtra = new Dictionary<string, string>
+                {
+                    { "TestKey", "TestValue" }
+                }
+            };
 
-            var result = await dbConnector.ExecuteScalarAsync<DateTime>(sql, CommandType.Text, null);
+            using (new CorrelationScope(correlationContext))
+            {
+                string sql = "SELECT GETDATE()";
+                var result = await dbConnector.ExecuteScalarAsync<DateTime>(sql, CommandType.Text, null);
+                Assert.IsTrue(result > DateTime.MinValue, "Result should be a valid DateTime");
+            }
 
-            Assert.IsTrue(result > DateTime.MinValue, "Result should be a valid DateTime");
+            var correlationContext2 = new DbCorrelationContext
+            {
+                CorrelationId = Guid.NewGuid().ToString(),
+                CorrelationExtra = new Dictionary<string, string>
+                {
+                    { "TestKey2", "TestValue2" }
+                }
+            };
+
+            using (new CorrelationScope(correlationContext2))
+            {
+                string sql = "SELECT GETDATE()";
+                var result = await dbConnector.ExecuteScalarAsync<DateTime>(sql, CommandType.Text, null);
+                Assert.IsTrue(result > DateTime.MinValue, "Result should be a valid DateTime");
+            }
         }
 
         [Test]
