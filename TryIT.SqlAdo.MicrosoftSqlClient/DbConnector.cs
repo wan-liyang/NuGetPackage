@@ -499,22 +499,24 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 {
                     try
                     {
+                        // keep original BeginExecute context, in case the logger only want to log once after execution, and use the context info to determine whether log or not, e.g. only log when exception happens, or only log when execution duration longer than certain threshold, etc.
                         var logContext = new DbLogContext
                         {
                             TraceId = traceId, // implement based on your context
                             Stage = exception == null ? LogStage.AfterExecute : LogStage.OnError,
-                            //Provider = "SqlServer",
-                            //Database = null, // optional: extract from connection if needed
-                            //DataSource = null, // optional
-                            //CommandText = SanitizeSql(sql),
-                            //CommandType = commandType,
-                            //Parameters = BuildParameters(parameters),
+                            Provider = "SqlServer",
+                            Database = _database, // optional: extract from connection if needed
+                            DataSource = _dataSource, // optional
+                            CommandText = SanitizeSql(sql),
+                            CommandType = commandType,
+                            Parameters = BuildParameters(parameters),
                             RowsAffected = TryGetResultCountSafe(result),
                             DurationMs = durationMs,
                             StartTimeUtc = startTime,
                             EndTimeUtc = endTime,
-                            Exception = exception,
-                            //InTransaction = false // enhance if you support transaction
+                            CorrelationId = context?.CorrelationId,
+                            CorrelationExtra = context?.CorrelationExtra,
+                            InTransaction = false // enhance if you support transaction
                         };
 
                         await SafeLogAsync(logContext);
