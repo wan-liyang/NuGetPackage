@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using TryIT.SqlAdo.MicrosoftSqlClient.Models;
+using TryIT.SqlAdo.MicrosoftSqlClient.Attributes;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 {
@@ -35,6 +35,33 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             var properties = GetPropertyInfos<T>();
 
             return properties?.Where(p => p.GetCustomAttributes(attributeType, true).Any()).ToArray();
+        }
+
+        private static List<string> GetIdentityFields<T>()
+        {
+            var properties = GetPropertyInfosWithAttribute<T>(typeof(SqlIdentityAttribute));
+
+            return properties?.Select(p => p.Name).ToList();
+        }
+
+        private static string GetReturnFieldSql<T>()
+        {
+            var sql_return = new StringBuilder();
+            var sql_return_script = string.Empty;
+            var returnFields = GetPropertyInfosWithAttribute<T>(typeof(SqlOutputAttribute));
+            if (returnFields != null && returnFields.Any())
+            {
+                sql_return.Append("OUTPUT ");
+
+                foreach (var columnName in returnFields.Select(p => p.Name))
+                {
+                    sql_return.Append($"INSERTED.{SqlHelper.SqlWarpColumn(columnName)},");
+                }
+
+                sql_return_script = sql_return.ToString().TrimEnd(',');
+            }
+
+            return sql_return_script;
         }
 
         /// <summary>
@@ -148,6 +175,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 
         /// <summary>
         /// generate update sql script based on <paramref name="entity"/>, the property from <paramref name="entity"/> must has at least one property with <see cref="KeyAttribute"/> to use as where condition, also must at least one property without <see cref="KeyAttribute"/> to perform update
+        /// <para>for identity column please mark with <see cref="SqlIdentityAttribute"/>, the identity column will be ignore in insert or update statement, also for return column please mark with <see cref="SqlOutputAttribute"/>, the return column will be included in output statement</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="tableName"></param>
@@ -173,19 +201,22 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             var parameters = new List<SqlParameter>();
 
             var properties = GetPropertyInfos<T>();
+
+            var identityFields = GetIdentityFields<T>();
+
             foreach (var prop in properties)
             {
                 string columnName = prop.Name;
 
-                // sql parameters
-                object value = GetDbValueForProperty(prop, entity);
-                parameters.Add(new SqlParameter($"@{columnName}", value));
-
-                // sql update
+                bool isIdentity = identityFields != null && identityFields.Contains(columnName);
                 bool isKey = prop.GetCustomAttribute(typeof(KeyAttribute)) != null;
 
                 if (isKey)
                 {
+                    // sql parameters
+                    object value = GetDbValueForProperty(prop, entity);
+                    parameters.Add(new SqlParameter($"@{columnName}", value));
+
                     if (value == DBNull.Value)
                     {
                         throw new ArgumentNullException($"the key [{columnName}] must not be null");
@@ -198,15 +229,21 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                     // indicate whether the field can be update
                     bool isNotUpdatable = CheckPropertyAttribute(prop, typeof(SqlUpdatableAttribute), "IsUpdatable", false);
 
-                    if (!isNotUpdatable)
+                    if (!isNotUpdatable && !isIdentity)
                     {
+                        // sql parameters
+                        object value = GetDbValueForProperty(prop, entity);
+                        parameters.Add(new SqlParameter($"@{columnName}", value));
+
                         columns_values_update.Append($"{SqlHelper.SqlWarpColumn(columnName)} = @{columnName},");
                     }
                 }
             }
 
+            var sql_return_script = GetReturnFieldSql<T>();
+
             string sqlWhere = TrimEnd(columns_values_update_where.ToString(), " AND ");
-            string sql = $"UPDATE {tableName} SET {columns_values_update.ToString().TrimEnd(',')} WHERE {sqlWhere}";
+            string sql = $"UPDATE {tableName} SET {columns_values_update.ToString().TrimEnd(',')} {sql_return_script} WHERE {sqlWhere}";
 
             return (sql, parameters);
         }
@@ -254,6 +291,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 
         /// <summary>
         /// generate sql script to insert record in table
+        /// <para>for identity column please mark with <see cref="SqlIdentityAttribute"/>, the identity column will be ignore in insert or update statement, also for return column please mark with <see cref="SqlOutputAttribute"/>, the return column will be included in output statement</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="tableName"></param>
@@ -263,12 +301,23 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         {
             tableName = SqlHelper.SqlWarpTable(tableName);
             var properties = GetPropertyInfos<T>();
+
             var columns_insert = new StringBuilder();
             var values_insert = new StringBuilder();
             var parameters = new List<SqlParameter>();
+
+            var identityFields = GetIdentityFields<T>();
+
             foreach (var prop in properties)
             {
                 string columnName = prop.Name;
+                bool isIdentity = identityFields != null && identityFields.Contains(columnName);
+
+                if (isIdentity)
+                {
+                    continue;
+                }
+
                 // sql parameters
                 object value = GetDbValueForProperty(prop, entity);
                 parameters.Add(new SqlParameter($"@{columnName}", value));
@@ -281,12 +330,16 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                 columns_insert.Append(SqlHelper.SqlWarpColumn(columnName));
                 values_insert.Append($"@{columnName}");
             }
-            string sql = $"INSERT INTO {tableName} ({columns_insert}) VALUES ({values_insert})";
+
+            var sql_return_script = GetReturnFieldSql<T>();
+
+            string sql = $"INSERT INTO {tableName} ({columns_insert}) {sql_return_script} VALUES ({values_insert})";
             return (sql, parameters);
         }
 
         /// <summary>
         /// generate sql script to insert or update record in table, if the entity has property with <see cref="KeyAttribute"/>, the script will perform update if record exists, otherwise insert new record
+        /// <para>for identity column please mark with <see cref="SqlIdentityAttribute"/>, the identity column will be ignore in insert or update statement, also for return column please mark with <see cref="SqlOutputAttribute"/>, the return column will be included in output statement</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="tableName"></param>
@@ -308,24 +361,29 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
             var columns_values_update = new StringBuilder();
             var columns_values_update_where = new StringBuilder();
 
+            var identityFields = GetIdentityFields<T>();
+
             foreach (var prop in properties)
             {
                 string columnName = prop.Name;
+                bool isIdentity = identityFields != null && identityFields.Contains(columnName);
 
                 // sql parameters
                 object value = GetDbValueForProperty(prop, entity);
                 parameters.Add(new SqlParameter($"@{columnName}", value));
 
-                // sql insert
-                if (columns_insert.Length > 0)
+                // sql insert, skip identity column
+                if (!isIdentity)
                 {
-                    columns_insert.Append(", ");
-                    values_insert.Append(", ");
+                    if (columns_insert.Length > 0)
+                    {
+                        columns_insert.Append(", ");
+                        values_insert.Append(", ");
+                    }
+
+                    columns_insert.Append(SqlHelper.SqlWarpColumn(columnName));
+                    values_insert.Append($"@{columnName}");
                 }
-
-                columns_insert.Append(SqlHelper.SqlWarpColumn(columnName));
-                values_insert.Append($"@{columnName}");
-
 
                 // sql update
                 bool isKey = prop.GetCustomAttribute(typeof(KeyAttribute)) != null;
@@ -345,17 +403,19 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                     // indicate whether the field can be update
                     bool isNotUpdatable = CheckPropertyAttribute(prop, typeof(SqlUpdatableAttribute), "IsUpdatable", false);
 
-                    if (!isNotUpdatable)
+                    if (!isNotUpdatable || !isIdentity)
                     {
                         columns_values_update.Append($"{SqlHelper.SqlWarpColumn(columnName)} = @{columnName},");
                     }
                 }
             }
 
+            var sql_return_script = GetReturnFieldSql<T>();
+
             string sql = string.Empty;
             string sqlWhere = TrimEnd(columns_values_update_where.ToString(), " AND ");
-            string sqlUpdate = $"UPDATE {tableName} SET {columns_values_update.ToString().TrimEnd(',')} WHERE {sqlWhere}";
-            string sqlInsert = $"INSERT INTO {tableName} ({columns_insert}) VALUES ({values_insert})";
+            string sqlUpdate = $"UPDATE {tableName} SET {columns_values_update.ToString().TrimEnd(',')} {sql_return_script} WHERE {sqlWhere}";
+            string sqlInsert = $"INSERT INTO {tableName} ({columns_insert}) {sql_return_script} VALUES ({values_insert})";
 
             if (hasKey)
             {

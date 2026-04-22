@@ -1,7 +1,10 @@
-﻿using System.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Data;
 using TryIT.ObjectExtension;
 using TryIT.SqlAdo.MicrosoftSqlClient;
+using TryIT.SqlAdo.MicrosoftSqlClient.Attributes;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
+using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
@@ -134,6 +137,68 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
                 }
             };
             dbConnector.CopyData(copyDataModel);
+        }
+
+        [Test]
+        public async Task GereateInsertSql_Test()
+        {
+            // dbo.Test_20231020
+
+            var obj = new TestGenrateScript
+            {
+                Text = "Test Value"
+            };
+
+            var sqlGenerator = SqlGenerator.GenerateInsertSql("dbo.Test_20260422", obj);
+
+            var result = await dbConnector.ExecuteScalarAsync<int>(sqlGenerator.Sql, CommandType.Text, sqlGenerator.Parameters.ToArray());
+
+            Assert.That(result, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task GenerateUpdateSql_Test()
+        {
+            // Assume a record with Id = 1 already exists in dbo.Test_20260422
+            var obj = new TestGenrateScript
+            {
+                Id = 1,
+                Text = "Updated Value"
+            };
+
+            var sqlGenerator = SqlGenerator.GenerateUpdateSql("dbo.Test_20260422", obj);
+
+            // If your update returns OUTPUT INSERTED.Id, use ExecuteScalarAsync
+            var result = await dbConnector.ExecuteScalarAsync<int>(sqlGenerator.Sql, CommandType.Text, sqlGenerator.Parameters.ToArray());
+
+            Assert.That(result, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task GenerateInsertUpdateSql_Test()
+        {
+            // If Id = 2 does not exist, this will insert; if it exists, it will update
+            var obj = new TestGenrateScript
+            {
+                Id = 2,
+                Text = "InsertOrUpdate Value"
+            };
+
+            var sqlGenerator = SqlGenerator.GenerateInsertUpdateSql("dbo.Test_20260422", obj);
+
+            // If your insert/update returns OUTPUT INSERTED.Id, use ExecuteScalarAsync
+            var result = await dbConnector.ExecuteScalarAsync<int>(sqlGenerator.Sql, CommandType.Text, sqlGenerator.Parameters.ToArray());
+
+            Assert.That(result, Is.EqualTo(2));
+        }
+
+        public class TestGenrateScript
+        {
+            [Key]
+            [SqlOutput]
+            [SqlIdentity]
+            public int Id { get; set; }
+            public string Text { get; set; }
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TryIT.SqlAdo.MicrosoftSqlClient.Models
+namespace TryIT.SqlAdo.MicrosoftSqlClient.Attributes
 {
     /// <summary>  
     /// Get or set if the property is updatable in SQL  
