@@ -38,6 +38,65 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
         }
 
         /// <summary>
+        /// Generate select sql script based on <paramref name="entity"/>, using the provided list of key property names for the WHERE clause.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tableName"></param>
+        /// <param name="entity"></param>
+        /// <param name="keyPropertyNames">List of property names to use as keys in the WHERE clause</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public static (string Sql, List<SqlParameter> Parameters) GenerateSelectSql<T>(string tableName, T entity, List<string> keyPropertyNames)
+        {
+            if (keyPropertyNames == null || !keyPropertyNames.Any())
+            {
+                throw new ArgumentNullException(nameof(keyPropertyNames), "Key property names list must not be null or empty.");
+            }
+
+            tableName = SqlHelper.SqlWarpTable(tableName);
+
+            var columns_values_select = new StringBuilder();
+            var columns_values_where = new StringBuilder();
+            var parameters = new List<SqlParameter>();
+
+            var properties = GetPropertyInfos<T>();
+            var propertyDict = properties.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var prop in properties)
+            {
+                string columnName = prop.Name;
+                columns_values_select.Append($"{SqlHelper.SqlWarpColumn(columnName)},");
+            }
+
+            foreach (var keyName in keyPropertyNames)
+            {
+                if (!propertyDict.TryGetValue(keyName, out var prop))
+                {
+                    throw new ArgumentException($"Key property '{keyName}' does not exist on type {typeof(T)}.");
+                }
+                object value = GetDbValueForProperty(prop, entity);
+                if (value == DBNull.Value)
+                {
+                    throw new ArgumentNullException($"the key [{keyName}] must not be null");
+                }
+                parameters.Add(new SqlParameter($"@{keyName}", value));
+                columns_values_where.Append($"{SqlHelper.SqlWarpColumn(keyName)} = @{keyName} AND ");
+            }
+
+            string sql = $"SELECT {columns_values_select.ToString().TrimEnd(',')} FROM {tableName} WITH(NOLOCK)";
+
+            if (columns_values_where.Length > 0)
+            {
+                string sqlWhere = TrimEnd(columns_values_where.ToString(), " AND ");
+                sql += $" WHERE {sqlWhere}";
+            }
+
+            return (sql, parameters);
+        }
+
+
+        /// <summary>
         /// generate select sql script based on <paramref name="entity"/>, if <paramref name="entity"/> has property with <see cref="KeyAttribute"/>, that property will be use as where condition also
         /// </summary>
         /// <typeparam name="T"></typeparam>

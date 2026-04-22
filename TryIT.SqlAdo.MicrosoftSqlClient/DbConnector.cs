@@ -419,12 +419,13 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             }
 
 
+            var context = CorrelationContextAccessor.Current;
             var startTime = DateTimeOffset.UtcNow;
             string traceId = GetTraceId();
+            string correlationId = context?.CorrelationId ?? Guid.NewGuid().ToString();
             Exception exception = null;
             TResult result = default;
 
-            var context = CorrelationContextAccessor.Current;
 
             try
             {
@@ -448,7 +449,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             StartTimeUtc = startTime,
                             //EndTimeUtc = endTime,
                             //Exception = exception,
-                            CorrelationId = context?.CorrelationId,
+                            CorrelationId = correlationId,
                             CorrelationExtra = context?.CorrelationExtra,
                             InTransaction = false // enhance if you support transaction
                         };
@@ -514,7 +515,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             DurationMs = durationMs,
                             StartTimeUtc = startTime,
                             EndTimeUtc = endTime,
-                            CorrelationId = context?.CorrelationId,
+                            CorrelationId = correlationId,
                             CorrelationExtra = context?.CorrelationExtra,
                             InTransaction = false // enhance if you support transaction
                         };
