@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
+using TryIT.SqlAdo.MicrosoftSqlClient.Validations;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient
 {
@@ -754,7 +755,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                     */
                 _copyMode.ColumnMappings = ResetColumnMap(_copyMode.SourceData, _copyMode.ColumnMappings);
-                ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
+                ColumnMapValidation.ValidateColumnMap(_copyMode.SourceData, targetTableStructure, _copyMode.ColumnMappings);
 
                 tobeCopyModes.Add(new DataCopyInfo
                 {
@@ -807,6 +808,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 {
                                     try
                                     {
+                                        ColumnMapValidation.PrimaryKeyExistsInColumnMap(insertUpdateMode.PrimaryKeys, insertUpdateMode.ColumnMappings);
                                         Upsert_Encrypted(insertUpdateMode, sqlConnection, transaction, alwaysEncryptedColumns);
                                     }
                                     catch (Exception ex)
@@ -818,6 +820,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                                 {
                                     try
                                     {
+                                        ColumnMapValidation.PrimaryKeyExistsInColumnMap(insertUpdateMode.PrimaryKeys, insertUpdateMode.ColumnMappings);
                                         UpsertToDestination(insertUpdateMode, sqlConnection, transaction, targetTableStructure);
                                     }
                                     catch (Exception ex)
@@ -835,6 +838,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
                                 try
                                 {
+                                    ColumnMapValidation.PrimaryKeyExistsInColumnMap(updateMode.PrimaryKeys, updateMode.ColumnMappings);
                                     UpdateToDestination(updateMode, sqlConnection, transaction, targetTableStructure);
                                 }
                                 catch (Exception ex)
@@ -965,51 +969,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
             return map;
         }
 
-        /// <summary>
-        /// validate column map against source DataTable and target Database Table Strucutre
-        /// </summary>
-        /// <param name="sourceTable"></param>
-        /// <param name="targetTableStructure"></param>
-        /// <param name="columnMap">expected source to target column map, if empty then will skip this validation</param>
-        /// <exception cref="Exception"></exception>
-        private static void ValidateColumnMap(DataTable sourceTable, List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
-        {
-            if (columnMap != null && columnMap.Count > 0)
-            {
-                // validate column mapping appear in source table
-                ValidateColumnMap_Source(sourceTable, columnMap);
-
-                // validate column mapping appear in target table
-                ValidateColumnMap_Target(targetTableStructure, columnMap);
-            }
-        }
-
-        private static void ValidateColumnMap_Source(DataTable sourceTable, Dictionary<string, string> columnMap)
-        {
-            List<string> sourceColumns = new List<string>();
-            foreach (DataColumn item in sourceTable.Columns)
-            {
-                sourceColumns.Add(item.ColumnName);
-            }
-            var notExists = columnMap.Where(map => !sourceColumns.Exists(s => s.Equals(map.Key, StringComparison.OrdinalIgnoreCase))).Select(p => p.Key).ToList();
-            if (notExists != null && notExists.Count > 0)
-            {
-                throw new ArgumentException($"column map not found in source data table: {string.Join(", ", notExists)}");
-            }
-        }
-
-        private static void ValidateColumnMap_Target(List<DbTableStructure> targetTableStructure, Dictionary<string, string> columnMap)
-        {
-            string targetTable = targetTableStructure[0].TABLE_NAME;
-
-            var notExists = columnMap.Where(map => !targetTableStructure.Exists(t => t.COLUMN_NAME.Equals(map.Value, StringComparison.OrdinalIgnoreCase))).Select(p => p.Value).ToList();
-            if (notExists != null && notExists.Count > 0)
-            {
-                throw new ArgumentException($"column map not found in target database, table: {targetTable}, column: {string.Join(", ", notExists)}");
-            }
-        }
-
-
         #region do Update
         /// <summary>
         /// perform insert or update action, 1) write data into temp table, 2) insert or update to target table join with temp table, 3) delete temp table
@@ -1022,11 +981,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <exception cref="Exception"></exception>
         private void UpdateToDestination(UpdateCopyMode copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
         {
-            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
-            {
-                throw new ArgumentException("Primary Key is mandatory for UpdateInsert copy mode");
-            }
-
             // write data into temp table
             string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction, targetTableStructure);
 
@@ -1113,11 +1067,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <exception cref="Exception"></exception>
         private void UpsertToDestination(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<DbTableStructure> targetTableStructure)
         {
-            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
-            {
-                throw new ArgumentException("Primary Key is mandatory for UpdateInsert copy mode");
-            }
-
             // write data into temp table
             string tempTable = WriteDataIntoTempTable(copyMode, sqlConnection, transaction, targetTableStructure);
 
@@ -1277,11 +1226,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
         /// <param name="alwaysEncryptedColumns"></param>
         private void Upsert_Encrypted(CopyMode_InsertUpdate copyMode, SqlConnection sqlConnection, SqlTransaction transaction, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
         {
-            if (copyMode.PrimaryKeys == null || copyMode.PrimaryKeys.Count == 0)
-            {
-                throw new ArgumentException("Primary Key is mandatory for UpdateInsert copy mode");
-            }
-
             ConsoleLog("upsert with always encrypted started");
 
             string sql_where = "";
@@ -1389,28 +1333,6 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 ConsoleLog($"{copyMode.SourceData.Rows.Count} exec posted");
             }
             ConsoleLog("upsert with always encrypted completed");
-        }
-
-        /// <summary>
-        /// get always encrypted column information, return null if not exists
-        /// </summary>
-        /// <param name="columnName"></param>
-        /// <param name="alwaysEncryptedColumns"></param>
-        /// <returns></returns>
-        private static AlwaysEncryptedColumn GetAlwaysEncryptedColumn(string columnName, List<AlwaysEncryptedColumn> alwaysEncryptedColumns)
-        {
-            return alwaysEncryptedColumns.FirstOrDefault(p => p.ColumnName.Equals(columnName));
-        }
-
-        private static void PostIntoDb(SqlConnection sqlConnection, SqlTransaction sqlTransaction, string sql, SqlParameter[] sqlParameters)
-        {
-            using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, sqlTransaction))
-            {
-                sqlCommand.CommandTimeout = 10 * 60;
-                sqlCommand.Parameters.Clear();
-                sqlCommand.Parameters.AddRange(sqlParameters);
-                sqlCommand.ExecuteNonQuery();
-            }
         }
         #endregion
 
