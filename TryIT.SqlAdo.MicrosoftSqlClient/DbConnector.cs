@@ -516,6 +516,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                             DurationMs = durationMs,
                             StartTimeUtc = startTime,
                             EndTimeUtc = endTime,
+                            Exception = exception,
                             CorrelationId = correlationId,
                             CorrelationExtra = context?.CorrelationExtra,
                             InTransaction = false // enhance if you support transaction

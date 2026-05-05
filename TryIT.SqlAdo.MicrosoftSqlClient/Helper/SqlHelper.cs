@@ -316,6 +316,8 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
                         break;
                     case "DECIMAL":
                         sqlParameter.SqlDbType = SqlDbType.Decimal;
+                        sqlParameter.Precision = checked((byte)alwaysEncryptedColumn.Precision);
+                        sqlParameter.Scale = checked((byte)alwaysEncryptedColumn.Scale);
                         break;
                     case "INT":
                         sqlParameter.SqlDbType = SqlDbType.Int;
