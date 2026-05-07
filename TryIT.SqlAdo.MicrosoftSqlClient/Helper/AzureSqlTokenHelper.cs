@@ -1,46 +1,112 @@
 ﻿using Microsoft.Identity.Client;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
 namespace TryIT.SqlAdo.MicrosoftSqlClient.Helper
 {
     /// <summary>
-    /// get azure sql access token for a service principal
+    /// Provides Azure SQL access tokens
+    /// using Azure AD service principal authentication.
     /// </summary>
     public static class AzureSqlTokenHelper
     {
-        private static string _cachedToken = null;
-        private static DateTimeOffset _tokenExpiry = DateTimeOffset.MinValue;
-        private static readonly object _lock = new object();
+        /// <summary>
+        /// Azure SQL scope
+        /// </summary>
+        private static readonly string[] _scopes =
+        {
+            "https://database.windows.net/.default"
+        };
 
         /// <summary>
-        /// get access token
+        /// Cache MSAL application instances by tenant/client combination
         /// </summary>
-        /// <returns></returns>
+        private static readonly ConcurrentDictionary<string, Lazy<IConfidentialClientApplication>> _applications = new ConcurrentDictionary<string, Lazy<IConfidentialClientApplication>>();
+
+        /// <summary>
+        /// Get access token
+        /// </summary>
+        /// <param name="servicePrincipal">Azure service principal</param>
+        /// <returns>Access token</returns>
+        public static async Task<string> GetTokenAsync(AzureServicePrincipal servicePrincipal)
+        {
+            if (servicePrincipal == null)
+            {
+                throw new ArgumentNullException(nameof(servicePrincipal));
+            }
+
+            ValidateServicePrincipal(servicePrincipal);
+
+            string cacheKey = BuildCacheKey(servicePrincipal);
+
+            var app = _applications.GetOrAdd(
+                cacheKey,
+                _ => new Lazy<IConfidentialClientApplication>(
+                    () => BuildApplication(servicePrincipal),
+                    LazyThreadSafetyMode.ExecutionAndPublication))
+                .Value;
+
+            var result = await app
+                .AcquireTokenForClient(_scopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            return result.AccessToken;
+        }
+
+        /// <summary>
+        /// Get access token (synchronous wrapper)
+        /// </summary>
+        /// <param name="servicePrincipal">Azure service principal</param>
+        /// <returns>Access token</returns>
         public static string GetToken(AzureServicePrincipal servicePrincipal)
         {
-            lock (_lock)
+            return GetTokenAsync(servicePrincipal)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Build MSAL confidential client application
+        /// </summary>
+        private static IConfidentialClientApplication BuildApplication(AzureServicePrincipal servicePrincipal)
+        {
+            return ConfidentialClientApplicationBuilder
+                .Create(servicePrincipal.ClientId)
+                .WithClientSecret(servicePrincipal.ClientSecret)
+                .WithAuthority($"https://login.microsoftonline.com/{servicePrincipal.TenantId}")
+                .Build();
+        }
+
+        /// <summary>
+        /// Build cache key
+        /// </summary>
+        private static string BuildCacheKey(AzureServicePrincipal servicePrincipal)
+        {
+            return $"{servicePrincipal.TenantId}|{servicePrincipal.ClientId}";
+        }
+
+        /// <summary>
+        /// Validate service principal configuration
+        /// </summary>
+        private static void ValidateServicePrincipal(AzureServicePrincipal servicePrincipal)
+        {
+            if (string.IsNullOrWhiteSpace(servicePrincipal.TenantId))
             {
-                if (_cachedToken != null && DateTimeOffset.UtcNow < _tokenExpiry.AddMinutes(-5))
-                {
-                    return _cachedToken;
-                }
+                throw new ArgumentException("TenantId is required.");
+            }
 
-                var app = ConfidentialClientApplicationBuilder.Create(servicePrincipal.ClientId)
-                    .WithClientSecret(servicePrincipal.ClientSecret)
-                    .WithAuthority(new Uri($"https://login.microsoftonline.com/{servicePrincipal.TenantId}"))
-                    .Build();
+            if (string.IsNullOrWhiteSpace(servicePrincipal.ClientId))
+            {
+                throw new ArgumentException("ClientId is required.");
+            }
 
-                string[] scopes = new[] { "https://database.windows.net/.default" };
-
-                var result = app.AcquireTokenForClient(scopes).ExecuteAsync().GetAwaiter().GetResult();
-
-                _cachedToken = result.AccessToken;
-                _tokenExpiry = result.ExpiresOn;
-
-                return _cachedToken;
+            if (string.IsNullOrWhiteSpace(servicePrincipal.ClientSecret))
+            {
+                throw new ArgumentException("ClientSecret is required.");
             }
         }
     }

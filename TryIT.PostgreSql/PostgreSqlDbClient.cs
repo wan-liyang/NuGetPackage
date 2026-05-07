@@ -1,21 +1,44 @@
-﻿using Npgsql;
+﻿using Azure.Core;
+using Npgsql;
 
-namespace TryIT.PostgreSQL
+namespace TryIT.PostgreSql
 {
     /// <summary>
     /// Helper class for PostgreSQL database operations
     /// </summary>
-    public class PostgreSqlHelper
+    public class PostgreSqlDbClient
     {
         private readonly string _connStr;
+        private readonly TokenCredential _credential;
+        private static readonly string[] _scopes =
+        {
+            "https://ossrdbms-aad.database.windows.net/.default"
+        };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PostgreSqlHelper"/> class.
+        /// Initializes a new instance of the <see cref="PostgreSqlDbClient"/> class
         /// </summary>
         /// <param name="connectionString"></param>
-        public PostgreSqlHelper(string connectionString)
+        /// <param name="credential"></param>
+        public PostgreSqlDbClient(string connectionString, TokenCredential credential)
         {
-            _connStr = connectionString;
+            _connStr = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _credential = credential ?? throw new ArgumentNullException(nameof(credential));
+        }
+
+        private async Task<NpgsqlConnection> CreateConnectionAsync(CancellationToken cancellationToken)
+        {
+            var token = await _credential.GetTokenAsync(
+                new TokenRequestContext(_scopes),
+                cancellationToken);
+
+            // IMPORTANT: inject token via connection string BEFORE open
+            var builder = new NpgsqlConnectionStringBuilder(_connStr)
+            {
+                Password = token.Token
+            };
+
+            return new NpgsqlConnection(builder.ConnectionString);
         }
 
         private async Task<TResult> ExecuteAsync<TResult>(
@@ -24,7 +47,7 @@ namespace TryIT.PostgreSQL
             NpgsqlParameter[]? parameters = null,
             CancellationToken cancellationToken = default)
         {
-            await using var conn = new NpgsqlConnection(_connStr);
+            await using var conn = await CreateConnectionAsync(cancellationToken);
             await using var cmd = new NpgsqlCommand(sql, conn);
 
             if (parameters is { Length: > 0 })
@@ -73,7 +96,7 @@ namespace TryIT.PostgreSQL
             CancellationToken cancellationToken = default)
         {
             // ⚠️ We can’t use ExecuteAsync here because connection must remain open for reader lifetime
-            var conn = new NpgsqlConnection(_connStr);
+            var conn = await CreateConnectionAsync(cancellationToken);
             var cmd = new NpgsqlCommand(sql, conn);
 
             if (parameters is { Length: > 0 })
