@@ -226,6 +226,18 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
             return _helper.MoveFile(file.id, targetFolderUrl, targetFileName);
         }
 
+        /// <summary>
+        /// Move a driveItem to a new folder
+        /// </summary>
+        /// <param name="driveId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="requestBody"></param>
+        /// <returns></returns>
+        public async Task<GetDriveItemResponse.Item> MoveItemAsync(string driveId, string itemId, MoveItemRequest.Body requestBody)
+        {
+            return await _helper.MoveItemAsync(driveId, itemId, requestBody);
+        }
+
 
         [Obsolete("change to use DeleteDriveItem", true)]
         /// <summary>

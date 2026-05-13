@@ -1,14 +1,14 @@
 ﻿namespace TryIT.MicrosoftGraphApi.Request.Sharepoint
 {
-    internal class MoveItemRequest
+    public class MoveItemRequest
     {
-        internal class Body
+        public class Body
         {
             public ParentReference parentReference { get; set; }
             public string name { get; set; }
         }
 
-        internal class ParentReference
+        public class ParentReference
         {
             public string id { get; set; }
         }

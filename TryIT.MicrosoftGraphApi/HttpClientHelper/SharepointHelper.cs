@@ -373,6 +373,18 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return false;
         }
 
+        internal async Task<GetDriveItemResponse.Item> MoveItemAsync(string driveId, string itemId, MoveItemRequest.Body requestBody)
+        {
+            string url = $"{GraphApiRootUrl}/drives/{driveId}/items/{itemId}";
+
+            HttpContent httpContent = GetJsonHttpContent(requestBody);
+            var response = await RestApi.PatchAsync(url, httpContent);
+            CheckStatusCode(response, RestApi.RetryResults);
+            string content = await response.Content.ReadAsStringAsync();
+            var item = content.JsonToObject<GetDriveItemResponse.Item>();
+            return item;
+        }
+
         public bool DeleteItem(string folderUrl, string itemName)
         {
             var folder = GetFolder(folderUrl);
