@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web;
 using TryIT.MicrosoftGraphApi.Helper;
 using TryIT.MicrosoftGraphApi.Model;
 using TryIT.MicrosoftGraphApi.Model.Sharepoint;
@@ -583,6 +584,151 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             string content = await response.Content.ReadAsStringAsync();
             var item = content.JsonToObject<CreateLinkResponse.Response>();
             return item;
+        }
+
+        private enum SharePointHandlingType
+        {
+            Unknown,
+            ShareId,   // Use /shares/{shareId}/driveItem
+            ItemId     // Use /sites/.../lists/.../items/{id}/driveItem
+        }
+        private SharePointHandlingType ClassifyUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return SharePointHandlingType.Unknown;
+
+            var lowerUrl = url.ToLowerInvariant();
+
+            // ---- ItemId branch (requires site/list/item navigation) ----
+            if (lowerUrl.Contains("/forms/dispform.aspx") && lowerUrl.Contains("?id="))
+                return SharePointHandlingType.ItemId;
+            if (lowerUrl.Contains("/newform.aspx") || lowerUrl.Contains("/editform.aspx"))
+                return SharePointHandlingType.ItemId;
+            if (lowerUrl.Contains("/allitems.aspx"))
+                return SharePointHandlingType.ItemId;
+
+            // ---- ShareId branch (can be directly encoded and passed to /shares) ----
+            if ((lowerUrl.Contains("/doc.aspx") || lowerUrl.Contains("/wopiframe.aspx")) 
+                && lowerUrl.Contains("sourcedoc="))
+                return SharePointHandlingType.ShareId;
+            if (lowerUrl.Contains("/:f:/") || lowerUrl.Contains("/:x:/") || 
+                lowerUrl.Contains("/:v:/") || lowerUrl.Contains("/:i:/"))
+                return SharePointHandlingType.ShareId;
+            if (!lowerUrl.Contains("?") && HasFileExtension(lowerUrl))
+                return SharePointHandlingType.ShareId;
+
+            return SharePointHandlingType.Unknown;
+        }
+        private bool HasFileExtension(string url)
+        {
+            var lastSlash = url.LastIndexOf('/');
+            if (lastSlash == -1) return false;
+            var fileName = url.Substring(lastSlash + 1);
+            return fileName.Contains('.') && !fileName.EndsWith(".aspx");
+        }
+        public async Task<GetDriveItemResponse.Item> GetItemByUrl(string driveId, string url)
+        {
+            var handlingType = ClassifyUrl(url);
+        
+            switch (handlingType)
+            {
+                case SharePointHandlingType.ShareId:
+                    return await GetItemViaShareIdAsync(url);
+                case SharePointHandlingType.ItemId:
+                    return await GetItemViaItemIdAsync(url);
+                default:
+                    throw new NotSupportedException($"Unsupported URL type: {url}");
+            }
+        }
+
+        private async Task<GetDriveItemResponse.Item> GetItemViaShareIdAsync(string originUrl)
+        {
+            string encodedUrl = Base64EncodeUrl(originUrl);
+            
+            string url = $"{GraphApiRootUrl}/shares/{encodedUrl}/driveItem";
+
+            var response = await DoGetAsync(async () => await RestApi.GetAsync(url));
+            
+            CheckStatusCode(response, RestApi.RetryResults);
+
+            string content = await response.Content.ReadAsStringAsync();
+            var result = content.JsonToObject<GetDriveItemResponse.Item>();
+
+            return result;
+        }
+
+        private async Task<GetDriveItemResponse.Item> GetItemViaItemIdAsync(string originUrl)
+        {
+            var (hostname, sitePath, listName, itemId) = ExtractDetailsFromUrl(originUrl);
+        
+            string siteId = await GetSiteIdAsync(hostname, sitePath);
+            string listId = await GetListIdAsync(siteId, listName);
+        
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists/{listId}/items/{itemId}/driveItem";
+            var response = await DoGetAsync(async () => await RestApi.GetAsync(url));
+            
+            CheckStatusCode(response, RestApi.RetryResults);
+        
+            string content = await response.Content.ReadAsStringAsync();
+            return content.JsonToObject<GetDriveItemResponse.Item>();
+        }
+        private (string hostname, string sitePath, string listName, string itemId) ExtractDetailsFromUrl(string url)
+        {
+            var uri = new Uri(url);
+            string hostname = uri.Host;
+            string path = uri.AbsolutePath;
+    
+            int sitesIndex = path.IndexOf("/sites/", StringComparison.OrdinalIgnoreCase);
+            if (sitesIndex == -1) 
+                throw new ArgumentException("Invalid SharePoint URL: missing /sites/");
+            int nextSlash = path.IndexOf('/', sitesIndex + 7);
+            string sitePath = nextSlash == -1 ? path : path.Substring(0, nextSlash);
+    
+            // Extract list name – from URL path after site path and before "/Forms/"
+            string listName = "Shared Documents"; // fallback
+            int formsIndex = path.IndexOf("/Forms/", StringComparison.OrdinalIgnoreCase);
+            if (formsIndex > sitesIndex)
+            {
+                int start = sitePath.Length + 1; // +1 to skip leading slash
+                int end = formsIndex;
+                if (end > start)
+                    listName = path.Substring(start, end - start).Trim('/');
+            }
+    
+            // Extract item ID from query string
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            string itemId = query["ID"];
+            if (string.IsNullOrEmpty(itemId)) 
+                throw new ArgumentException("No ID parameter found");
+    
+            return (hostname, sitePath, listName, itemId);
+        }
+
+        private async Task<string> GetSiteIdAsync(string hostname, string sitePath)
+        {
+            // Graph expects: sites/{hostname}:{sitePath}
+            // sitePath should start with /, e.g., "/sites/SF-Test"
+            string url = $"{GraphApiRootUrl}/sites/{hostname}:{sitePath}";
+            
+            var response = await DoGetAsync(async () => await RestApi.GetAsync(url));
+            CheckStatusCode(response, RestApi.RetryResults);
+            
+            string json = await response.Content.ReadAsStringAsync();
+            return json.GetJsonValue<string>("id");
+        }
+        private async Task<string> GetListIdAsync(string siteId, string listName)
+        {
+            // Call Graph: GET /sites/{siteId}/lists?$filter=displayName eq '{listName}'
+            string filter = $"$filter=displayName eq '{HttpUtility.UrlEncode(listName)}'";
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?{filter}";
+            
+            var response = await DoGetAsync(async () => await RestApi.GetAsync(url));
+            CheckStatusCode(response, RestApi.RetryResults);
+            
+            string json = await response.Content.ReadAsStringAsync();
+
+            // Parse first list's id
+            return json.GetJsonValue<string>("value[0]:id");
         }
     }
 }
