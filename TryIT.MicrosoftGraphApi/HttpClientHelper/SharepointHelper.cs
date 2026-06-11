@@ -622,7 +622,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             if (lowerUrl.Contains("/:f:/") || lowerUrl.Contains("/:b:/") ||
                 lowerUrl.Contains("/:w:/") || lowerUrl.Contains("/:x:/") ||
                 lowerUrl.Contains("/:v:/") || lowerUrl.Contains("/:i:/") ||
-                lowerUrl.Contains("/:t:/") || lowerUrl.Contains("/:p:/"))
+                lowerUrl.Contains("/:t:/") || lowerUrl.Contains("/:p:/") ||
+                lowerUrl.Contains("/:u:/"))  // <-- Add this line for zip
                 return SharePointHandlingType.ShareId;
 
             // 3. Direct file link (no query string, ends with a file extension)
