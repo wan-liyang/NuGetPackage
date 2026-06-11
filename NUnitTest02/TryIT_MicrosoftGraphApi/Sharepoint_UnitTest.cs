@@ -152,6 +152,19 @@ namespace NUnitTest02.TryIT_MicrosoftGraphApi
             Assert.IsNotEmpty(response.link.webUrl);
         }
 
+        [Test]
+        public async Task GetItemByUrl_Test()
+        {
+            SharepointApi api = new SharepointApi(config);
+
+            var result = await api.GetItemByUrlAsync("https://xxx/_layouts/15/Doc.aspx?sourcedoc={7D3D8F1C-0AEE-476F-85A2-1BB49FD3D3A5}");
+
+            var result2 = await api.GetItemByUrlAsync("https://xxx/Shared Documents/Forms/DispForm.aspx?ID=1234");
+
+            Assert.That(result != null);
+            Assert.That(result2 != null);
+        }
+
         public class ListItem
         {
             public string Id { get; set; }

@@ -12,6 +12,8 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 {
     internal class SiteListHelper : BaseHelper
     {
+        public SiteListHelper(MsGraphApiConfig config) : base(config) { }
+
         private readonly string _siteId;
         public SiteListHelper(MsGraphApiConfig config, string hostName, string siteName) : base(config) 
         {
@@ -30,6 +32,26 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             var response = await RestApi.GetAsync(url);
             CheckStatusCode(response, RestApi.RetryResults);
 
+            string content = await response.Content.ReadAsStringAsync();
+            return content.JsonToObject<GetListResponse.Response>().value;
+        }
+
+        /// <summary>
+        /// Get lists from site
+        /// </summary>
+        /// <param name="siteId"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public async Task<List<GetListResponse.SiteList>> GetListsAsync(string siteId, string filter = "")
+        {
+            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists";
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                url = $"{url}?$filter={EscapeExpression(filter)}";
+            }
+
+            var response = await DoGetAsync(async () => await RestApi.GetAsync(url));
+            CheckStatusCode(response, RestApi.RetryResults);
             string content = await response.Content.ReadAsStringAsync();
             return content.JsonToObject<GetListResponse.Response>().value;
         }

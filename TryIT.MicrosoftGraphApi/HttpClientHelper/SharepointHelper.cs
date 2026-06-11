@@ -18,9 +18,11 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
     internal class SharepointHelper : BaseHelper
     {
         private readonly SiteHelper _siteHelper;
+        private readonly SiteListHelper _siteListHelper;
         public SharepointHelper(MsGraphApiConfig config) : base(config)
         {
             _siteHelper = new SiteHelper(config);
+            _siteListHelper = new SiteListHelper(config);
         }
 
         /// <summary>
@@ -592,7 +594,7 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             ShareId,   // Use /shares/{shareId}/driveItem
             ItemId     // Use /sites/.../lists/.../items/{id}/driveItem
         }
-        private SharePointHandlingType ClassifyUrl(string url)
+        private static SharePointHandlingType ClassifyUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
                 return SharePointHandlingType.Unknown;
@@ -619,14 +621,14 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
 
             return SharePointHandlingType.Unknown;
         }
-        private bool HasFileExtension(string url)
+        private static bool HasFileExtension(string url)
         {
             var lastSlash = url.LastIndexOf('/');
             if (lastSlash == -1) return false;
             var fileName = url.Substring(lastSlash + 1);
             return fileName.Contains('.') && !fileName.EndsWith(".aspx");
         }
-        public async Task<GetDriveItemResponse.Item> GetItemByUrl(string driveId, string url)
+        public async Task<GetDriveItemResponse.Item> GetItemByUrlAsync(string url)
         {
             var handlingType = ClassifyUrl(url);
         
@@ -718,17 +720,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
         }
         private async Task<string> GetListIdAsync(string siteId, string listName)
         {
-            // Call Graph: GET /sites/{siteId}/lists?$filter=displayName eq '{listName}'
-            string filter = $"$filter=displayName eq '{HttpUtility.UrlEncode(listName)}'";
-            string url = $"{GraphApiRootUrl}/sites/{siteId}/lists?{filter}";
+            var lists = await _siteListHelper.GetListsAsync(siteId);
             
-            var response = await DoGetAsync(async () => await RestApi.GetAsync(url));
-            CheckStatusCode(response, RestApi.RetryResults);
-            
-            string json = await response.Content.ReadAsStringAsync();
+            // Decode URL-encoded name (e.g., "Shared%20Documents" -> "Shared Documents")
+            string decodedListName = Uri.UnescapeDataString(listName);
 
-            // Parse first list's id
-            return json.GetJsonValue<string>("value[0]:id");
+            return lists.FirstOrDefault(p => p.name.IsEquals(decodedListName))?.id;
         }
     }
 }

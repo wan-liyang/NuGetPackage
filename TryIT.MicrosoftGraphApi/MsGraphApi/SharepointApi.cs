@@ -58,12 +58,11 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         /// <para>.../Forms/DispForm.aspx?ID=...</para>
         /// <para>.../Doc.aspx?sourcedoc=...</para>
         /// </summary>
-        /// <param name="driveId"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        public async Task<GetDriveItemResponse.Item> GetItemByUrl(string driveId, string url)
+        public async Task<GetDriveItemResponse.Item> GetItemByUrlAsync(string url)
         {
-            return await _helper.GetItemByUrl(driveId, url);
+            return await _helper.GetItemByUrlAsync(url);
         }
 
         /// <summary>
