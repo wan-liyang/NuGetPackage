@@ -610,12 +610,22 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
                 return SharePointHandlingType.ItemId;
 
             // ---- ShareId branch (can be directly encoded and passed to /shares) ----
-            if ((lowerUrl.Contains("/doc.aspx") || lowerUrl.Contains("/wopiframe.aspx")) 
+
+            // 1. Doc.aspx / WopiFrame.aspx with sourcedoc parameter
+            if ((lowerUrl.Contains("/doc.aspx") || lowerUrl.Contains("/wopiframe.aspx"))
                 && lowerUrl.Contains("sourcedoc="))
                 return SharePointHandlingType.ShareId;
-            if (lowerUrl.Contains("/:f:/") || lowerUrl.Contains("/:x:/") || 
-                lowerUrl.Contains("/:v:/") || lowerUrl.Contains("/:i:/"))
+
+            // 2. Modern sharing links (Microsoft 365 automatic sharing URLs)
+            //    Common prefixes: :f: (folder), :b: (file), :w: (Word), :x: (Excel),
+            //    :v: (video), :i: (image), :t: (other/teams), :p: (presentation), etc.
+            if (lowerUrl.Contains("/:f:/") || lowerUrl.Contains("/:b:/") ||
+                lowerUrl.Contains("/:w:/") || lowerUrl.Contains("/:x:/") ||
+                lowerUrl.Contains("/:v:/") || lowerUrl.Contains("/:i:/") ||
+                lowerUrl.Contains("/:t:/") || lowerUrl.Contains("/:p:/"))
                 return SharePointHandlingType.ShareId;
+
+            // 3. Direct file link (no query string, ends with a file extension)
             if (!lowerUrl.Contains("?") && HasFileExtension(lowerUrl))
                 return SharePointHandlingType.ShareId;
 
