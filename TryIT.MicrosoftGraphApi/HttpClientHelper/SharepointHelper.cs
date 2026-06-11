@@ -297,12 +297,12 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             return content;
         }
 
-        public byte[] GetFileContent(string graphdownloadUrl)
+        public async Task<byte[]> GetFileContentAsync(string graphdownloadUrl)
         {
-            var response = RestApi.GetAsync(graphdownloadUrl).GetAwaiter().GetResult();
+            var response = await RestApi.GetAsync(graphdownloadUrl);
             CheckStatusCode(response, RestApi.RetryResults);
 
-            byte[] content = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+            byte[] content = await response.Content.ReadAsByteArrayAsync();
 
             return content;
         }

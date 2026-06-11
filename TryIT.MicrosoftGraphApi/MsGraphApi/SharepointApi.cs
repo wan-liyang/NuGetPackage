@@ -133,6 +133,16 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         }
 
         /// <summary>
+        /// get file content with Microsoft Graph download url from GetItem response @microsoft.graph.downloadUrl
+        /// </summary>
+        /// <param name="MicrosoftGraphDownloadUrl"></param>
+        /// <returns></returns>
+        public async Task<byte[]> GetFileContentAsync(string MicrosoftGraphDownloadUrl)
+        {
+            return await _helper.GetFileContentAsync(MicrosoftGraphDownloadUrl);
+        }
+
+        /// <summary>
         /// create subfolder under <paramref name="folderItemId"/>, the subfolder <paramref name="newFolderNameOrPath"/> could be subfolder name or subfolder path, e.g A\B\C
         /// </summary>
         /// <param name="driveId"></param>
@@ -315,7 +325,7 @@ namespace TryIT.MicrosoftGraphApi.MsGraphApi
         {
             if (item.file != null)
             {
-                var _byte = _helper.GetFileContent(item.MicrosoftGraphDownloadUrl);
+                var _byte = _helper.GetFileContentAsync(item.MicrosoftGraphDownloadUrl).GetAwaiter().GetResult();
 
                 string localFileNameAndPath = System.IO.Path.Combine(folderPath, item.name);
 
