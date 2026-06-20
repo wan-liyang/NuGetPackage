@@ -8,12 +8,12 @@ namespace TryIT.PostgreSql
     /// </summary>
     public class PostgreSqlDbClient
     {
-        private readonly string _connStr;
-        private readonly TokenCredential _credential;
         private static readonly string[] _scopes =
         {
             "https://ossrdbms-aad.database.windows.net/.default"
         };
+
+        private readonly NpgsqlDataSource dataSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlDbClient"/> class
@@ -22,23 +22,18 @@ namespace TryIT.PostgreSql
         /// <param name="credential"></param>
         public PostgreSqlDbClient(string connectionString, TokenCredential credential)
         {
-            _connStr = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
-            _credential = credential ?? throw new ArgumentNullException(nameof(credential));
-        }
+            if (string.IsNullOrWhiteSpace(connectionString)) throw new ArgumentNullException(nameof(connectionString));
+            if (credential == null) throw new ArgumentNullException(nameof(credential));
 
-        private async Task<NpgsqlConnection> CreateConnectionAsync(CancellationToken cancellationToken)
-        {
-            var token = await _credential.GetTokenAsync(
-                new TokenRequestContext(_scopes),
-                cancellationToken);
-
-            // IMPORTANT: inject token via connection string BEFORE open
-            var builder = new NpgsqlConnectionStringBuilder(_connStr)
-            {
-                Password = token.Token
-            };
-
-            return new NpgsqlConnection(builder.ConnectionString);
+            dataSource = new NpgsqlDataSourceBuilder(connectionString)
+                .UsePeriodicPasswordProvider(async (builder, cancellationToken) =>
+                {
+                    var token = await credential.GetTokenAsync(
+                        new TokenRequestContext(_scopes),
+                        cancellationToken);
+                    return token.Token;
+                }, TimeSpan.FromMinutes(25), TimeSpan.FromSeconds(30))
+                .Build();
         }
 
         private async Task<TResult> ExecuteAsync<TResult>(
@@ -47,13 +42,11 @@ namespace TryIT.PostgreSql
             NpgsqlParameter[]? parameters = null,
             CancellationToken cancellationToken = default)
         {
-            await using var conn = await CreateConnectionAsync(cancellationToken);
-            await using var cmd = new NpgsqlCommand(sql, conn);
+            await using var cmd = dataSource.CreateCommand(sql);
 
             if (parameters is { Length: > 0 })
                 cmd.Parameters.AddRange(parameters);
 
-            await conn.OpenAsync(cancellationToken);
             return await executor(cmd, cancellationToken);
         }
 
@@ -95,14 +88,10 @@ namespace TryIT.PostgreSql
             NpgsqlParameter[]? parameters = null,
             CancellationToken cancellationToken = default)
         {
-            // ⚠️ We can’t use ExecuteAsync here because connection must remain open for reader lifetime
-            var conn = await CreateConnectionAsync(cancellationToken);
-            var cmd = new NpgsqlCommand(sql, conn);
+            var cmd = dataSource.CreateCommand(sql);
 
             if (parameters is { Length: > 0 })
                 cmd.Parameters.AddRange(parameters);
-
-            await conn.OpenAsync(cancellationToken);
 
             // CommandBehavior.CloseConnection ensures conn closes when reader is disposed
             return await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.CloseConnection, cancellationToken);
