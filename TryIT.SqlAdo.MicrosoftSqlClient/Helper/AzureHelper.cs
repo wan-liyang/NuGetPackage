@@ -1,6 +1,5 @@
 ﻿using Azure.Core;
 using Azure.Identity;
-using Microsoft.Identity.Client;
 using System;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 

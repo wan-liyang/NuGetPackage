@@ -192,6 +192,25 @@ namespace NUnitTest02.TryIT_SqlAdo_MicrosoftSqlClient
             Assert.That(result, Is.EqualTo(2));
         }
 
+        [Test]
+        public async Task TransactionScope_Test()
+        {
+            var dbConnector = new DbConnector(new ConnectorConfig
+            {
+                ConnectionString = "Server={serverName};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True",
+                TimeoutSecond = 10 * 60 // 10 minute
+            });
+
+            using (var scope = dbConnector.BeginTransaction())
+            {
+                //scope.ExecuteScalarAsync();
+                //scope.FetchDataTableAsync();
+                //scope.ExecuteNonQueryAsync();
+                scope.Commit();
+            }
+        }
+
+
         public class TestGenrateScript
         {
             [Key]
