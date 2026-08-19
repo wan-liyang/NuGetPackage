@@ -5,13 +5,14 @@ using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TryIT.SqlAdo.MicrosoftSqlClient.BulkOperations;
-using TryIT.SqlAdo.MicrosoftSqlClient.Core;
 using TryIT.SqlAdo.MicrosoftSqlClient.CopyMode;
+using TryIT.SqlAdo.MicrosoftSqlClient.Core;
 using TryIT.SqlAdo.MicrosoftSqlClient.Helper;
 using TryIT.SqlAdo.MicrosoftSqlClient.Models;
 
@@ -213,12 +214,39 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
 
         // ---------------------- Scalar Function ----------------------
 
+        /// <summary>
+        /// Fetches a scalar value from a scalar function. The function name must include the schema, e.g. "dbo.MyFunction".
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="function"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public T FetchScalarFunction<T>(string function, params SqlParameter[] parameters)
+            => FetchScalarFunctionAsync<T>(function, parameters).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Fetches a scalar value from a scalar function. The function name must include the schema, e.g. "dbo.MyFunction".
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="function"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<T> FetchScalarFunctionAsync<T>(string function, params SqlParameter[] parameters)
         {
             if (string.IsNullOrEmpty(function))
                 throw new ArgumentNullException(nameof(function));
-            if (function.Split('.').Length != 2)
-                throw new InvalidOperationException($"Function '{function}' must contain schema and function name, e.g. schema.function");
+
+            var parts = function.Split('.');
+            if (parts.Length != 2 ||
+                string.IsNullOrWhiteSpace(parts[0]) ||
+                string.IsNullOrWhiteSpace(parts[1]))
+            {
+                throw new ArgumentException(
+                    $"Function '{function}' must contain schema and function name, e.g. dbo.MyFunction.",
+                    nameof(function));
+            }
 
             string sql = new StringBuilder("SELECT ")
                 .Append(function)
@@ -226,18 +254,42 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 .Append(parameters?.Length > 0 ? string.Join(",", parameters.Select(p => p.ParameterName)) : "")
                 .Append(")")
                 .ToString();
-
-            return ExecuteScalar<T>(sql, CommandType.Text, parameters);
+            return await ExecuteScalarAsync<T>(sql, CommandType.Text, parameters).ConfigureAwait(false);
         }
 
         // ---------------------- Table-Valued Function ----------------------
 
+        /// <summary>
+        /// Fetches a DataTable from a table-valued function. The function name must include the schema, e.g. "dbo.MyFunction".
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public DataTable FetchDataTableFunction(string function, params SqlParameter[] parameters)
+            => FetchDataTableFunctionAsync(function, parameters).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Fetches a DataTable from a table-valued function. The function name must include the schema, e.g. "dbo.MyFunction".
+        /// </summary>
+        /// <param name="function"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<DataTable> FetchDataTableFunctionAsync(string function, params SqlParameter[] parameters)
         {
             if (string.IsNullOrEmpty(function))
                 throw new ArgumentNullException(nameof(function));
-            if (function.Split('.').Length != 2)
-                throw new InvalidOperationException($"Function '{function}' must contain schema and function name, e.g. schema.function");
+
+            var parts = function.Split('.');
+            if (parts.Length != 2 ||
+                string.IsNullOrWhiteSpace(parts[0]) ||
+                string.IsNullOrWhiteSpace(parts[1]))
+            {
+                throw new ArgumentException(
+                    $"Function '{function}' must contain schema and function name, e.g. dbo.MyFunction.",
+                    nameof(function));
+            }
 
             string sql = new StringBuilder("SELECT * FROM ")
                 .Append(function)
@@ -245,8 +297,7 @@ namespace TryIT.SqlAdo.MicrosoftSqlClient
                 .Append(parameters?.Length > 0 ? string.Join(",", parameters.Select(p => p.ParameterName)) : "")
                 .Append(")")
                 .ToString();
-
-            return FetchDataTable(sql, CommandType.Text, parameters);
+            return await FetchDataTableAsync(sql, CommandType.Text, parameters).ConfigureAwait(false);
         }
 
         // ---------------------- ExecuteReader ----------------------
