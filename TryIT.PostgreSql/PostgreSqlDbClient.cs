@@ -1,5 +1,10 @@
 ﻿using Azure.Core;
 using Npgsql;
+using Polly;
+using Polly.Retry;
+using TryIT.PostgreSql.Core;
+using TryIT.PostgreSql.Helper;
+using TryIT.PostgreSql.Models;
 
 namespace TryIT.PostgreSql
 {
@@ -13,55 +18,105 @@ namespace TryIT.PostgreSql
             "https://ossrdbms-aad.database.windows.net/.default"
         };
 
-        private readonly NpgsqlDataSource dataSource;
+        private readonly List<RetryResult> _retryResults = new List<RetryResult>();
+        private readonly NpgsqlDataSource _dataSource;
+
+        private readonly CommandExecutor _executor;
+
+        /// <summary>
+        /// Retry results from the operation, including attempt number, timestamp, and exception details.
+        /// </summary>
+        public List<RetryResult> RetryResults => _retryResults;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlDbClient"/> class
         /// </summary>
-        /// <param name="connectionString"></param>
-        /// <param name="credential"></param>
-        public PostgreSqlDbClient(string connectionString, TokenCredential credential)
+        /// <param name="config"></param>
+        public PostgreSqlDbClient(ConnectorConfig config)
         {
-            if (string.IsNullOrWhiteSpace(connectionString)) throw new ArgumentNullException(nameof(connectionString));
-            if (credential == null) throw new ArgumentNullException(nameof(credential));
+            if (string.IsNullOrWhiteSpace(config.ConnectionString)) throw new ArgumentNullException(nameof(config), $"{nameof(config.ConnectionString)} is mandatory");
+            if (config.TokenCredential == null) throw new ArgumentNullException(nameof(config), $"{nameof(config.TokenCredential)} is mandatory");
 
-            dataSource = new NpgsqlDataSourceBuilder(connectionString)
+            _dataSource = new NpgsqlDataSourceBuilder(config.ConnectionString)
                 .UsePeriodicPasswordProvider(async (builder, cancellationToken) =>
                 {
-                    var token = await credential.GetTokenAsync(
+                    var token = await config.TokenCredential.GetTokenAsync(
                         new TokenRequestContext(_scopes),
                         cancellationToken);
                     return token.Token;
                 }, TimeSpan.FromMinutes(25), TimeSpan.FromSeconds(30))
                 .Build();
+
+            var pipeline = BuildResiliencePipeline(config.RetryProperty);
+            _executor = new CommandExecutor(config, pipeline, _retryResults, config.DbLogDelegate);
         }
 
-        private async Task<TResult> ExecuteAsync<TResult>(
-            string sql,
-            Func<NpgsqlCommand, CancellationToken, Task<TResult>> executor,
-            NpgsqlParameter[]? parameters = null,
-            CancellationToken cancellationToken = default)
+        private ResiliencePipeline BuildResiliencePipeline(RetryProperty? retryProperty)
         {
-            await using var cmd = dataSource.CreateCommand(sql);
+            if (retryProperty == null 
+                || retryProperty.RetryExceptions == null 
+                || !retryProperty.RetryExceptions.Any())
+                return new ResiliencePipelineBuilder().Build();
 
-            if (parameters is { Length: > 0 })
-                cmd.Parameters.AddRange(parameters);
+            var builder = new PredicateBuilder();
+            builder.Handle<Exception>(ex =>
+                retryProperty.RetryExceptions.Any(retryEx =>
+                    retryEx.ExceptionType.IsInstanceOfType(ex) &&
+                    (string.IsNullOrEmpty(retryEx.MessageKeyword) ||
+                     ex.Message.ToUpperInvariant().Contains(retryEx.MessageKeyword.ToUpperInvariant()))
+                )
+            );
 
-            return await executor(cmd, cancellationToken);
+            return new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    ShouldHandle = builder,
+                    Delay = retryProperty.RetryDelay,
+                    MaxRetryAttempts = retryProperty.RetryCount,
+                    BackoffType = DelayBackoffType.Constant,
+                    OnRetry = args =>
+                    {
+                        _retryResults.Add(new RetryResult
+                        {
+                            AttemptNumber = args.AttemptNumber,
+                            Timestamp = DateTime.Now,
+                            Exception = args.Outcome.Exception
+                        });
+                        return default;
+                    }
+                })
+                .Build();
         }
 
         /// <summary>
-        /// Executes a non-query SQL command asynchronously.
+        /// Executes a SQL command that returns the number of rows affected
         /// </summary>
         /// <param name="sql"></param>
         /// <param name="parameters"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<int> ExecuteNonQueryAsync(
+        public async Task<int> ExecuteNonQueryAsync(
             string sql,
             NpgsqlParameter[]? parameters = null,
             CancellationToken cancellationToken = default)
-            => ExecuteAsync(sql, (cmd, token) => cmd.ExecuteNonQueryAsync(token), parameters, cancellationToken);
+        {
+            return await _executor.ExecuteWithRetryAndLogAsync(
+                sql,
+                _dataSource,
+                async (dataSource, trans, token) =>
+                {
+                    await using var cmd = dataSource.CreateCommand(sql);
+
+                    if (parameters is { Length: > 0 })
+                        cmd.Parameters.AddRange(parameters);
+
+                    return await cmd.ExecuteNonQueryAsync(token);
+                },
+                parameters,
+                false,
+                cancellationToken
+            ).ConfigureAwait(false);
+        }
 
         /// <summary>
         /// Executes a SQL command that returns a single value asynchronously.
@@ -70,11 +125,31 @@ namespace TryIT.PostgreSql
         /// <param name="parameters"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<object?> ExecuteScalarAsync(
+        public async Task<T> ExecuteScalarAsync<T>(
             string sql,
             NpgsqlParameter[]? parameters = null,
             CancellationToken cancellationToken = default)
-            => ExecuteAsync(sql, (cmd, token) => cmd.ExecuteScalarAsync(token), parameters, cancellationToken);
+        {
+            object? result = await _executor.ExecuteWithRetryAndLogAsync(
+                sql,
+                _dataSource,
+                async (dataSource, trans, token) =>
+                {
+                    await using var cmd = dataSource.CreateCommand(sql);
+
+                    if (parameters is { Length: > 0 })
+                        cmd.Parameters.AddRange(parameters);
+
+                    return await cmd.ExecuteScalarAsync(token);
+                },
+                parameters,
+                false,
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            return SqlHelper.ConvertValue<T>(result);
+        }
+
 
         /// <summary>
         /// Executes a SQL command that returns a data reader asynchronously.
@@ -88,13 +163,13 @@ namespace TryIT.PostgreSql
             NpgsqlParameter[]? parameters = null,
             CancellationToken cancellationToken = default)
         {
-            var cmd = dataSource.CreateCommand(sql);
+            var cmd = _dataSource.CreateCommand(sql);
 
             if (parameters is { Length: > 0 })
                 cmd.Parameters.AddRange(parameters);
 
             // CommandBehavior.CloseConnection ensures conn closes when reader is disposed
             return await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.CloseConnection, cancellationToken);
-        }
+        }        
     }
 }
