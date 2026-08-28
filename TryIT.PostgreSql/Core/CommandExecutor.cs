@@ -137,7 +137,17 @@ namespace TryIT.PostgreSql.Core
             }
         }
 
-
+        /// <summary>
+        /// Clones an array of SqlParameter to avoid "already contained in another collection" errors on retry.
+        /// </summary>
+        internal static NpgsqlParameter[] CloneParameters(NpgsqlParameter[] original)
+        {
+            if (original == null) return null;
+            var cloned = new NpgsqlParameter[original.Length];
+            for (int i = 0; i < original.Length; i++)
+                cloned[i] = (NpgsqlParameter)((ICloneable)original[i]).Clone();
+            return cloned;
+        }
         private void AddExceptionData(Exception ex)
         {
             if (_retryResults.Any())

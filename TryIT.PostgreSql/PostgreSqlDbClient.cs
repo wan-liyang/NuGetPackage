@@ -138,7 +138,7 @@ namespace TryIT.PostgreSql
                     await using var cmd = dataSource.CreateCommand(sql);
 
                     if (parameters is { Length: > 0 })
-                        cmd.Parameters.AddRange(parameters);
+                        cmd.Parameters.AddRange(CommandExecutor.CloneParameters(parameters));
 
                     return await cmd.ExecuteScalarAsync(token);
                 },
