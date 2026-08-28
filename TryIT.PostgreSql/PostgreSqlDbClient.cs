@@ -53,8 +53,8 @@ namespace TryIT.PostgreSql
 
         private ResiliencePipeline BuildResiliencePipeline(RetryProperty? retryProperty)
         {
-            if (retryProperty == null 
-                || retryProperty.RetryExceptions == null 
+            if (retryProperty == null
+                || retryProperty.RetryExceptions == null
                 || !retryProperty.RetryExceptions.Any())
                 return new ResiliencePipelineBuilder().Build();
 
@@ -108,7 +108,7 @@ namespace TryIT.PostgreSql
                     await using var cmd = dataSource.CreateCommand(sql);
 
                     if (parameters is { Length: > 0 })
-                        cmd.Parameters.AddRange(parameters);
+                        cmd.Parameters.AddRange(CommandExecutor.CloneParameters(parameters));
 
                     return await cmd.ExecuteNonQueryAsync(token);
                 },
@@ -166,10 +166,10 @@ namespace TryIT.PostgreSql
             var cmd = _dataSource.CreateCommand(sql);
 
             if (parameters is { Length: > 0 })
-                cmd.Parameters.AddRange(parameters);
+                cmd.Parameters.AddRange(CommandExecutor.CloneParameters(parameters));
 
             // CommandBehavior.CloseConnection ensures conn closes when reader is disposed
             return await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.CloseConnection, cancellationToken);
-        }        
+        }
     }
 }
