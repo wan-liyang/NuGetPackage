@@ -37,7 +37,8 @@ namespace TryIT.MicrosoftGraphApi.DatalakeApi
 
             TokenApi tokenApi = new TokenApi(new MsGraphApiConfig
             {
-                Proxy = config.Proxy
+                Proxy = config.Proxy,
+                HttpLogDelegate = config.HttpLogDelegate,
             });
 
             var issueAt = DateTime.Now;
@@ -54,7 +55,8 @@ namespace TryIT.MicrosoftGraphApi.DatalakeApi
                 Proxy = _apiConfig.Proxy,
                 Token = access_token,
                 TimeoutSecond = _apiConfig.TimeoutSecond,
-                RetryProperty = _apiConfig.RetryProperty
+                RetryProperty = _apiConfig.RetryProperty,
+                HttpLogDelegate = _apiConfig.HttpLogDelegate
             };
             _helper = new DatalakeHelper(config);
         }
