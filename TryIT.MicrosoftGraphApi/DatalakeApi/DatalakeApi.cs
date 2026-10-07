@@ -80,6 +80,18 @@ namespace TryIT.MicrosoftGraphApi.DatalakeApi
         }
 
         /// <summary>
+        /// Asynchronously retrieves a list of files based on the specified request parameters.
+        /// </summary>
+        /// <param name="request">An object containing the criteria for listing files, such as filters or pagination options. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="ListFileResponse"/>
+        /// object with the list of files and related metadata.</returns>
+        public async Task<ListFileResponse> ListFilesAsync(ListFileRequest request)
+        {
+            await RefreshToken();
+            return await _helper.ListFilesAsync(request);
+        }
+
+        /// <summary>
         /// Asynchronously retrieves the file specified by the request.
         /// </summary>
         /// <param name="request">An object that specifies the parameters for the file retrieval operation. Cannot be null.</param>
