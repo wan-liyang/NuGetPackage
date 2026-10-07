@@ -113,5 +113,16 @@ namespace TryIT.MicrosoftGraphApi.DatalakeApi
             await RefreshToken();
             await _helper.UploadFileAsync(request);
         }
+
+        /// <summary>
+        /// Asynchronously deletes the file specified in the request.
+        /// </summary>
+        /// <param name="request">An object containing the details of the file to delete. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        public async Task DeleteFileAsync(DeleteFileRequest request)
+        {
+            await RefreshToken();
+            await _helper.DeleteFileAsync(request);
+        }
     }
 }

@@ -115,5 +115,15 @@ namespace TryIT.MicrosoftGraphApi.HttpClientHelper
             var flushResponse = await RestApi.PatchAsync(flushFileUrl, null);
             CheckStatusCode(flushResponse);
         }
+
+        public async Task DeleteFileAsync(DeleteFileRequest deleteFileRequest)
+        {
+            var url =
+            $"https://{deleteFileRequest.InstanceName}.dfs.core.windows.net/" +
+            $"{deleteFileRequest.FilePath.TrimStart('/')}";
+
+            var response = await RestApi.DeleteAsync(url);
+            CheckStatusCode(response);
+        }
     }
 }
